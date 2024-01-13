@@ -94,8 +94,11 @@ class HomeScreen : Activity() {
         NotificationService.MediaObserver.track {
             musicView.updateTrack(it)
         }
-        val wallpaperManager = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
-        wallpaperManager.setWallpaperOffsets(summaryView.windowToken, 0.5f, 0.5f)
+        homeScreen.post {
+            // windowToken might not be loaded, so we post this to the view
+            val wallpaperManager = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
+            wallpaperManager.setWallpaperOffsets(homeScreen.windowToken, 0.5f, 0.5f)
+        }
     }
 
     override fun onPause() {

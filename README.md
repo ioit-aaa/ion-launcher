@@ -7,6 +7,8 @@
 
 **Productive**: The launcher shows you relevant information on the home screen when its needed
 
+**Elegant**: The design does not take a back seat in this launcher, the default setup looks great, and you can make it look even better with a couple adjustments
+
 ## Future goals
 
 - Hiding apps

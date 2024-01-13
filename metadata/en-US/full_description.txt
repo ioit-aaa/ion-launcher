@@ -1,3 +1,7 @@
-The home screen consists of an app grid at the bottom with an app suggestions row below it.
+<b>Small</b>: The launcher is made to take up as little space as possible (within reason)
 
-Above that is the summary view, it shows you calendar events when there are any, and a media player when music is playing.
+<b>Unobtrusive</b>: Elements are arranged in an optimal way for muscle memory and reachability
+
+<b>Productive</b>: The launcher shows you relevant information on the home screen when its needed
+
+<b>Elegant</b>: The design does not take a back seat in this launcher, the default setup looks great, and you can make it look even better with a couple adjustments

@@ -14,6 +14,7 @@ import one.zagura.IonLauncher.provider.items.IconLoader
 import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.search.Search
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
+import one.zagura.IonLauncher.util.CrashActivity
 import one.zagura.IonLauncher.util.Settings
 
 val Context.ionApplication
@@ -27,6 +28,7 @@ class IonLauncherApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        CrashActivity.init(this)
         settings.init(applicationContext)
         SuggestionsManager.onCreate(this)
         setupApps()
