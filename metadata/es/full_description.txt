@@ -1,0 +1,7 @@
+<b>Pequeño</b>: Este lanzador esta hecho para ocupar el minimo espacio posible (dentro de lo razonable)
+
+<b>No obtrusivo</b>: Los elementos estan puesto de la manera optima para memoria muscular y proximidad al pulgar
+
+<b>Productivo</b>: El lanzador muestra información relevante cuando es necesitada
+
+<b>Elegante</b>: El diseño tiene alta prioridad en este lanzador, la configuracion predeterminada ya se ve bien y se puede ver aun mejor con algunos ajustes
