@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search">Çercar</string>
+    <string name="upcoming_alarm">Proper alarma</string>
+    <string name="next_track">Següent cançó</string>
+    <string name="play">Reproduir</string>
+    <string name="pause">Pausar</string>
+    <string name="tweaks">Retocs d\'Ion Launcher</string>
+    <string name="pinned_grid">Apps anclades</string>
+    <string name="rows">Files</string>
+    <string name="columns">Columnes</string>
+    <string name="look_and_feel">Aparença</string>
+    <string name="icon_packs">Paquets d\'icones</string>
+    <string name="chosen">Escollits</string>
+    <string name="available">Disponibles</string>
+    <string name="grayscale_icons">Icones blanc i negres</string>
+    <string name="suggestions">Sugeriments</string>
+    <string name="count">Quantitat</string>
+    <string name="other">Altres</string>
+    <string name="choose_launcher">Triar llençador predeterminat</string>
+    <string name="grant_permissions">Donar permissos</string>
+    <string name="notification_access">Acces a notificacions</string>
+    <string name="contacts_access">Acces a contactes</string>
+    <string name="calendar_access">Acces al calendari</string>
+    <string name="usage_access">Acces a l\'us d\'apps</string>
+    <string name="to_show_in_search">Per mostrar en resultats de çerca</string>
+    <string name="to_show_media_player">Per mostrar el reproductor d\'audio</string>
+    <string name="for_suggestions">Per sugeriments i çerca millorada</string>
+    <string name="to_show_upcoming_events">Per mostrar propers events</string>
+    <string name="start">Començar</string>
+    <string name="today">Avuí</string>
+    <string name="icon_size">Tamany d\'icones</string>
+    <string name="background">Fons</string>
+    <string name="foreground">Text i icones</string>
+    <string name="background_opacity">Opacitat del fons</string>
+</resources>

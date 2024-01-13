@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search">Search</string>
+    <string name="upcoming_alarm">Следуйщий будильник</string>
+    <string name="next_track">Следуйщая песня</string>
+    <string name="play">Играть</string>
+    <string name="pause">Пауза</string>
+    <string name="tweaks">Настройки Ion Launcher</string>
+    <string name="pinned_grid">Сетка приложений</string>
+    <string name="rows">Ряды</string>
+    <string name="columns">Столбы</string>
+    <string name="look_and_feel">Внешнясть</string>
+    <string name="icon_packs">Пакеты иконок</string>
+    <string name="chosen">Выбранные</string>
+    <string name="available">Не выбранные</string>
+    <string name="grayscale_icons">Чернобелые иконки</string>
+    <string name="suggestions">Рекомендации</string>
+    <string name="count">Количество</string>
+    <string name="other">Другие</string>
+    <string name="choose_launcher">Выбрать главный лаунчер</string>
+    <string name="grant_permissions">Дать разришения</string>
+    <string name="notification_access">Доступ к уведомлениям</string>
+    <string name="contacts_access">Доступ к контактам</string>
+    <string name="calendar_access">Доступ к календарю</string>
+    <string name="usage_access">Доступ к использованию прилошений</string>
+    <string name="to_show_in_search">Чтобы их показывать в результатах поиска</string>
+    <string name="to_show_media_player">Чтобы показывать играющую музику</string>
+    <string name="for_suggestions">Для рекомендацый и улучшеного поиска</string>
+    <string name="to_show_upcoming_events">Чтобы показывать следуйщие эвенты</string>
+    <string name="start">Начать</string>
+    <string name="today">Сегодня</string>
+    <string name="icon_size">Размер иконок</string>
+    <string name="background">Фон</string>
+    <string name="foreground">Техт и иконки</string>
+    <string name="background_opacity">Непрозрачность фона</string>
+</resources>

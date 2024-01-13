@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search">Buscar</string>
+    <string name="upcoming_alarm">Proximo alarma</string>
+    <string name="next_track">Siguiente cancion</string>
+    <string name="play">Reproducir</string>
+    <string name="pause">Pausar</string>
+    <string name="tweaks">Ajustes de Ion Launcher</string>
+    <string name="pinned_grid">Apps ancladas</string>
+    <string name="rows">Filas</string>
+    <string name="columns">Columnas</string>
+    <string name="look_and_feel">Apariencia</string>
+    <string name="icon_packs">Paquetes de iconos</string>
+    <string name="chosen">Elegidos</string>
+    <string name="available">Disponibles</string>
+    <string name="grayscale_icons">Iconos blanco y negros</string>
+    <string name="suggestions">Sugerencias</string>
+    <string name="count">Cantidad</string>
+    <string name="other">Otros</string>
+    <string name="choose_launcher">Elegir lanzador predeterminado</string>
+    <string name="grant_permissions">Dar permisos</string>
+    <string name="notification_access">Acceso a notificaciones</string>
+    <string name="contacts_access">Acceso a contactos</string>
+    <string name="calendar_access">Acceso al calendario</string>
+    <string name="usage_access">Acceso a uso de apps</string>
+    <string name="to_show_in_search">Para mostrarlos en resultados de busqueda</string>
+    <string name="to_show_media_player">Para mostrar el reproductor de musica</string>
+    <string name="for_suggestions">Para sugerencias y ajustar los resultados de busqueda</string>
+    <string name="to_show_upcoming_events">Para mostrar proximos eventos</string>
+    <string name="start">Comenzar</string>
+    <string name="today">Hoy</string>
+    <string name="icon_size">Tamaño de iconos</string>
+    <string name="background">Fondo</string>
+    <string name="foreground">Texto e iconos</string>
+    <string name="background_opacity">Opacidad del fondo</string>
+</resources>

@@ -1,0 +1,33 @@
+package one.zagura.IonLauncher.data.items
+
+import android.content.Intent
+import android.graphics.Rect
+import android.view.View
+
+class ActionItem(
+    val action: String,
+    override val label: String,
+) : LauncherItem() {
+
+    override fun open(view: View, bounds: Rect) {
+        super.open(view, bounds)
+        val anim = createOpeningAnimation(view, bounds.left, bounds.top, bounds.right, bounds.bottom)
+        try {
+            val intent = Intent(action)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            view.context.startActivity(intent, anim)
+        } catch (e: Exception) { e.printStackTrace() }
+    }
+
+    override fun open(view: View) {
+        super.open(view)
+        val anim = createOpeningAnimation(view)
+        try {
+            val intent = Intent(action)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            view.context.startActivity(intent, anim)
+        } catch (e: Exception) { e.printStackTrace() }
+    }
+
+    override fun toString() = "${ACTION.toString(16)}$action/$label"
+}
