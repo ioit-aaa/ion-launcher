@@ -1,0 +1,3 @@
+The home screen consists of an app grid at the bottom with an app suggestions row below it.
+
+Above that is the summary view, it shows you calendar events when there are any, and a media player when music is playing.
