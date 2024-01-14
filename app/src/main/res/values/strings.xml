@@ -17,7 +17,7 @@
     <string name="count">Count</string>
     <string name="other">Other</string>
     <string name="choose_launcher">Set Default Launcher</string>
-    <string name="grant_permissions">Grant Permissions</string>
+    <string name="grant_permissions">Grant Permissions (or do that later in system settings)</string>
     <string name="notification_access">Notification Access</string>
     <string name="contacts_access">Contacts Access</string>
     <string name="calendar_access">Calendar Access</string>
@@ -26,7 +26,8 @@
     <string name="to_show_media_player">To show the media player</string>
     <string name="for_suggestions">For suggestions and tweaked search results</string>
     <string name="to_show_upcoming_events">To show upcoming events</string>
-    <string name="start">Start</string>
+    <string name="finish_setup">Finish Setup</string>
+    <string name="just_look">Just look at the launcher</string>
     <string name="today">Today</string>
     <string name="icon_size">Icon size</string>
     <string name="background">Background</string>

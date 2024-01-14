@@ -57,11 +57,15 @@ object AppLoader : UpdatingResource<List<App>>() {
         override fun onPackageRemoved(packageName: String, user: UserHandle) {
             apps.removeAll { it.packageName == packageName && it.userHandle == user }
             update(apps)
+            IconLoader.removePackage(packageName)
         }
 
         override fun onPackageAdded(packageName: String?, user: UserHandle?) = reloadApps(context)
 
-        override fun onPackageChanged(packageName: String?, user: UserHandle?) = reloadApps(context)
+        override fun onPackageChanged(packageName: String, user: UserHandle?) {
+            reloadApps(context)
+            IconLoader.removePackage(packageName)
+        }
 
         override fun onPackagesAvailable(
             packageNames: Array<out String>?,

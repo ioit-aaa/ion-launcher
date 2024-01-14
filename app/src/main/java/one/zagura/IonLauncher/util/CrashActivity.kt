@@ -28,6 +28,7 @@ class CrashActivity : Activity() {
                 val dp = resources.displayMetrics.density
                 val p = (12 * dp).toInt()
                 setPadding(p, p, p, p)
+                setTextIsSelectable(true)
 
                 text = buildString {
                     appendLine(t.toString())

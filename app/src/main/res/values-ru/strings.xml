@@ -18,7 +18,7 @@
     <string name="count">Количество</string>
     <string name="other">Другие</string>
     <string name="choose_launcher">Выбрать главный лаунчер</string>
-    <string name="grant_permissions">Дать разришения</string>
+    <string name="grant_permissions">Дать разришения (это можно зделать позже, в настройках системы)</string>
     <string name="notification_access">Доступ к уведомлениям</string>
     <string name="contacts_access">Доступ к контактам</string>
     <string name="calendar_access">Доступ к календарю</string>
@@ -27,7 +27,8 @@
     <string name="to_show_media_player">Чтобы показывать играющую музику</string>
     <string name="for_suggestions">Для рекомендацый и улучшеного поиска</string>
     <string name="to_show_upcoming_events">Чтобы показывать следуйщие эвенты</string>
-    <string name="start">Начать</string>
+    <string name="finish_setup">Закончить настройку</string>
+    <string name="just_look">Просто увидить лаунчер</string>
     <string name="today">Сегодня</string>
     <string name="icon_size">Размер иконок</string>
     <string name="background">Фон</string>

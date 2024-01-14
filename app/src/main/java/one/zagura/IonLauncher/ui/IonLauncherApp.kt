@@ -28,9 +28,9 @@ class IonLauncherApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        CrashActivity.init(this)
+        CrashActivity.init(applicationContext)
         settings.init(applicationContext)
-        SuggestionsManager.onCreate(this)
+        SuggestionsManager.onCreate(applicationContext)
         setupApps()
 
         NotificationService.MediaObserver.updateMediaItem(this)

@@ -11,6 +11,7 @@ import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RoundRectShape
 import android.os.Build
 import android.os.Bundle
+import android.os.Process
 import android.provider.Settings
 import android.view.Gravity
 import android.view.View
@@ -21,9 +22,13 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
 import one.zagura.IonLauncher.BuildConfig
 import one.zagura.IonLauncher.R
+import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
+import one.zagura.IonLauncher.provider.Dock
+import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.ui.HomeScreen
+import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.Utils
 
 class SetupActivity : Activity() {
@@ -58,9 +63,17 @@ class SetupActivity : Activity() {
                     updateNotificationAccess = permissionSwitch(hasNotificationAccess(), ::grantNotificationAccess)
                 }
             }
+            title(R.string.look_and_feel)
+            setting(R.string.background) {
+                color("color:bg", ColorThemer.DEFAULT_BG)
+            }
+            setting(R.string.foreground) {
+                color("color:fg", ColorThemer.DEFAULT_FG)
+            }
             val dp = resources.displayMetrics.density
+            val m = (18 * dp).toInt()
             view.addView(TextView(view.context).apply {
-                setText(R.string.start)
+                setText(R.string.finish_setup)
                 textSize = 18f
                 typeface = Typeface.DEFAULT_BOLD
                 gravity = Gravity.CENTER
@@ -70,8 +83,33 @@ class SetupActivity : Activity() {
                 setTextColor(ColorThemer.COLOR_CARD)
                 setOnClickListener(::start)
             }, ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (56 * dp).toInt()).apply {
-                val m = (18 * dp).toInt()
                 setMargins(m, (32 * dp).toInt(), m, m)
+            })
+            view.addView(TextView(view.context).apply {
+                setText(R.string.just_look)
+                textSize = 18f
+                typeface = Typeface.DEFAULT_BOLD
+                gravity = Gravity.CENTER
+                val r = 12 * dp
+                background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
+                backgroundTintList = ColorStateList.valueOf(ColorThemer.COLOR_TEXT)
+                setTextColor(ColorThemer.COLOR_CARD)
+                setOnClickListener {
+                    packageManager.setComponentEnabledSetting(
+                        ComponentName(it.context, HomeScreen::class.java),
+                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                        PackageManager.DONT_KILL_APP,
+                    )
+                    Dock.setItem(it.context, it.context.ionApplication.settings, 0, AppLoader.loadApp(
+                        it.context,
+                        BuildConfig.APPLICATION_ID,
+                        SetupActivity::class.java.name,
+                        Process.myUserHandle(),
+                    ))
+                    it.context.startActivity(Intent(it.context, HomeScreen::class.java))
+                }
+            }, ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (56 * dp).toInt()).apply {
+                setMargins(m, 0, m, m)
             })
         }
     }
@@ -89,12 +127,37 @@ class SetupActivity : Activity() {
     }
 
     private fun start(v: View) {
-        packageManager.setComponentEnabledSetting(ComponentName(this, HomeScreen::class.java), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
         packageManager.setComponentEnabledSetting(ComponentName(this, SettingsActivity::class.java), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
         packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
 
+        if (packageManager.getComponentEnabledSetting(ComponentName(this, HomeScreen::class.java)) != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+            packageManager.setComponentEnabledSetting(
+                ComponentName(this, HomeScreen::class.java),
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                PackageManager.DONT_KILL_APP
+            )
+            Dock.setItem(this, ionApplication.settings, 0, getCategoryItem(Intent.CATEGORY_APP_CONTACTS))
+            Dock.setItem(this, ionApplication.settings, 1, getCategoryItem(Intent.CATEGORY_APP_CALCULATOR))
+            Dock.setItem(this, ionApplication.settings, 2, getCategoryItem(Intent.CATEGORY_APP_BROWSER))
+            Dock.setItem(this, ionApplication.settings, 3, getCategoryItem(Intent.CATEGORY_APP_CALENDAR))
+            Dock.setItem(this, ionApplication.settings, 4, getCategoryItem(Intent.CATEGORY_APP_GALLERY))
+            Dock.setItem(this, ionApplication.settings, 5, getCategoryItem(Intent.CATEGORY_APP_MAPS))
+            Dock.setItem(this, ionApplication.settings, 6, getCategoryItem(Intent.CATEGORY_APP_MUSIC))
+            Dock.setItem(this, ionApplication.settings, 7, getCategoryItem(Intent.CATEGORY_APP_EMAIL))
+            Dock.setItem(this, ionApplication.settings, 8, getCategoryItem(Intent.CATEGORY_APP_MARKET))
+        }
+
         if (Utils.getDefaultLauncher(packageManager) != BuildConfig.APPLICATION_ID)
             Utils.chooseDefaultLauncher(this)
+    }
+
+    private fun getCategoryItem(category: String): LauncherItem? {
+        return packageManager.queryIntentActivities(
+            Intent(Intent.ACTION_MAIN)
+                .addCategory(category),
+            PackageManager.MATCH_DEFAULT_ONLY).firstOrNull()?.activityInfo?.let {
+            AppLoader.loadApp(this, it.packageName, it.name, Process.myUserHandle())
+        }
     }
 
     private fun hasNotificationAccess() = NotificationManagerCompat.getEnabledListenerPackages(applicationContext).contains(applicationContext.packageName)

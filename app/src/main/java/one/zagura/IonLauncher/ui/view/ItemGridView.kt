@@ -50,6 +50,14 @@ class ItemGridView(
         return items[i]
     }
 
+    private fun setItem(x: Int, y: Int, item: LauncherItem?) {
+        val i = y * columns + x
+        while (items.size <= i)
+            items.add(null)
+        items[i] = item
+        Dock.setItem(context, context.ionApplication.settings, i, item)
+    }
+
     init {
         val dp = resources.displayMetrics.density
         val p = (8 * dp).toInt()
@@ -93,13 +101,7 @@ class ItemGridView(
 
     fun updateGridApps() {
         val settings = context.ionApplication.settings
-        val dp = resources.displayMetrics.density
-        val iconSize = (context.ionApplication.settings["dock:icon-size", 48] * dp).toInt()
-        val vMargin = (12 * dp).toInt()
-        val rowHeight = iconSize + vMargin * 2
-        val columns = settings["dock:columns", 5]
-        val appCount = settings["dock:rows", 2] * columns
-        items = ArrayList(Dock.getItems(context, settings).take(appCount))
+        items = ArrayList(Dock.getItems(context, settings))
         invalidate()
     }
 
@@ -223,10 +225,8 @@ class ItemGridView(
         Utils.vibrate(context)
         replacePreview = ItemPreview(NonDrawable, x, y)
         Utils.startDrag(this, item, x to y)
-        val i = y * columns + x
-        items[i] = null
+        setItem(x, y, null)
         showDropTargets = true
-        Dock.setItem(context, context.ionApplication.settings, i, null)
         return true
     }
 
@@ -270,22 +270,14 @@ class ItemGridView(
                 Utils.vibrate(context)
 
                 val (x, y) = viewToGridCoords(event.x.toInt(), event.y.toInt())
-                val i = y * columns + x
 
                 val origCoords = event.localState as Pair<Int, Int>?
-                if (origCoords != null) {
-                    val origI = origCoords.second * columns + origCoords.first
-                    val ri = items[i]
-                    items[origI] = ri
-                    Dock.setItem(context, context.ionApplication.settings, origI, ri)
-                }
+                if (origCoords != null)
+                    setItem(origCoords.first, origCoords.second, getItem(x, y))
 
                 val newItem = LauncherItem.decode(context, event.clipDescription.label.toString())!!
-                while (items.size <= i)
-                    items.add(null)
-                items[i] = newItem
+                setItem(x, y, newItem)
                 invalidate()
-                Dock.setItem(context, context.ionApplication.settings, i, newItem)
             }
         }
         return true

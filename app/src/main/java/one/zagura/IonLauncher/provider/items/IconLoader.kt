@@ -43,7 +43,9 @@ import java.io.FileNotFoundException
 import java.time.Instant
 
 object IconLoader {
-    private val cache = HashMap<LauncherItem, Drawable>()
+    private val cacheApps = HashMap<App, Drawable>()
+    private val cacheContacts = HashMap<ContactItem, Drawable>()
+    private val cacheShortcuts = HashMap<StaticShortcut, Drawable>()
     private var iconPacks = emptyList<IconTheming.IconPackInfo>()
 
     fun updateIconPacks(context: Context, settings: Settings) {
@@ -73,7 +75,7 @@ object IconLoader {
             ?: NonDrawable
 
     fun loadIcon(context: Context, app: App): Drawable {
-        return cache.getOrPut(app) {
+        return cacheApps.getOrPut(app) {
             val externalIcon = iconPacks.firstNotNullOfOrNull {
                 it.getDrawable(app.packageName, app.name, context.resources.displayMetrics.densityDpi)
             }
@@ -92,7 +94,7 @@ object IconLoader {
     }
 
     fun loadIcon(context: Context, contact: ContactItem): Drawable {
-        return cache.getOrPut(contact) {
+        return cacheContacts.getOrPut(contact) {
             if (contact.iconUri != null) try {
                 val inputStream = context.contentResolver.openInputStream(contact.iconUri)
                 val pic = Drawable.createFromStream(inputStream, contact.iconUri.toString()) ?: NonDrawable
@@ -114,7 +116,7 @@ object IconLoader {
 
     @RequiresApi(Build.VERSION_CODES.N_MR1)
     fun loadIcon(context: Context, shortcut: StaticShortcut): Drawable {
-        return cache.getOrPut(shortcut) {
+        return cacheShortcuts.getOrPut(shortcut) {
             val launcherApps =
                 context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
             if (!launcherApps.hasShortcutHostPermission())
@@ -129,7 +131,16 @@ object IconLoader {
     }
 
     fun clearCache() {
-        cache.clear()
+        cacheApps.clear()
+        cacheContacts.clear()
+        cacheShortcuts.clear()
+    }
+
+    fun removePackage(packageName: String) {
+        val iterator = cacheApps.iterator()
+        for ((app, _) in iterator)
+            if (app.packageName == packageName)
+                iterator.remove()
     }
 
     private fun themeIcon(context: Context, icon: Drawable): Drawable {
