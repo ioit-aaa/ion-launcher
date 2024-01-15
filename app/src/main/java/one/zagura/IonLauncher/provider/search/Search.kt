@@ -14,6 +14,7 @@ object Search {
             ShortcutsProvider
         else null,
         SettingsProvider,
+        HiddenProvider,
     )
 
     fun updateData(context: Context) {

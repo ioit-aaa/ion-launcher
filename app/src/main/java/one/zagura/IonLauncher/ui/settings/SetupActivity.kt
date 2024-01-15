@@ -100,7 +100,7 @@ class SetupActivity : Activity() {
                         PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                         PackageManager.DONT_KILL_APP,
                     )
-                    Dock.setItem(it.context, it.context.ionApplication.settings, 0, AppLoader.loadApp(
+                    Dock.setItem(it.context, 0, AppLoader.loadApp(
                         it.context,
                         BuildConfig.APPLICATION_ID,
                         SetupActivity::class.java.name,
@@ -136,15 +136,15 @@ class SetupActivity : Activity() {
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                 PackageManager.DONT_KILL_APP
             )
-            Dock.setItem(this, ionApplication.settings, 0, getCategoryItem(Intent.CATEGORY_APP_CONTACTS))
-            Dock.setItem(this, ionApplication.settings, 1, getCategoryItem(Intent.CATEGORY_APP_CALCULATOR))
-            Dock.setItem(this, ionApplication.settings, 2, getCategoryItem(Intent.CATEGORY_APP_BROWSER))
-            Dock.setItem(this, ionApplication.settings, 3, getCategoryItem(Intent.CATEGORY_APP_CALENDAR))
-            Dock.setItem(this, ionApplication.settings, 4, getCategoryItem(Intent.CATEGORY_APP_GALLERY))
-            Dock.setItem(this, ionApplication.settings, 5, getCategoryItem(Intent.CATEGORY_APP_MAPS))
-            Dock.setItem(this, ionApplication.settings, 6, getCategoryItem(Intent.CATEGORY_APP_MUSIC))
-            Dock.setItem(this, ionApplication.settings, 7, getCategoryItem(Intent.CATEGORY_APP_EMAIL))
-            Dock.setItem(this, ionApplication.settings, 8, getCategoryItem(Intent.CATEGORY_APP_MARKET))
+            Dock.setItem(this, 0, getCategoryItem(Intent.CATEGORY_APP_CONTACTS))
+            Dock.setItem(this, 1, getCategoryItem(Intent.CATEGORY_APP_CALCULATOR))
+            Dock.setItem(this, 2, getCategoryItem(Intent.CATEGORY_APP_BROWSER))
+            Dock.setItem(this, 3, getCategoryItem(Intent.CATEGORY_APP_CALENDAR))
+            Dock.setItem(this, 4, getCategoryItem(Intent.CATEGORY_APP_GALLERY))
+            Dock.setItem(this, 5, getCategoryItem(Intent.CATEGORY_APP_MAPS))
+            Dock.setItem(this, 6, getCategoryItem(Intent.CATEGORY_APP_MUSIC))
+            Dock.setItem(this, 7, getCategoryItem(Intent.CATEGORY_APP_EMAIL))
+            Dock.setItem(this, 8, getCategoryItem(Intent.CATEGORY_APP_MARKET))
         }
 
         if (Utils.getDefaultLauncher(packageManager) != BuildConfig.APPLICATION_ID)

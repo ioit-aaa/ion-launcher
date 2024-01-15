@@ -1,8 +1,10 @@
 package one.zagura.IonLauncher.ui
 
+import android.app.Activity
 import android.os.Build
 import android.text.TextUtils
 import android.text.style.ForegroundColorSpan
+import android.view.DragEvent
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -17,11 +19,13 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.data.items.StaticShortcut
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.items.IconLoader
+import one.zagura.IonLauncher.ui.view.LongPressMenu
 import one.zagura.IonLauncher.util.Utils
 
 class SearchAdapter(
     val showDropTargets: () -> Unit,
     val onItemOpened: (LauncherItem) -> Unit,
+    val activity: Activity,
 ) : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
 
     init {
@@ -69,8 +73,34 @@ class SearchAdapter(
             }
             itemView.setOnLongClickListener {
                 val item = getItem(bindingAdapterPosition)
-                Utils.startDrag(it, item, null)
-                showDropTargets()
+                val sh = it.resources.displayMetrics.heightPixels
+                val (lx, ly) = IntArray(2).apply(it::getLocationInWindow)
+                if (ly > sh / 2) {
+                    LongPressMenu.popup(
+                        it, item,
+                        Gravity.BOTTOM or Gravity.START,
+                        lx, Utils.getDisplayHeight(activity) - ly
+                    )
+                } else {
+                    LongPressMenu.popup(
+                        it, item,
+                        Gravity.TOP or Gravity.START,
+                        lx, ly + it.height
+                    )
+                }
+                Utils.startDrag(it, item, it to bindingAdapterPosition)
+                true
+            }
+            itemView.setOnDragListener { v, e ->
+                if (e.action == DragEvent.ACTION_DRAG_EXITED) {
+                    if (e.localState == v to bindingAdapterPosition) {
+                        LongPressMenu.dismissCurrent()
+                        showDropTargets()
+                    }
+                } else if (e.action == DragEvent.ACTION_DRAG_ENDED) {
+                    if (e.localState == v to bindingAdapterPosition)
+                        LongPressMenu.onDragEnded()
+                }
                 true
             }
         }

@@ -33,4 +33,7 @@
     <string name="background">Background</string>
     <string name="foreground">Foreground</string>
     <string name="background_opacity">Background Opacity</string>
+    <string name="app_info">App Info</string>
+    <string name="hide">Hide</string>
+    <string name="unhide">Unhide</string>
 </resources>

@@ -54,7 +54,7 @@ object ColorThemer {
         val lab = DoubleArray(3)
         ColorUtils.colorToLAB(color, lab)
         val f = 70.0 / max(abs(lab[1]), abs(lab[2]))
-        lab[0] = 80.0
+        lab[0] = 70.0
         lab[1] *= f
         lab[2] *= f
         return ColorUtils.LABToColor(lab[0], lab[1], lab[2])

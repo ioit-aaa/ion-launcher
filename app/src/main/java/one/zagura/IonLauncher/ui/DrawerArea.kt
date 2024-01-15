@@ -1,6 +1,7 @@
 package one.zagura.IonLauncher.ui
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.graphics.Typeface
 import android.os.Build
@@ -31,13 +32,13 @@ import one.zagura.IonLauncher.util.Utils
 
 @SuppressLint("UseCompatLoadingForDrawables", "ViewConstructor")
 class DrawerArea(
-    context: Context,
+    context: Activity,
     showDropTargets: () -> Unit,
     onItemOpened: (LauncherItem) -> Unit,
 ) : LinearLayout(context) {
 
     val recyclerView: RecyclerView
-    private val searchAdapter = SearchAdapter(showDropTargets, onItemOpened)
+    private val searchAdapter = SearchAdapter(showDropTargets, onItemOpened, context)
     private val entry: EditText
     private val separator: View
     private val icSearch = context.getDrawable(R.drawable.ic_search)!!
@@ -117,6 +118,11 @@ class DrawerArea(
         entry.clearFocus()
         recyclerView.stopScroll()
         recyclerView.scrollToPosition(0)
+    }
+
+    fun onAppsChanged() {
+        if (isDrawer)
+            searchAdapter.notifyDataSetChanged()
     }
 
     private fun unsearch() {

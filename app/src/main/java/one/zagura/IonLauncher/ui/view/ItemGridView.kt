@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable
 import android.view.DragEvent
 import android.view.GestureDetector
 import android.view.GestureDetector.OnGestureListener
+import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.updateLayoutParams
@@ -55,7 +56,7 @@ class ItemGridView(
         while (items.size <= i)
             items.add(null)
         items[i] = item
-        Dock.setItem(context, context.ionApplication.settings, i, item)
+        Dock.setItem(context, i, item)
     }
 
     init {
@@ -85,10 +86,8 @@ class ItemGridView(
      */
     fun calculateSideMargin(): Int {
         val dp = resources.displayMetrics.density
-        val columns = context.ionApplication.settings["dock:columns", 5]
-        val p = (8 * dp).toInt()
         val iconSize = (iconSize * dp).toInt()
-        return (resources.displayMetrics.widthPixels / columns - iconSize) / 2 + p
+        return (resources.displayMetrics.widthPixels / columns - iconSize) / 2 + paddingLeft
     }
 
     fun calculateGridHeight(): Int {
@@ -100,8 +99,7 @@ class ItemGridView(
     }
 
     fun updateGridApps() {
-        val settings = context.ionApplication.settings
-        items = ArrayList(Dock.getItems(context, settings))
+        items = ArrayList(Dock.getItems(context))
         invalidate()
     }
 
@@ -175,6 +173,14 @@ class ItemGridView(
         return gx to gy
     }
 
+    private fun gridToPopupCoords(gx: Int, gy: Int): Pair<Int, Int> {
+        val (sx, sy) = IntArray(2).apply(::getLocationInWindow)
+        val yoff = resources.displayMetrics.heightPixels + Utils.getStatusBarHeight(context) + Utils.getNavigationBarHeight(context) - (sy + height)
+        val vx = calculateSideMargin() + gx * ((width - paddingLeft - paddingRight) / columns)
+        val vy = paddingTop + gy * ((height - paddingTop - paddingBottom) / rows)
+        return sx + vx to height - vy + yoff
+    }
+
     private fun getIconBounds(x: Int, y: Int): Rect {
         val w = (width - paddingLeft - paddingRight) / columns
         val h = (height - paddingTop - paddingBottom) / rows
@@ -216,30 +222,29 @@ class ItemGridView(
 
         override fun onLongPress(e: MotionEvent) {
             val (x, y) = viewToGridCoords(e.x.toInt(), e.y.toInt())
-            startDrag(x, y)
+            val item = getItem(x, y) ?: return
+            val (vx, vy) = gridToPopupCoords(x, y)
+            LongPressMenu.popup(this@ItemGridView, item, Gravity.BOTTOM or Gravity.START, vx, vy)
+            Utils.vibrate(context)
+            replacePreview = ItemPreview(NonDrawable, x, y)
+            Utils.startDrag(this@ItemGridView, item, x to y)
+            setItem(x, y, null)
+            showDropTargets = true
         }
     })
-
-    private fun startDrag(x: Int, y: Int): Boolean {
-        val item = getItem(x, y) ?: return false
-        Utils.vibrate(context)
-        replacePreview = ItemPreview(NonDrawable, x, y)
-        Utils.startDrag(this, item, x to y)
-        setItem(x, y, null)
-        showDropTargets = true
-        return true
-    }
 
     override fun onDragEvent(event: DragEvent): Boolean {
         when (event.action) {
             DragEvent.ACTION_DRAG_LOCATION -> {
                 val (x, y) = viewToGridCoords(event.x.toInt(), event.y.toInt())
+                val replaceItem = (event.localState as? Pair<Int, Int>)?.takeIf { it.first is Int && it.second is Int }
+                if (replaceItem == x to y)
+                    LongPressMenu.dismissCurrent()
                 val d = dropPreview
                 if (d == null || d.x != x || d.y != y)
                     Utils.tick(context)
                 val newItem = LauncherItem.decode(context, event.clipDescription.label.toString())!!
                 dropPreview = ItemPreview(IconLoader.loadIcon(context, newItem), x, y)
-                val replaceItem = event.localState as Pair<Int, Int>?
                 if (replaceItem != null) {
                     replacePreview = ItemPreview(
                         getItem(x, y)?.let { IconLoader.loadIcon(context, it) } ?: NonDrawable,
@@ -251,7 +256,7 @@ class ItemGridView(
             DragEvent.ACTION_DRAG_EXITED -> {
                 Utils.tick(context)
                 dropPreview = null
-                val replaceItem = event.localState as Pair<Int, Int>?
+                val replaceItem = (event.localState as? Pair<Int, Int>)?.takeIf { it.first is Int && it.second is Int }
                 if (replaceItem != null) {
                     replacePreview = ItemPreview(
                         NonDrawable,
@@ -264,6 +269,7 @@ class ItemGridView(
                 dropPreview = null
                 replacePreview = null
                 showDropTargets = false
+                LongPressMenu.onDragEnded()
             }
             DragEvent.ACTION_DROP -> {
                 LiveWallpaper.drop(context, windowToken, event.x.toInt(), event.y.toInt())
@@ -271,7 +277,7 @@ class ItemGridView(
 
                 val (x, y) = viewToGridCoords(event.x.toInt(), event.y.toInt())
 
-                val origCoords = event.localState as Pair<Int, Int>?
+                val origCoords = (event.localState as? Pair<Int, Int>)?.takeIf { it.first is Int && it.second is Int }
                 if (origCoords != null)
                     setItem(origCoords.first, origCoords.second, getItem(x, y))
 

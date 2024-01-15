@@ -89,6 +89,7 @@ class HomeScreen : Activity() {
         suggestionsView.update()
         summaryView.updateEvents(EventsLoader.load(this))
         AppLoader.track {
+            drawerArea.onAppsChanged()
             pinnedGrid.updateGridApps()
         }
         NotificationService.MediaObserver.track {
@@ -127,10 +128,8 @@ class HomeScreen : Activity() {
         val m = pinnedGrid.calculateSideMargin()
         summaryView.setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 2), m, m)
         musicView.setPadding(m, 0, m, m - (8 * dp).toInt())
-        suggestionsView.updateLayoutParams<MarginLayoutParams> {
-            val v = (dp * 6).toInt()
-            setMargins(m, v, m, v)
-        }
+        val v = (dp * 6).toInt()
+        suggestionsView.setPadding(m, v, m, v)
     }
 
     private fun createHomeScreen(): CoordinatorLayout {
@@ -155,7 +154,7 @@ class HomeScreen : Activity() {
                 MarginLayoutParams(LayoutParams.MATCH_PARENT, pinnedGrid.calculateGridHeight()))
             addView(
                 suggestionsView,
-                MarginLayoutParams(LayoutParams.MATCH_PARENT, (32 * dp).toInt()))
+                MarginLayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
             setPadding(0, 0, 0, Utils.getNavigationBarHeight(this@HomeScreen))
         }
 

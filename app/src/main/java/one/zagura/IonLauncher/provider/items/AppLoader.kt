@@ -5,8 +5,10 @@ import android.content.pm.LauncherApps
 import android.os.UserHandle
 import android.os.UserManager
 import one.zagura.IonLauncher.data.items.App
+import one.zagura.IonLauncher.provider.HiddenApps
 import one.zagura.IonLauncher.provider.UpdatingResource
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
+import one.zagura.IonLauncher.ui.ionApplication
 
 object AppLoader : UpdatingResource<List<App>>() {
     override fun getResource() = apps
@@ -25,7 +27,8 @@ object AppLoader : UpdatingResource<List<App>>() {
                 val name = appList[i].name
                 val label = appList[i].label.toString().ifEmpty { packageName }
                 val app = App(packageName, name, user, label)
-                collection.add(app)
+                if (!HiddenApps.isHidden(context.ionApplication.settings, app))
+                    collection.add(app)
             }
         }
         apps = collection
@@ -48,6 +51,18 @@ object AppLoader : UpdatingResource<List<App>>() {
         val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
         val info = launcherApps.getActivityList(packageName, user)?.find { it.name == name } ?: return null
         return App(packageName, name, user, info.label.toString())
+    }
+
+    fun onHide(app: App) {
+        apps.remove(app)
+        update(apps)
+    }
+
+    fun onShow(app: App) {
+        if (!apps.contains(app))
+            apps.add(app)
+        resort()
+        update(apps)
     }
 
     class AppCallback(

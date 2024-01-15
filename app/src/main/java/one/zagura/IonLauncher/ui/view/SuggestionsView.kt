@@ -6,6 +6,7 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RoundRectShape
 import android.text.TextUtils
+import android.view.DragEvent
 import android.view.Gravity
 import android.view.View
 import android.widget.ImageView
@@ -36,15 +37,15 @@ class SuggestionsView(
         }
         isVisible = true
         val dp = resources.displayMetrics.density
-        val l = LayoutParams(0, LayoutParams.MATCH_PARENT, 1f).apply {
+        val l = LayoutParams(0, (dp * 32).toInt(), 1f).apply {
             leftMargin = (12 * dp).toInt()
         }
         for ((i, s) in suggestions.withIndex()) {
-            addView(createItemView(s), if (i == 0) LayoutParams(0, LayoutParams.MATCH_PARENT, 1f) else l)
+            addView(createItemView(s, i, suggestions.size), if (i == 0) LayoutParams(0, LayoutParams.MATCH_PARENT, 1f) else l)
         }
     }
 
-    private fun createItemView(s: LauncherItem): View = LinearLayout(context).apply {
+    private fun createItemView(s: LauncherItem, i: Int, columns: Int): View = LinearLayout(context).apply {
         val dp = resources.displayMetrics.density
         orientation = HORIZONTAL
         val r = 99 * dp
@@ -67,8 +68,21 @@ class SuggestionsView(
         })
         setOnClickListener(s::open)
         setOnLongClickListener {
-            Utils.startDrag(it, s, null)
+            LongPressMenu.popup(
+                it, s,
+                Gravity.BOTTOM or Gravity.START,
+                this@SuggestionsView.paddingLeft + (this@SuggestionsView.width - this@SuggestionsView.paddingLeft - this@SuggestionsView.paddingRight) / columns * i,
+                this@SuggestionsView.height + Utils.getNavigationBarHeight(it.context) + (4 * dp).toInt()
+            )
+            Utils.startDrag(it, s, it)
             showDropTargets()
+            true
+        }
+        setOnDragListener { v, e ->
+            if (e.action == DragEvent.ACTION_DRAG_EXITED) {
+                if (e.localState == v)
+                    LongPressMenu.dismissCurrent()
+            }
             true
         }
     }
@@ -77,7 +91,7 @@ class SuggestionsView(
         val suggestionCount = context.ionApplication.settings["suggestion:count", 3]
         if (suggestionCount == 0)
             return emptyList()
-        val dockItems = Dock.getItems(context, context.ionApplication.settings)
+        val dockItems = Dock.getItems(context)
         return SuggestionsManager.getResource()
             .asSequence()
             .filter { !dockItems.contains(it) }

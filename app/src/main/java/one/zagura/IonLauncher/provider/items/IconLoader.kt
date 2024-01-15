@@ -17,7 +17,6 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.InsetDrawable
 import android.graphics.drawable.LayerDrawable
@@ -40,7 +39,6 @@ import one.zagura.IonLauncher.util.IconTheming
 import one.zagura.IonLauncher.util.NonDrawable
 import one.zagura.IonLauncher.util.Settings
 import java.io.FileNotFoundException
-import java.time.Instant
 
 object IconLoader {
     private val cacheApps = HashMap<App, Drawable>()
