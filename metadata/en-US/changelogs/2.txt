@@ -1,0 +1,9 @@
+Added app long-press menus
+Added app hiding and unhiding
+
+Improved onboarding screen
+Tweaked lightness of calendar color dots
+Made app icon update when its app is updated
+Made text in crash activity selectable
+
+Fixed crash when dragging icon on pinned grid
