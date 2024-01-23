@@ -118,6 +118,8 @@ class DrawerArea(
     fun onAppsChanged() {
         if (isDrawer)
             searchAdapter.notifyDataSetChanged()
+        else
+            reloadProviders()
     }
 
     private fun unsearch() {
