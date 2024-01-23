@@ -16,6 +16,7 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.data.summary.Event
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.summary.Alarm
+import one.zagura.IonLauncher.util.LiveWallpaper
 import one.zagura.IonLauncher.util.Utils
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -36,6 +37,12 @@ class SummaryView(c: Context) : View(c) {
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float) = false
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
+            if (tryConsumeTap(e)) return true
+            LiveWallpaper.tap(context, windowToken, e.x.toInt(), e.y.toInt())
+            return false
+        }
+
+        private fun tryConsumeTap(e: MotionEvent): Boolean {
             val y = e.y
             val dateHeight = datePaint.descent() - datePaint.ascent()
             if (y < paddingTop + paddingLeft + dateHeight)
