@@ -3,7 +3,6 @@ package one.zagura.IonLauncher.provider
 import android.content.Context
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.ui.ionApplication
-import one.zagura.IonLauncher.util.Settings
 
 object Dock {
 

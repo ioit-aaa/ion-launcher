@@ -24,7 +24,7 @@ import one.zagura.IonLauncher.util.Utils
 import kotlin.math.abs
 
 @SuppressLint("UseCompatLoadingForDrawables")
-class ItemGridView(
+class PinnedGridView(
     context: Context,
 ) : View(context) {
 
@@ -216,7 +216,7 @@ class ItemGridView(
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             val (x, y) = viewToGridCoords(e.x.toInt(), e.y.toInt())
             val item = getItem(x, y) ?: return false
-            item.open(this@ItemGridView, getIconBounds(x, y))
+            item.open(this@PinnedGridView, getIconBounds(x, y))
             return true
         }
 
@@ -224,10 +224,10 @@ class ItemGridView(
             val (x, y) = viewToGridCoords(e.x.toInt(), e.y.toInt())
             val item = getItem(x, y) ?: return
             val (vx, vy) = gridToPopupCoords(x, y)
-            LongPressMenu.popup(this@ItemGridView, item, Gravity.BOTTOM or Gravity.START, vx, vy)
+            LongPressMenu.popup(this@PinnedGridView, item, Gravity.BOTTOM or Gravity.START, vx, vy)
             Utils.vibrate(context)
             replacePreview = ItemPreview(NonDrawable, x, y)
-            Utils.startDrag(this@ItemGridView, item, x to y)
+            Utils.startDrag(this@PinnedGridView, item, x to y)
             setItem(x, y, null)
             showDropTargets = true
         }

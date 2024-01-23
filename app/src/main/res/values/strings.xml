@@ -36,4 +36,7 @@
     <string name="app_info">App Info</string>
     <string name="hide">Hide</string>
     <string name="unhide">Unhide</string>
+    <string name="widgets">Widgets</string>
+    <string name="choose_widget">Choose Widget</string>
+    <string name="nothing">Nothing</string>
 </resources>

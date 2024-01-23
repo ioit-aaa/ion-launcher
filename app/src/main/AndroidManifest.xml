@@ -19,6 +19,7 @@
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES"/>
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR"/>
+    <uses-permission android:name="android.permission.BIND_APPWIDGET"/>
 
     <application
         android:name=".ui.IonLauncherApp"
@@ -77,6 +78,10 @@
 
         <activity
             android:name=".ui.settings.suggestions.SuggestionsActivity"
+            android:theme="@style/IonLauncher.Settings"/>
+
+        <activity
+            android:name=".ui.settings.widgets.WidgetChooserActivity"
             android:theme="@style/IonLauncher.Settings"/>
 
         <activity

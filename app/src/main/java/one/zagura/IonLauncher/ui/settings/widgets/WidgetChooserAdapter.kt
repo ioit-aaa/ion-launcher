@@ -1,0 +1,119 @@
+package one.zagura.IonLauncher.ui.settings.widgets
+
+import android.appwidget.AppWidgetProviderInfo
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewGroup.MarginLayoutParams
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.core.view.updateLayoutParams
+import androidx.recyclerview.widget.RecyclerView
+import one.zagura.IonLauncher.R
+import one.zagura.IonLauncher.provider.ColorThemer
+import one.zagura.IonLauncher.ui.settings.common.TitleViewHolder
+import one.zagura.IonLauncher.util.FillDrawable
+
+class WidgetChooserAdapter(
+    private val providers: List<AppWidgetProviderInfo>,
+    private val activity: WidgetChooserActivity,
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    class VH(
+        view: View,
+        val label: TextView,
+        val preview: ImageView,
+        val icon: ImageView
+    ) : RecyclerView.ViewHolder(view)
+
+    override fun getItemCount() = providers.size + 2
+
+    override fun getItemViewType(position: Int) = when (position) {
+        0 -> 1
+        1 -> 2
+        else -> 0
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, type: Int): RecyclerView.ViewHolder {
+        if (type == 1)
+            return TitleViewHolder(parent.context)
+        val label = TextView(parent.context).apply {
+            setTextColor(ColorThemer.COLOR_TEXT)
+            textSize = 12f
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        val context = parent.context
+        val dp = parent.resources.displayMetrics.density
+        val preview = ImageView(context).apply {
+            val p = (16 * dp).toInt()
+            setPadding(p, p, p, p)
+        }
+        val icon = ImageView(context).apply {
+            val p = (8 * dp).toInt()
+            setPadding(p, p, p, p)
+        }
+        val v = LinearLayout(context).apply {
+            layoutParams = RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT)
+            background = GradientDrawable().apply {
+                cornerRadius = 12 * dp
+                setStroke((dp).toInt(), ColorThemer.COLOR_SEPARATOR)
+            }
+            orientation = LinearLayout.VERTICAL
+            val h = (48 * dp).toInt()
+            addView(preview, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, parent.resources.displayMetrics.widthPixels / 2 - h))
+            addView(
+                View(context).apply { background = FillDrawable(ColorThemer.COLOR_SEPARATOR) },
+                LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp.toInt()))
+            addView(LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+                addView(icon, LinearLayout.LayoutParams(h, h))
+                addView(label, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, h))
+            }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, h))
+        }
+        return VH(v, label, preview, icon).apply {
+            if (type == 0) itemView.setOnClickListener {
+                val p = providers[bindingAdapterPosition - 2]
+                activity.requestAddWidget(p)
+            }
+            else if (type == 2) itemView.setOnClickListener {
+                activity.requestRemoveWidget()
+            }
+        }
+    }
+
+    private val iconCache = arrayOfNulls<Drawable>(providers.size)
+    private val previewCache = arrayOfNulls<Drawable>(providers.size)
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, i: Int) {
+        if (holder is TitleViewHolder)
+            return holder.bind(holder.itemView.context.getString(R.string.choose_widget))
+        val context = holder.itemView.context
+        holder as VH
+
+        val dp = context.resources.displayMetrics.density
+        val a = (8 * dp).toInt()
+        holder.itemView.updateLayoutParams<MarginLayoutParams> {
+            if (i % 2 == 0)
+                setMargins(a, a * 2, a * 2, 0)
+            else
+                setMargins(a * 2, a * 2, a, 0)
+        }
+
+        if (i == 1) {
+            holder.icon.setImageDrawable(null)
+            holder.preview.setImageDrawable(null)
+            holder.label.text = context.getString(R.string.nothing)
+            return
+        }
+        val p = providers[i - 2]
+        val pm = context.packageManager
+        holder.label.text = p.loadLabel(pm)
+        holder.icon.setImageDrawable(iconCache[i - 2]
+            ?: p.loadIcon(context, context.resources.displayMetrics.densityDpi).also { iconCache[i - 2] = it })
+        holder.preview.setImageDrawable(previewCache[i - 2]
+            ?: (p.loadPreviewImage(context, context.resources.displayMetrics.densityDpi) ?: iconCache[i - 2]).also { previewCache[i - 2] = it })
+    }
+}

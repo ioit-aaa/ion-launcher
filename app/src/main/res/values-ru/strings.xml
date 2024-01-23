@@ -34,4 +34,10 @@
     <string name="background">Фон</string>
     <string name="foreground">Техт и иконки</string>
     <string name="background_opacity">Непрозрачность фона</string>
+    <string name="app_info">Инфо приложения</string>
+    <string name="hide">Спрятать</string>
+    <string name="unhide">Показать</string>
+    <string name="widgets">Виджеты</string>
+    <string name="choose_widget">Выбрать виджет</string>
+    <string name="nothing">Ничего</string>
 </resources>

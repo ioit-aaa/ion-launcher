@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.settings
+package one.zagura.IonLauncher.ui.settings.common
 
 import android.app.Dialog
 import android.app.WallpaperManager
@@ -24,8 +24,6 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toColorInt
 import androidx.core.widget.doOnTextChanged
 import one.zagura.IonLauncher.provider.ColorThemer
-import one.zagura.IonLauncher.ui.ionApplication
-import one.zagura.IonLauncher.util.Utils
 
 object ColorPicker {
 

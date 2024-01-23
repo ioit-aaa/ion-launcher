@@ -1,6 +1,5 @@
 package one.zagura.IonLauncher.ui.view
 
-import android.app.ActivityOptions
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Typeface
@@ -21,7 +20,6 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.HiddenApps
 import one.zagura.IonLauncher.ui.ionApplication
-import one.zagura.IonLauncher.util.FillDrawable
 
 object LongPressMenu {
 
@@ -72,10 +70,6 @@ object LongPressMenu {
 
     private fun ViewGroup.addOption(@StringRes label: Int, onClick: (View) -> Unit) {
         val dp = resources.displayMetrics.density
-//        addView(
-//            View(context).apply { background = FillDrawable(ColorThemer.background(context)) },
-//            LayoutParams(LayoutParams.MATCH_PARENT, (dp * 2).toInt())
-//        )
         addView(TextView(context).apply {
             background = GradientDrawable().apply {
                 color = ColorStateList.valueOf(ColorThemer.foreground(context))

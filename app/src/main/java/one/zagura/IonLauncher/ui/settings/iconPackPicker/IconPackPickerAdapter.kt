@@ -4,9 +4,9 @@ import android.content.Context
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.R
+import one.zagura.IonLauncher.ui.settings.common.TitleViewHolder
 import one.zagura.IonLauncher.ui.settings.iconPackPicker.viewHolder.IconPackViewHolder
 import one.zagura.IonLauncher.ui.settings.iconPackPicker.viewHolder.SectionViewHolder
-import one.zagura.IonLauncher.ui.settings.iconPackPicker.viewHolder.TitleViewHolder
 import one.zagura.IonLauncher.util.Settings
 import java.util.*
 

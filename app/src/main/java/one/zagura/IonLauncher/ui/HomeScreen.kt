@@ -17,22 +17,24 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.luminance
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
+import one.zagura.IonLauncher.provider.Widgets
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.summary.EventsLoader
 import one.zagura.IonLauncher.provider.items.IconLoader
 import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
-import one.zagura.IonLauncher.ui.view.ItemGridView
+import one.zagura.IonLauncher.ui.drawer.DrawerArea
+import one.zagura.IonLauncher.ui.view.PinnedGridView
 import one.zagura.IonLauncher.ui.view.MusicView
 import one.zagura.IonLauncher.ui.view.SuggestionsView
 import one.zagura.IonLauncher.ui.view.SummaryView
+import one.zagura.IonLauncher.ui.view.WidgetView
 import one.zagura.IonLauncher.util.FillDrawable
 import one.zagura.IonLauncher.util.Utils
 
@@ -50,9 +52,10 @@ class HomeScreen : Activity() {
     private lateinit var drawerArea: DrawerArea
 
     private lateinit var summaryView: SummaryView
+    private var widgetView: WidgetView? = null
     private lateinit var musicView: MusicView
     private lateinit var suggestionsView: SuggestionsView
-    private lateinit var pinnedGrid: ItemGridView
+    private lateinit var pinnedGrid: PinnedGridView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,14 +83,8 @@ class HomeScreen : Activity() {
         applyCustomizations()
     }
 
-    override fun onResume() {
-        super.onResume()
-        ionApplication.settings.consumeUpdate {
-            IconLoader.updateIconPacks(this, ionApplication.settings)
-            applyCustomizations()
-        }
-        suggestionsView.update()
-        summaryView.updateEvents(EventsLoader.load(this))
+    override fun onStart() {
+        super.onStart()
         AppLoader.track {
             drawerArea.onAppsChanged()
             pinnedGrid.updateGridApps()
@@ -95,6 +92,8 @@ class HomeScreen : Activity() {
         NotificationService.MediaObserver.track {
             musicView.updateTrack(it)
         }
+        widgetView?.startListening()
+        suggestionsView.update()
         homeScreen.post {
             // windowToken might not be loaded, so we post this to the view
             val wallpaperManager = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
@@ -102,11 +101,21 @@ class HomeScreen : Activity() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onStop() {
+        super.onStop()
         AppLoader.release()
         NotificationService.MediaObserver.release()
         SuggestionsManager.saveToStorage(this)
+        widgetView?.stopListening()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        ionApplication.settings.consumeUpdate {
+            IconLoader.updateIconPacks(this, ionApplication.settings)
+            applyCustomizations()
+        }
+        summaryView.updateEvents(EventsLoader.load(this))
     }
 
     @Suppress("DEPRECATION")
@@ -130,6 +139,23 @@ class HomeScreen : Activity() {
         musicView.setPadding(m, 0, m, m - (8 * dp).toInt())
         val v = (dp * 6).toInt()
         suggestionsView.setPadding(m, v, m, v)
+        val widget = Widgets.getWidget(this)
+        if (widget != widgetView?.widget) {
+            if (widgetView != null) {
+                desktop.removeView(widgetView)
+                widgetView = null
+            }
+            if (widget != null) {
+                widgetView = WidgetView.new(this, widget)
+                desktop.addView(widgetView, 1, LinearLayout.LayoutParams(
+                    LayoutParams.MATCH_PARENT,
+                    (96 * dp).toInt(),
+                ).apply {
+                    gravity = Gravity.CENTER
+                    setMargins(m, m, m, v)
+                })
+            }
+        }
     }
 
     private fun createHomeScreen(): CoordinatorLayout {
@@ -139,7 +165,7 @@ class HomeScreen : Activity() {
         summaryView = SummaryView(this)
         musicView = MusicView(this)
         suggestionsView = SuggestionsView(this, ::showDropTargets)
-        pinnedGrid = ItemGridView(this)
+        pinnedGrid = PinnedGridView(this)
 
         desktop = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL

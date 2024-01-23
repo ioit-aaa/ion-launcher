@@ -2,7 +2,6 @@ package one.zagura.IonLauncher.data.items
 
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.content.pm.LauncherApps
 import android.graphics.Rect
 import android.os.UserHandle

@@ -34,4 +34,10 @@
     <string name="background">Fons</string>
     <string name="foreground">Text i icones</string>
     <string name="background_opacity">Opacitat del fons</string>
+    <string name="app_info">Info d\'app</string>
+    <string name="hide">Amagar</string>
+    <string name="unhide">Mostrar</string>
+    <string name="widgets">Widgets</string>
+    <string name="choose_widget">Escollir widget</string>
+    <string name="nothing">Res</string>
 </resources>

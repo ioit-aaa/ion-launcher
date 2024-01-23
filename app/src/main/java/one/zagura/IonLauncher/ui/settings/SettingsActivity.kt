@@ -4,24 +4,27 @@ import android.app.Activity
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.view.WindowManager
 import androidx.core.view.isVisible
 import one.zagura.IonLauncher.BuildConfig
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.ui.ionApplication
+import one.zagura.IonLauncher.ui.settings.common.color
+import one.zagura.IonLauncher.ui.settings.common.onClick
+import one.zagura.IonLauncher.ui.settings.common.seekbar
+import one.zagura.IonLauncher.ui.settings.common.setSettingsContentView
+import one.zagura.IonLauncher.ui.settings.common.setting
+import one.zagura.IonLauncher.ui.settings.common.switch
+import one.zagura.IonLauncher.ui.settings.common.title
 import one.zagura.IonLauncher.ui.settings.iconPackPicker.IconPackPickerActivity
 import one.zagura.IonLauncher.ui.settings.suggestions.SuggestionsActivity
+import one.zagura.IonLauncher.ui.settings.widgets.WidgetChooserActivity
 import one.zagura.IonLauncher.util.Utils
 
 class SettingsActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-            window.setDecorFitsSystemWindows(false)
-        else
-            window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
         setSettingsContentView(R.string.tweaks) {
             title(R.string.pinned_grid)
             setting(R.string.columns, isVertical = true) {
@@ -69,6 +72,10 @@ class SettingsActivity : Activity() {
                 setting(R.string.suggestions) {
                     onClick(SuggestionsActivity::class.java)
                 }
+            }
+            title(R.string.widgets)
+            setting(R.string.choose_widget) {
+                onClick(WidgetChooserActivity::class.java)
             }
             title(R.string.other)
             setting(R.string.choose_launcher) {

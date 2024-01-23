@@ -1,10 +1,7 @@
 package one.zagura.IonLauncher.provider.notification
 
-import android.content.Context
 import android.media.MediaMetadata
 import android.media.session.MediaController
-import android.media.session.PlaybackState
-import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.media.MediaPlayerData
 
 object MediaItemCreator {

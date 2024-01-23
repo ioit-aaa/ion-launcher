@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.settings.iconPackPicker.viewHolder
+package one.zagura.IonLauncher.ui.settings.common
 
 import android.content.Context
 import android.view.Gravity

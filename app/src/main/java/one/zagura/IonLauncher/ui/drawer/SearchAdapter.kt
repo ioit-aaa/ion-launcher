@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui
+package one.zagura.IonLauncher.ui.drawer
 
 import android.app.Activity
 import android.os.Build
@@ -19,6 +19,7 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.data.items.StaticShortcut
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.items.IconLoader
+import one.zagura.IonLauncher.ui.HomeScreen
 import one.zagura.IonLauncher.ui.view.LongPressMenu
 import one.zagura.IonLauncher.util.Utils
 

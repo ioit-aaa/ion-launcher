@@ -1,10 +1,8 @@
 package one.zagura.IonLauncher.provider.search
 
 import android.content.Context
-import one.zagura.IonLauncher.data.items.ContactItem
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.HiddenApps
-import one.zagura.IonLauncher.provider.items.ContactsLoader
 
 object HiddenProvider : BasicProvider<LauncherItem> {
 

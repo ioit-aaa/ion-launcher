@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalContracts::class)
 
-package one.zagura.IonLauncher.ui.settings
+package one.zagura.IonLauncher.ui.settings.common
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -9,7 +9,6 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.graphics.drawable.ClipDrawable
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
@@ -24,6 +23,7 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.WindowManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -46,13 +46,22 @@ import kotlin.contracts.contract
 
 class ViewBuilderScope(val view: ViewGroup)
 
-inline fun Activity.setSettingsContentView(@StringRes titleId: Int, builder: ViewBuilderScope.() -> Unit) {
-    contract { callsInPlace(builder, InvocationKind.EXACTLY_ONCE) }
-    val dp = resources.displayMetrics.density
+fun Activity.setupWindow() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+        window.setDecorFitsSystemWindows(false)
+    else
+        window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+
     window.setBackgroundDrawable(FillDrawable(ColorThemer.COLOR_CARD))
     val bc = ColorThemer.COLOR_CARD and 0xffffff or 0x55000000
     window.statusBarColor = bc
     window.navigationBarColor = bc
+}
+
+inline fun Activity.setSettingsContentView(@StringRes titleId: Int, builder: ViewBuilderScope.() -> Unit) {
+    contract { callsInPlace(builder, InvocationKind.EXACTLY_ONCE) }
+    val dp = resources.displayMetrics.density
+    setupWindow()
     setContentView(NestedScrollView(this).apply {
         addView(LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
@@ -214,7 +223,10 @@ fun ViewBuilderScope.color(settingId: String, default: Int) {
     val dr = ShapeDrawable(OvalShape())
     dr.paint.color = view.context.ionApplication.settings[settingId, default] or 0xff000000.toInt()
     view.setOnClickListener {
-        ColorPicker.show(it.context, it.context.ionApplication.settings[settingId, default]) { newColor ->
+        ColorPicker.show(
+            it.context,
+            it.context.ionApplication.settings[settingId, default]
+        ) { newColor ->
             dr.paint.color = newColor or 0xff000000.toInt()
             dr.invalidateSelf()
             it.context.ionApplication.settings.edit(it.context) {

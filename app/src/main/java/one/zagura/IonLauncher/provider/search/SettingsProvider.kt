@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import one.zagura.IonLauncher.data.items.ActionItem
-import one.zagura.IonLauncher.data.items.ContactItem
 
 object SettingsProvider : BasicProvider<ActionItem> {
 

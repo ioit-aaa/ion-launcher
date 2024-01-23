@@ -16,7 +16,6 @@ import android.provider.Settings
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
@@ -28,7 +27,11 @@ import one.zagura.IonLauncher.provider.Dock
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.ui.HomeScreen
-import one.zagura.IonLauncher.ui.ionApplication
+import one.zagura.IonLauncher.ui.settings.common.color
+import one.zagura.IonLauncher.ui.settings.common.permissionSwitch
+import one.zagura.IonLauncher.ui.settings.common.setSettingsContentView
+import one.zagura.IonLauncher.ui.settings.common.setting
+import one.zagura.IonLauncher.ui.settings.common.title
 import one.zagura.IonLauncher.util.Utils
 
 class SetupActivity : Activity() {
@@ -40,11 +43,6 @@ class SetupActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-            window.setDecorFitsSystemWindows(false)
-        else
-            window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-
         setSettingsContentView(R.string.app_name) {
             title(R.string.grant_permissions)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

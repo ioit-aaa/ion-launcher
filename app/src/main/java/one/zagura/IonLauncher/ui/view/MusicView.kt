@@ -23,9 +23,7 @@ class MusicView(c: Context) : LinearLayout(c) {
 
     private val musicService = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-    private val image = ImageView(context).apply {
-        scaleType = ImageView.ScaleType.FIT_END
-    }
+    private val image = ImageView(context)
 
     private val title = TextView(context).apply {
         textSize = 14f
@@ -122,6 +120,11 @@ class MusicView(c: Context) : LinearLayout(c) {
 
         setOnClickListener { data.onTap?.send() }
         image.setImageBitmap(data.cover)
+        if (data.cover != null) {
+            image.scaleType = if (data.cover.width > data.cover.height)
+                ImageView.ScaleType.FIT_END
+            else ImageView.ScaleType.FIT_START
+        }
         with(title) {
             text = data.name
         }

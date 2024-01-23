@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui
+package one.zagura.IonLauncher.ui.drawer
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -21,12 +21,7 @@ import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.ColorThemer
-import one.zagura.IonLauncher.provider.search.AppsProvider
-import one.zagura.IonLauncher.provider.search.ContactsProvider
 import one.zagura.IonLauncher.provider.search.Search
-import one.zagura.IonLauncher.provider.search.SettingsProvider
-import one.zagura.IonLauncher.provider.search.ShortcutsProvider
-import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.util.FillDrawable
 import one.zagura.IonLauncher.util.Utils
 

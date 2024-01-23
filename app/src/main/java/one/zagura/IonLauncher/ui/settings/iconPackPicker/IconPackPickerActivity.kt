@@ -2,21 +2,16 @@ package one.zagura.IonLauncher.ui.settings.iconPackPicker
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
-import android.os.Build
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.DOWN
 import androidx.recyclerview.widget.ItemTouchHelper.UP
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import one.zagura.IonLauncher.R
-import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.ui.ionApplication
+import one.zagura.IonLauncher.ui.settings.common.setupWindow
 import one.zagura.IonLauncher.ui.settings.iconPackPicker.viewHolder.IconPackViewHolder
-import one.zagura.IonLauncher.util.FillDrawable
 import one.zagura.IonLauncher.util.IconTheming
 import one.zagura.IonLauncher.util.Utils
 import java.util.*
@@ -25,17 +20,9 @@ class IconPackPickerActivity : Activity() {
     @SuppressLint("UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-            window.setDecorFitsSystemWindows(false)
-        else
-            window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        setupWindow()
 
         val settings = ionApplication.settings
-
-        window.setBackgroundDrawable(FillDrawable(ColorThemer.COLOR_CARD))
-        val bc = ColorThemer.COLOR_CARD and 0xffffff or 0x55000000
-        window.statusBarColor = bc
-        window.navigationBarColor = bc
 
         val dp = resources.displayMetrics.density
 
