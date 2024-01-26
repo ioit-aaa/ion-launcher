@@ -1,0 +1,8 @@
+Added widget support
+
+Made tapping on live wallpapers work
+Tweaked haptic feedback
+
+Fixed search results not updating when an app is uninstalled
+Fixed popup menus disappearing instantly after appearing in pinned items grid
+Fixed the music player not updating
