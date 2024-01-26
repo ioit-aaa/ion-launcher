@@ -3,6 +3,7 @@ package one.zagura.IonLauncher.ui
 import android.app.Activity
 import android.app.WallpaperManager
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
@@ -89,6 +90,8 @@ class HomeScreen : Activity() {
             drawerArea.onAppsChanged()
             pinnedGrid.updateGridApps()
         }
+        // Just in case it died for some reason
+        startService(Intent(this, NotificationService::class.java))
         NotificationService.MediaObserver.track {
             musicView.updateTrack(it)
         }
@@ -147,12 +150,12 @@ class HomeScreen : Activity() {
             }
             if (widget != null) {
                 widgetView = WidgetView.new(this, widget)
-                desktop.addView(widgetView, 1, LinearLayout.LayoutParams(
+                desktop.addView(widgetView, 2, LinearLayout.LayoutParams(
                     LayoutParams.MATCH_PARENT,
                     (96 * dp).toInt(),
                 ).apply {
                     gravity = Gravity.CENTER
-                    setMargins(m, m, m, v)
+                    setMargins(m, 0, m, v)
                 })
             }
         }
