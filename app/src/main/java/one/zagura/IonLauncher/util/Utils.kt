@@ -11,6 +11,7 @@ import android.content.pm.PackageManager
 import android.graphics.Point
 import android.media.AudioAttributes
 import android.os.Build
+import android.os.CombinedVibration
 import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -113,55 +114,80 @@ object Utils {
 
     @Suppress("DEPRECATION")
     @RequiresPermission(android.Manifest.permission.VIBRATE)
-    fun vibrate(context: Context) {
-        val v = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    fun vibrateDrop(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val v = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            v.defaultVibrator
-        } else {
-            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (v.defaultVibrator.areAllPrimitivesSupported(VibrationEffect.Composition.PRIMITIVE_THUD)) {
+                v.vibrate(
+                    CombinedVibration.createParallel(
+                        VibrationEffect.startComposition()
+                            .addPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD)
+                            .compose()),
+                    VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_TOUCH).build())
+                return
+            }
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val v = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+        else
+            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             v.vibrate(
-                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK),
-                VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_TOUCH).build(),
-            )
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK),
+                VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_TOUCH).build())
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             v.vibrate(
-                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK),
-                AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build(),
-            )
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK),
+                AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             v.vibrate(
-                VibrationEffect.createOneShot(10L, VibrationEffect.DEFAULT_AMPLITUDE),
-                AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build(),
-            )
-        } else v.vibrate(10L)
+                VibrationEffect.createOneShot(15L, VibrationEffect.DEFAULT_AMPLITUDE),
+                AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+        else v.vibrate(15L)
     }
 
+    @Suppress("DEPRECATION")
+    @RequiresPermission(android.Manifest.permission.VIBRATE)
+    fun click(context: Context) {
+        val v = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+        else
+            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            v.vibrate(
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK),
+                VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_TOUCH).build())
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            v.vibrate(
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK),
+                AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            v.vibrate(
+                VibrationEffect.createOneShot(10L, VibrationEffect.DEFAULT_AMPLITUDE),
+                AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+        else v.vibrate(10L)
+    }
+
+    @Suppress("DEPRECATION")
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     fun tick(context: Context) {
-        val v = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val v = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            v.defaultVibrator
-        } else {
+        val v = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+        else
             context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             v.vibrate(
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK),
-                VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_TOUCH).build(),
-            )
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_TOUCH).build())
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             v.vibrate(
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK),
-                AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build(),
-            )
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             v.vibrate(
-                VibrationEffect.createOneShot(1L, 10),
-                AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build(),
-            )
-        } else v.vibrate(1L)
+                VibrationEffect.createOneShot(1L, VibrationEffect.DEFAULT_AMPLITUDE),
+                AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+        else v.vibrate(1L)
     }
 
     fun chooseDefaultLauncher(context: Context) {

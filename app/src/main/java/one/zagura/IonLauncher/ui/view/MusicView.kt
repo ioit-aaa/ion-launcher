@@ -43,7 +43,7 @@ class MusicView(c: Context) : LinearLayout(c) {
         contentDescription = resources.getString(R.string.play)
         setOnClickListener {
             it as ImageView
-            Utils.vibrate(it.context)
+            Utils.click(it.context)
             if (musicService.isMusicActive) {
                 musicService.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE))
                 musicService.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PAUSE))
@@ -64,7 +64,7 @@ class MusicView(c: Context) : LinearLayout(c) {
     private val next = ImageView(context).apply {
         setImageResource(R.drawable.ic_track_next)
         setOnClickListener {
-            Utils.vibrate(it.context)
+            Utils.click(it.context)
             musicService.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT))
             musicService.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_NEXT))
             play.setImageResource(R.drawable.ic_pause)

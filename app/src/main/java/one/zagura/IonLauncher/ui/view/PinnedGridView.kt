@@ -225,8 +225,9 @@ class PinnedGridView(
             val item = getItem(x, y) ?: return
             val (vx, vy) = gridToPopupCoords(x, y)
             LongPressMenu.popup(this@PinnedGridView, item, Gravity.BOTTOM or Gravity.START, vx, vy)
-            Utils.vibrate(context)
+            Utils.click(context)
             replacePreview = ItemPreview(NonDrawable, x, y)
+            dropPreview = ItemPreview(NonDrawable, x, y)
             Utils.startDrag(this@PinnedGridView, item, x to y)
             setItem(x, y, null)
             showDropTargets = true
@@ -238,7 +239,7 @@ class PinnedGridView(
             DragEvent.ACTION_DRAG_LOCATION -> {
                 val (x, y) = viewToGridCoords(event.x.toInt(), event.y.toInt())
                 val replaceItem = (event.localState as? Pair<Int, Int>)?.takeIf { it.first is Int && it.second is Int }
-                if (replaceItem == x to y)
+                if (replaceItem != x to y)
                     LongPressMenu.dismissCurrent()
                 val d = dropPreview
                 if (d == null || d.x != x || d.y != y)
@@ -273,7 +274,7 @@ class PinnedGridView(
             }
             DragEvent.ACTION_DROP -> {
                 LiveWallpaper.drop(context, windowToken, event.x.toInt(), event.y.toInt())
-                Utils.vibrate(context)
+                Utils.vibrateDrop(context)
 
                 val (x, y) = viewToGridCoords(event.x.toInt(), event.y.toInt())
 

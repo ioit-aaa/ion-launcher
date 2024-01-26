@@ -167,7 +167,7 @@ fun ViewBuilderScope.switch(settingId: String, default: Boolean, listener: (View
         thumbDrawable = generateSwitchThumbDrawable(context)
         isChecked = context.ionApplication.settings[settingId, default]
         setOnCheckedChangeListener { v, isChecked ->
-            Utils.vibrate(v.context)
+            Utils.click(v.context)
             listener(v, isChecked)
             v.context.ionApplication.settings.edit(v.context) {
                 settingId set isChecked
@@ -191,7 +191,7 @@ fun ViewBuilderScope.permissionSwitch(default: Boolean, listener: (View) -> Unit
             if (!isChecked)
                 return@setOnCheckedChangeListener
             isEnabled = false
-            Utils.vibrate(v.context)
+            Utils.click(v.context)
             listener(v)
         }
     }
