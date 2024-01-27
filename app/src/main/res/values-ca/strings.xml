@@ -18,7 +18,7 @@
     <string name="count">Quantitat</string>
     <string name="other">Altres</string>
     <string name="choose_launcher">Triar llençador predeterminat</string>
-    <string name="grant_permissions">Donar permissos (es pot fer despres, en configuració del sistema)</string>
+    <string name="grant_permissions">Donar permissos</string>
     <string name="notification_access">Acces a notificacions</string>
     <string name="contacts_access">Acces a contactes</string>
     <string name="calendar_access">Acces al calendari</string>

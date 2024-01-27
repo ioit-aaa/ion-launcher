@@ -15,6 +15,7 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.luminance
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -91,7 +92,8 @@ class HomeScreen : Activity() {
             pinnedGrid.updateGridApps()
         }
         // Just in case it died for some reason
-        startService(Intent(this, NotificationService::class.java))
+        if (NotificationService.hasPermission(this))
+            startService(Intent(this, NotificationService::class.java))
         NotificationService.MediaObserver.track {
             musicView.updateTrack(it)
         }

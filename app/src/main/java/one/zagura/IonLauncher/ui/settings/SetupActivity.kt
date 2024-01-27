@@ -18,14 +18,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.RequiresApi
-import androidx.core.app.NotificationManagerCompat
 import one.zagura.IonLauncher.BuildConfig
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Dock
 import one.zagura.IonLauncher.provider.items.AppLoader
+import one.zagura.IonLauncher.provider.items.ContactsLoader
+import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
+import one.zagura.IonLauncher.provider.summary.EventsLoader
 import one.zagura.IonLauncher.ui.HomeScreen
 import one.zagura.IonLauncher.ui.settings.common.color
 import one.zagura.IonLauncher.ui.settings.common.permissionSwitch
@@ -53,7 +55,7 @@ class SetupActivity : Activity() {
                     updateCalendarAccess = permissionSwitch(hasCalendarAccess(), ::grantCalendarAccess)
                 }
                 setting(R.string.usage_access, subtitle = R.string.for_suggestions) {
-                    updateUsageAccess = permissionSwitch(SuggestionsManager.checkUsageAccessPermission(view.context), ::grantUsageAccess)
+                    updateUsageAccess = permissionSwitch(SuggestionsManager.hasPermission(view.context), ::grantUsageAccess)
                 }
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
@@ -117,7 +119,7 @@ class SetupActivity : Activity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             updateContactsAccess(hasContactsAccess())
             updateCalendarAccess(hasCalendarAccess())
-            updateUsageAccess(SuggestionsManager.checkUsageAccessPermission(this))
+            updateUsageAccess(SuggestionsManager.hasPermission(this))
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             updateNotificationAccess(hasNotificationAccess())
@@ -158,9 +160,9 @@ class SetupActivity : Activity() {
         }
     }
 
-    private fun hasNotificationAccess() = NotificationManagerCompat.getEnabledListenerPackages(applicationContext).contains(applicationContext.packageName)
-    private fun hasContactsAccess() = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED
-    private fun hasCalendarAccess() = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || checkSelfPermission(Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED
+    private fun hasNotificationAccess() = NotificationService.hasPermission(this)
+    private fun hasContactsAccess() = ContactsLoader.hasPermission(this)
+    private fun hasCalendarAccess() = EventsLoader.hasPermission(this)
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     fun grantNotificationAccess(v: View) {

@@ -22,9 +22,7 @@ object EventsLoader {
     )
 
     fun load(context: Context): List<Event> {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-            context.checkSelfPermission(Manifest.permission.READ_CALENDAR) !=
-            PackageManager.PERMISSION_GRANTED)
+        if (!hasPermission(context))
             return emptyList()
         val eventsUriBuilder = CalendarContract.Instances.CONTENT_URI
             .buildUpon()
@@ -63,4 +61,8 @@ object EventsLoader {
         cur.close()
         return events
     }
+
+    fun hasPermission(context: Context): Boolean =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+        context.checkSelfPermission(Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED
 }

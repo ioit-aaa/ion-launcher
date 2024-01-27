@@ -6,6 +6,7 @@ import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
+import android.os.Build
 import android.service.notification.NotificationListenerService
 import androidx.core.app.NotificationManagerCompat
 import one.zagura.IonLauncher.BuildConfig
@@ -15,9 +16,8 @@ import one.zagura.IonLauncher.provider.UpdatingResource
 class NotificationService : NotificationListenerService() {
 
     override fun onCreate() {
-        if (!NotificationManagerCompat.getEnabledListenerPackages(applicationContext).contains(applicationContext.packageName)) {
+        if (!hasPermission(applicationContext))
             stopSelf()
-        }
         val msm = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
         msm.addOnActiveSessionsChangedListener(onMediaControllersUpdated, componentName)
     }
@@ -43,7 +43,7 @@ class NotificationService : NotificationListenerService() {
         }
 
         fun updateMediaItem(context: Context) {
-            if (!NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName))
+            if (!hasPermission(context))
                 return
             val msm = context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
             onMediaControllersUpdated(msm.getActiveSessions(componentName))
@@ -86,5 +86,9 @@ class NotificationService : NotificationListenerService() {
 
     companion object {
         private val componentName = ComponentName(BuildConfig.APPLICATION_ID, NotificationService::class.java.name)
+
+        fun hasPermission(context: Context): Boolean =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1 &&
+            NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
     }
 }

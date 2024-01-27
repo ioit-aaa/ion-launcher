@@ -18,7 +18,7 @@
     <string name="count">Cantidad</string>
     <string name="other">Otros</string>
     <string name="choose_launcher">Elegir lanzador predeterminado</string>
-    <string name="grant_permissions">Dar permisos (se puede hacer después en ajustes de sistema)</string>
+    <string name="grant_permissions">Dar permisos</string>
     <string name="notification_access">Acceso a notificaciones</string>
     <string name="contacts_access">Acceso a contactos</string>
     <string name="calendar_access">Acceso al calendario</string>

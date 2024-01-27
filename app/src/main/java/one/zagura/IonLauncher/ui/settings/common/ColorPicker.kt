@@ -208,7 +208,7 @@ object ColorPicker {
         w.show()
     }
 
-    private fun formatColorString(@ColorInt color: Int): String =
+    fun formatColorString(@ColorInt color: Int): String =
         "#${(color and 0xffffff).toString(16).padStart(6, '0')}"
 
     private fun parseColorString(color: String): Int =

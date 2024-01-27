@@ -61,7 +61,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
     }
 
     private fun updateSuggestions(context: Context) {
-        val timeBased = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkUsageAccessPermission(context)) {
+        val timeBased = if (hasPermission(context)) {
             @SuppressLint("InlinedApi")
             val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
@@ -179,8 +179,9 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    fun checkUsageAccessPermission(context: Context): Boolean {
+    fun hasPermission(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+            return false
         val aom = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
         @Suppress("DEPRECATION")
         val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)

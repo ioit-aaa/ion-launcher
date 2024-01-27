@@ -18,7 +18,7 @@
     <string name="count">Количество</string>
     <string name="other">Другие</string>
     <string name="choose_launcher">Выбрать главный лаунчер</string>
-    <string name="grant_permissions">Дать разришения (это можно зделать позже, в настройках системы)</string>
+    <string name="grant_permissions">Дать разришения</string>
     <string name="notification_access">Доступ к уведомлениям</string>
     <string name="contacts_access">Доступ к контактам</string>
     <string name="calendar_access">Доступ к календарю</string>

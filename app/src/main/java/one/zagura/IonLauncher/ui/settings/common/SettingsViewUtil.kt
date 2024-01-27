@@ -44,7 +44,12 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-class ViewBuilderScope(val view: ViewGroup)
+class SettingsPageScope(val view: ViewGroup)
+
+class SettingViewScope(
+    val updateSubtitle: (String) -> Unit,
+    val view: ViewGroup,
+)
 
 fun Activity.setupWindow() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
@@ -58,7 +63,7 @@ fun Activity.setupWindow() {
     window.navigationBarColor = bc
 }
 
-inline fun Activity.setSettingsContentView(@StringRes titleId: Int, builder: ViewBuilderScope.() -> Unit) {
+inline fun Activity.setSettingsContentView(@StringRes titleId: Int, builder: SettingsPageScope.() -> Unit) {
     contract { callsInPlace(builder, InvocationKind.EXACTLY_ONCE) }
     val dp = resources.displayMetrics.density
     setupWindow()
@@ -78,12 +83,12 @@ inline fun Activity.setSettingsContentView(@StringRes titleId: Int, builder: Vie
             addView(View(context).apply {
                 background = FillDrawable(ColorThemer.COLOR_SEPARATOR)
             }, LayoutParams(MATCH_PARENT, dp.toInt()))
-            builder(ViewBuilderScope(this))
+            builder(SettingsPageScope(this))
         }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
     })
 }
 
-fun ViewBuilderScope.title(@StringRes text: Int) {
+fun SettingsPageScope.title(@StringRes text: Int) {
     val dp = view.resources.displayMetrics.density
     view.addView(TextView(view.context).apply {
         gravity = Gravity.CENTER_VERTICAL
@@ -96,18 +101,18 @@ fun ViewBuilderScope.title(@StringRes text: Int) {
     }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
 }
 
-inline fun ViewBuilderScope.setting(
+inline fun SettingsPageScope.setting(
     @StringRes title: Int,
     @StringRes subtitle: Int,
     isVertical: Boolean = false,
-    child: ViewBuilderScope.() -> Unit
+    child: SettingViewScope.() -> Unit
 ) = setting(title, view.context.getString(subtitle), isVertical, child)
 
-inline fun ViewBuilderScope.setting(
+inline fun SettingsPageScope.setting(
     @StringRes title: Int,
     subtitle: String? = null,
     isVertical: Boolean = false,
-    child: ViewBuilderScope.() -> Unit
+    child: SettingViewScope.() -> Unit
 ): View {
     contract { callsInPlace(child, InvocationKind.EXACTLY_ONCE) }
     val ll = LinearLayout(view.context).apply {
@@ -118,6 +123,7 @@ inline fun ViewBuilderScope.setting(
         val h = (20 * dp).toInt()
         val v = (6 * dp).toInt()
         setPadding(h, v, h, v)
+        var updateSubtitle: (String) -> Unit = {}
         if (isVertical) {
             addView(TextView(context).apply {
                 setText(title)
@@ -125,11 +131,13 @@ inline fun ViewBuilderScope.setting(
                 textSize = 18f
             }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
             if (subtitle != null) {
-                addView(TextView(context).apply {
+                val sub = TextView(context).apply {
                     text = subtitle
-                    setTextColor(ColorThemer.COLOR_TEXT)
+                    setTextColor(ColorThemer.COLOR_HINT)
                     textSize = 14f
-                }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+                }
+                addView(sub, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+                updateSubtitle = sub::setText
             }
         } else {
             if (subtitle == null) {
@@ -139,6 +147,11 @@ inline fun ViewBuilderScope.setting(
                     textSize = 18f
                 }, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
             } else {
+                val sub = TextView(context).apply {
+                    text = subtitle
+                    setTextColor(ColorThemer.COLOR_HINT)
+                    textSize = 14f
+                }
                 addView(LinearLayout(context).apply {
                     orientation = LinearLayout.VERTICAL
                     addView(TextView(context).apply {
@@ -146,22 +159,19 @@ inline fun ViewBuilderScope.setting(
                         setTextColor(ColorThemer.COLOR_TEXT)
                         textSize = 18f
                     }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
-                    addView(TextView(context).apply {
-                        text = subtitle
-                        setTextColor(ColorThemer.COLOR_TEXT)
-                        textSize = 14f
-                    }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+                    addView(sub, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
                 }, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
+                updateSubtitle = sub::setText
             }
         }
-        child(ViewBuilderScope(this))
+        child(SettingViewScope(updateSubtitle, this))
     }
     view.addView(ll, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
     return ll
 }
 
 @SuppressLint("UseSwitchCompatOrMaterialCode")
-fun ViewBuilderScope.switch(settingId: String, default: Boolean, listener: (View, Boolean) -> Unit = { _, _ -> }) {
+fun SettingViewScope.switch(settingId: String, default: Boolean, listener: (View, Boolean) -> Unit = { _, _ -> }) {
     val switch = Switch(view.context).apply {
         trackDrawable = generateSwitchTrackDrawable()
         thumbDrawable = generateSwitchThumbDrawable(context)
@@ -181,7 +191,7 @@ fun ViewBuilderScope.switch(settingId: String, default: Boolean, listener: (View
 }
 
 @SuppressLint("UseSwitchCompatOrMaterialCode")
-fun ViewBuilderScope.permissionSwitch(default: Boolean, listener: (View) -> Unit): (Boolean) -> Unit {
+fun SettingViewScope.permissionSwitch(default: Boolean, listener: (View) -> Unit): (Boolean) -> Unit {
     val switch = Switch(view.context).apply {
         trackDrawable = generateSwitchTrackDrawable()
         thumbDrawable = generateSwitchThumbDrawable(context)
@@ -205,11 +215,11 @@ fun ViewBuilderScope.permissionSwitch(default: Boolean, listener: (View) -> Unit
     }
 }
 
-fun ViewBuilderScope.onClick(activity: Class<*>) = onClick {
+fun SettingViewScope.onClick(activity: Class<*>) = onClick {
     it.context.startActivity(Intent(it.context, activity))
 }
 
-fun ViewBuilderScope.onClick(listener: (View) -> Unit) {
+fun SettingViewScope.onClick(listener: (View) -> Unit) {
     view.setOnClickListener(listener)
     val dp = view.context.resources.displayMetrics.density
     val s = (24 * dp).toInt()
@@ -219,7 +229,7 @@ fun ViewBuilderScope.onClick(listener: (View) -> Unit) {
     }, LayoutParams(s, s))
 }
 
-fun ViewBuilderScope.color(settingId: String, default: Int) {
+fun SettingViewScope.color(settingId: String, default: Int) {
     val dr = ShapeDrawable(OvalShape())
     dr.paint.color = view.context.ionApplication.settings[settingId, default] or 0xff000000.toInt()
     view.setOnClickListener {
@@ -232,8 +242,10 @@ fun ViewBuilderScope.color(settingId: String, default: Int) {
             it.context.ionApplication.settings.edit(it.context) {
                 settingId set newColor
             }
+            updateSubtitle(ColorPicker.formatColorString(newColor))
         }
     }
+    updateSubtitle(ColorPicker.formatColorString(dr.paint.color))
     val dp = view.context.resources.displayMetrics.density
     val s = (32 * dp).toInt()
     view.addView(View(view.context).apply {
@@ -241,7 +253,7 @@ fun ViewBuilderScope.color(settingId: String, default: Int) {
     }, LayoutParams(s, s))
 }
 
-fun ViewBuilderScope.seekbar(
+fun SettingViewScope.seekbar(
     settingId: String,
     default: Int,
     min: Int,

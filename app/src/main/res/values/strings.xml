@@ -17,7 +17,7 @@
     <string name="count">Count</string>
     <string name="other">Other</string>
     <string name="choose_launcher">Set Default Launcher</string>
-    <string name="grant_permissions">Grant Permissions (or do that later in system settings)</string>
+    <string name="grant_permissions">Grant Permissions</string>
     <string name="notification_access">Notification Access</string>
     <string name="contacts_access">Contacts Access</string>
     <string name="calendar_access">Calendar Access</string>

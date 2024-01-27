@@ -12,9 +12,7 @@ import one.zagura.IonLauncher.data.items.ContactItem
 object ContactsLoader {
 
     fun load(context: Context, requiresStar: Boolean = false): List<ContactItem> {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-            context.checkSelfPermission(Manifest.permission.READ_CONTACTS) !=
-                PackageManager.PERMISSION_GRANTED)
+        if (!hasPermission(context))
             return emptyList()
         val cur = context.contentResolver.query(
             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
@@ -74,4 +72,8 @@ object ContactsLoader {
 
         return contactMap.values.toList()
     }
+
+    fun hasPermission(context: Context): Boolean =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+        context.checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED
 }
