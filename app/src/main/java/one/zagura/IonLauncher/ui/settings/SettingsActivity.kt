@@ -18,7 +18,6 @@ import one.zagura.IonLauncher.provider.summary.EventsLoader
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.settings.common.color
 import one.zagura.IonLauncher.ui.settings.common.onClick
-import one.zagura.IonLauncher.ui.settings.common.permissionSwitch
 import one.zagura.IonLauncher.ui.settings.common.seekbar
 import one.zagura.IonLauncher.ui.settings.common.setSettingsContentView
 import one.zagura.IonLauncher.ui.settings.common.setting

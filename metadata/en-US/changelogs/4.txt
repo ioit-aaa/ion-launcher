@@ -1,0 +1,4 @@
+Added permission granting to setting
+Added hex code subtitles to color settings
+
+Fixed crash when not given notification access
