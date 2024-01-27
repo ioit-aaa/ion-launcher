@@ -14,7 +14,10 @@ class FillDrawable(var color: Int) : Drawable() {
 
     override fun getOpacity() = if (color.alpha == 0xff) PixelFormat.OPAQUE else PixelFormat.TRANSLUCENT
 
-    override fun setAlpha(alpha: Int) { color = color and 0xffffff or (alpha shl 24) }
+    override fun setAlpha(alpha: Int) {
+        color = color and 0xffffff or (alpha shl 24)
+        invalidateSelf()
+    }
     override fun getAlpha() = color.alpha
     override fun setColorFilter(cf: ColorFilter?) {}
 

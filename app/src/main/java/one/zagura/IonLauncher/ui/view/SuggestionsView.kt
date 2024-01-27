@@ -37,7 +37,8 @@ class SuggestionsView(
         }
         isVisible = true
         val dp = resources.displayMetrics.density
-        val l = LayoutParams(0, (dp * 32).toInt(), 1f).apply {
+        val height = (36 * dp).toInt()
+        val l = LayoutParams(0, height, 1f).apply {
             leftMargin = (12 * dp).toInt()
         }
         for ((i, s) in suggestions.withIndex()) {
@@ -51,10 +52,11 @@ class SuggestionsView(
         val r = 99 * dp
         background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
         backgroundTintList = ColorStateList.valueOf(ColorThemer.foreground(context))
+        val height = (36 * dp).toInt()
         addView(ImageView(context).apply {
             setImageDrawable(IconLoader.loadIcon(context, s))
             setPadding((dp * 4).toInt())
-        }, LayoutParams((dp * 32).toInt(), LayoutParams.MATCH_PARENT))
+        }, LayoutParams(height, LayoutParams.MATCH_PARENT))
         addView(TextView(context).apply {
             text = s.label
             setTextColor(ColorThemer.background(context))

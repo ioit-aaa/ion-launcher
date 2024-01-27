@@ -73,20 +73,23 @@ class SearchAdapter(
                 onItemOpened(item)
             }
             itemView.setOnLongClickListener {
+                val dp = it.resources.displayMetrics.density
                 val item = getItem(bindingAdapterPosition)
                 val sh = it.resources.displayMetrics.heightPixels
-                val (lx, ly) = IntArray(2).apply(it::getLocationInWindow)
+                val (lx, ly) = IntArray(2).apply(icon::getLocationInWindow)
+                val h = (-2 * dp).toInt()
+                val v = (8 * dp).toInt()
                 if (ly > sh / 2) {
                     LongPressMenu.popup(
                         it, item,
                         Gravity.BOTTOM or Gravity.START,
-                        lx, Utils.getDisplayHeight(activity) - ly
+                        lx + h, Utils.getDisplayHeight(activity) - ly + v
                     )
                 } else {
                     LongPressMenu.popup(
                         it, item,
                         Gravity.TOP or Gravity.START,
-                        lx, ly + it.height
+                        lx + h, ly + icon.height + v
                     )
                 }
                 Utils.startDrag(it, item, it to bindingAdapterPosition)

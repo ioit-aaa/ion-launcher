@@ -59,7 +59,7 @@ class CrashActivity : Activity() {
             setContentView(NestedScrollView(this).apply {
                 addView(stackTrace, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
             })
-            window.decorView.background = FillDrawable(ColorThemer.COLOR_CARD)
+            window.decorView.background = FillDrawable(ColorThemer.COLOR_BG)
         } catch (e: Throwable) {
             e.printStackTrace()
         }

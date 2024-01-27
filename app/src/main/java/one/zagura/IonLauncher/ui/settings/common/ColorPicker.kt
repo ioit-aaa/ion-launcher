@@ -5,6 +5,7 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Typeface
+import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RoundRectShape
 import android.os.Build
@@ -66,8 +67,9 @@ object ColorPicker {
             hint = formatColorString(ColorThemer.DEFAULT_BG)
             setTextColor(ColorThemer.contrast(0, 0.9, 0))
             setHintTextColor(ColorThemer.COLOR_HINT)
-            val p = (8 * dp).toInt()
+            val p = (12 * dp).toInt()
             setPadding(p, p, p, p)
+            setSingleLine()
             val r = 8 * dp
             background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
             doOnTextChanged { text, _, _, _ ->
@@ -126,7 +128,7 @@ object ColorPicker {
             setContentView(content, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
             val r = 24 * dp
             window!!.setBackgroundDrawable(ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null)).apply {
-                paint.color = ColorThemer.COLOR_CARD
+                paint.color = ColorThemer.COLOR_BG
             })
         }
 
@@ -154,11 +156,15 @@ object ColorPicker {
         }, MarginLayoutParams((320 * dp).toInt(), (128 * dp).toInt()).apply {
             bottomMargin = (8 * dp).toInt()
         })
-        content.addView(colorText)
+        content.addView(colorText, MarginLayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply {
+            bottomMargin = (8 * dp).toInt()
+        })
         val l = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         content.addView(LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
+            val v = (4 * dp).toInt()
+            setPadding(0, v, 0, v)
             addView(TextView(context).apply {
                 setTextColor(ColorThemer.COLOR_TEXT)
                 text = "L"
@@ -168,6 +174,8 @@ object ColorPicker {
         content.addView(LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
+            val v = (4 * dp).toInt()
+            setPadding(0, v, 0, v)
             addView(TextView(context).apply {
                 setTextColor(ColorThemer.COLOR_TEXT)
                 text = "S"
@@ -177,6 +185,8 @@ object ColorPicker {
         content.addView(LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
+            val v = (4 * dp).toInt()
+            setPadding(0, v, 0, v)
             addView(TextView(context).apply {
                 setTextColor(ColorThemer.COLOR_TEXT)
                 text = "H"
@@ -184,26 +194,47 @@ object ColorPicker {
             addView(hue, l)
         }, l)
         content.addView(LinearLayout(context).apply {
+            val br = 8 * dp
+            val h = (18 * dp).toInt()
+            val v = (10 * dp).toInt()
             orientation = LinearLayout.HORIZONTAL
             addView(TextView(context).apply {
                 setText(android.R.string.ok)
                 setTextColor(ColorThemer.COLOR_TEXT)
-                val p = (8 * dp).toInt()
-                setPadding(p, p, p, p)
+                background = RippleDrawable(
+                    ColorStateList.valueOf(ColorThemer.COLOR_SEPARATOR),
+                    ShapeDrawable(RoundRectShape(floatArrayOf(br, br, 0f, 0f, 0f, 0f, br, br), null, null)).apply {
+                        paint.color = ColorThemer.COLOR_CARD
+                    }, null)
+                setPadding(h, v, h, v)
+                gravity = Gravity.CENTER_HORIZONTAL
                 typeface = Typeface.DEFAULT_BOLD
+                setSingleLine()
+                isAllCaps = true
                 setOnClickListener {
                     onSelect(parseColorString(colorText.text.toString()) or 0xff000000.toInt())
                     w.dismiss()
                 }
+            }, LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f).apply {
+                marginEnd = (2 * dp).toInt()
             })
             addView(TextView(context).apply {
                 setText(android.R.string.cancel)
                 setTextColor(ColorThemer.COLOR_TEXT)
-                val p = (8 * dp).toInt()
-                setPadding(p, p, p, p)
+                background = RippleDrawable(
+                    ColorStateList.valueOf(ColorThemer.COLOR_SEPARATOR),
+                    ShapeDrawable(RoundRectShape(floatArrayOf(0f, 0f, br, br, br, br, 0f, 0f), null, null)).apply {
+                        paint.color = ColorThemer.COLOR_CARD
+                    }, null)
+                setPadding(h, v, h, v)
+                gravity = Gravity.CENTER_HORIZONTAL
                 typeface = Typeface.DEFAULT_BOLD
+                setSingleLine()
+                isAllCaps = true
                 setOnClickListener { w.dismiss() }
-            })
+            }, LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
+        }, MarginLayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply {
+            topMargin = (8 * dp).toInt()
         })
         w.show()
     }
@@ -220,7 +251,17 @@ object ColorPicker {
         val dp = resources.displayMetrics.density
         addView(View(context).apply {
             val r = 8 * dp
-            background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
+            val highlight = DoubleArray(3)
+                .also { ColorUtils.colorToLAB(color, it) }
+                .also {
+                    it[0] = (it[0] + 20.0) * 1.2
+                    it[1] *= 1.6
+                    it[1] *= 1.6
+                }
+                .let { ColorUtils.LABToColor(it[0], it[1], it[2]) }
+            background = RippleDrawable(
+                ColorStateList.valueOf(highlight),
+                ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null)), null)
             backgroundTintList = ColorStateList.valueOf(color or 0xff000000.toInt())
             setOnClickListener {
                 target.setText(formatColorString(color))

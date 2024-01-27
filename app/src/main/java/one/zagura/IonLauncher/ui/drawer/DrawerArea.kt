@@ -157,6 +157,7 @@ class DrawerArea(
             unsearch()
         val fgColor = ColorThemer.foreground(context)
         val hintColor = ColorThemer.hint(context)
+        val bgColor = ColorThemer.background(context)
         with(entry) {
             setTextColor(fgColor)
             setHintTextColor(hintColor)
@@ -166,5 +167,6 @@ class DrawerArea(
         }
         icSearch.setTint(hintColor)
         separator.background = FillDrawable(hintColor)
+        background = FillDrawable(bgColor)
     }
 }

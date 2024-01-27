@@ -141,6 +141,7 @@ class PinnedGridView(
                     else IconLoader.loadIcon(context, getItem(x, y) ?: continue)
                 val centerX = (paddingLeft + (width - paddingLeft - paddingRight) / columns * (0.5f + x)).toInt()
                 val centerY = (paddingTop + (height - paddingTop - paddingBottom) / rows * (0.5f + y)).toInt()
+                icon.copyBounds(tmpRect)
                 icon.setBounds(centerX - r, centerY - r, centerX + r, centerY + r)
                 if (showDropTargets) {
                     val a = icon.alpha
@@ -149,8 +150,11 @@ class PinnedGridView(
                     icon.alpha = a
                 } else
                     icon.draw(canvas)
+                icon.bounds = tmpRect
             }
     }
+
+    private val tmpRect = Rect()
 
     private val gridPaint = Paint().apply {
         isAntiAlias = true

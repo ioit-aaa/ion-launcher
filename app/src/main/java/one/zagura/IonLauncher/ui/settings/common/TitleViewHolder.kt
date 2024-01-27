@@ -20,7 +20,7 @@ class TitleViewHolder(context: Context) : RecyclerView.ViewHolder(LinearLayout(c
         setPadding(h, Utils.getStatusBarHeight(context), h, 0)
         textSize = 22f
         setTextColor(ColorThemer.COLOR_HINT)
-        background = FillDrawable(ColorThemer.COLOR_CARD)
+        background = FillDrawable(ColorThemer.COLOR_BG)
     }
 
     private val separator = View(context).apply {

@@ -80,7 +80,7 @@ class SetupActivity : Activity() {
                 val r = 12 * dp
                 background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
                 backgroundTintList = ColorStateList.valueOf(ColorThemer.COLOR_TEXT)
-                setTextColor(ColorThemer.COLOR_CARD)
+                setTextColor(ColorThemer.COLOR_BG)
                 setOnClickListener(::start)
             }, ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (56 * dp).toInt()).apply {
                 setMargins(m, (32 * dp).toInt(), m, m)
@@ -93,7 +93,7 @@ class SetupActivity : Activity() {
                 val r = 12 * dp
                 background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
                 backgroundTintList = ColorStateList.valueOf(ColorThemer.COLOR_TEXT)
-                setTextColor(ColorThemer.COLOR_CARD)
+                setTextColor(ColorThemer.COLOR_BG)
                 setOnClickListener {
                     packageManager.setComponentEnabledSetting(
                         ComponentName(it.context, HomeScreen::class.java),

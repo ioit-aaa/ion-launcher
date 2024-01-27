@@ -16,8 +16,12 @@ class ItemDragShadow(context: Context, val icon: Drawable) : DragShadowBuilder()
     }
 
     override fun onDrawShadow(canvas: Canvas) {
-        icon.setBounds(0, 0, canvas.width, canvas.height)
+        icon.setBounds(0, 0, icon.intrinsicWidth, icon.intrinsicHeight)
+        canvas.save()
+        val s = canvas.width.toFloat() / icon.intrinsicWidth
+        canvas.scale(s, s)
         icon.draw(canvas)
+        canvas.restore()
     }
 
     override fun onProvideShadowMetrics(outShadowSize: Point, outShadowTouchPoint: Point) {

@@ -10,10 +10,6 @@ object ColorThemer {
     const val DEFAULT_BG = 0x111111
     const val DEFAULT_FG = 0xfefefe
 
-    fun backgroundOverlay(context: Context): Int {
-        val s = context.ionApplication.settings
-        return s["color:bg", DEFAULT_BG] and 0xffffff or (s["color:bg:alpha", 0xdd] shl 24)
-    }
     fun background(context: Context): Int {
         return context.ionApplication.settings["color:bg", DEFAULT_BG] or 0xff000000.toInt()
     }
@@ -26,10 +22,11 @@ object ColorThemer {
         return c or 0x91000000.toInt()
     }
 
-    const val COLOR_CARD = 0xff101010.toInt()
-    const val COLOR_CARD_SUNK = 0xff000000.toInt()
+    const val COLOR_BG = 0xff101010.toInt()
+    const val COLOR_BG_SUNK = 0xff000000.toInt()
+    const val COLOR_CARD = 0xff222222.toInt()
     const val COLOR_SEPARATOR = 0xff444444.toInt()
-    const val COLOR_HINT = 0xff919191.toInt()
+    const val COLOR_HINT = 0xff969696.toInt()
     const val COLOR_TEXT = 0xfffefefe.toInt()
 
     fun level(color: Int, level: Double): Int {

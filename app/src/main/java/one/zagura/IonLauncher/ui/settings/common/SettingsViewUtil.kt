@@ -15,6 +15,7 @@ import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.StateListDrawable
 import android.graphics.drawable.shapes.OvalShape
+import android.graphics.drawable.shapes.RoundRectShape
 import android.os.Build
 import android.util.StateSet
 import android.view.Gravity
@@ -32,7 +33,6 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.StringRes
-import androidx.core.view.setPadding
 import androidx.core.widget.NestedScrollView
 import androidx.core.widget.doOnTextChanged
 import one.zagura.IonLauncher.R
@@ -57,8 +57,8 @@ fun Activity.setupWindow() {
     else
         window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
 
-    window.setBackgroundDrawable(FillDrawable(ColorThemer.COLOR_CARD))
-    val bc = ColorThemer.COLOR_CARD and 0xffffff or 0x55000000
+    window.setBackgroundDrawable(FillDrawable(ColorThemer.COLOR_BG))
+    val bc = ColorThemer.COLOR_BG and 0xffffff or 0x55000000
     window.statusBarColor = bc
     window.navigationBarColor = bc
 }
@@ -77,7 +77,7 @@ inline fun Activity.setSettingsContentView(@StringRes titleId: Int, builder: Set
                 setPadding(h, Utils.getStatusBarHeight(context), h, 0)
                 textSize = 22f
                 setTextColor(ColorThemer.COLOR_HINT)
-                background = FillDrawable(ColorThemer.COLOR_CARD)
+                background = FillDrawable(ColorThemer.COLOR_BG)
                 setText(titleId)
             }, LayoutParams(MATCH_PARENT, (64 * dp).toInt() + Utils.getStatusBarHeight(context)))
             addView(View(context).apply {
@@ -260,6 +260,7 @@ fun SettingViewScope.seekbar(
     max: Int,
     multiplier: Int = 1,
 ) {
+    val dp = view.resources.displayMetrics.density
     val number = EditText(view.context)
     val seekBar = SeekBar(view.context).apply {
         progressDrawable = generateSeekbarTrackDrawable(context)
@@ -283,9 +284,14 @@ fun SettingViewScope.seekbar(
         })
     }
     with(number) {
+        val r = 8 * dp
+        background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null)).apply {
+            paint.color = ColorThemer.COLOR_BG_SUNK
+        }
+        val h = (12 * dp).toInt()
+        val v = (6 * dp).toInt()
+        setPadding(h, v, h, v)
         textSize = 16f
-        background = null
-        setPadding(0)
         typeface = Typeface.DEFAULT_BOLD
         includeFontPadding = false
         setTextColor(ColorThemer.COLOR_HINT)
@@ -306,6 +312,8 @@ fun SettingViewScope.seekbar(
     view.addView(LinearLayout(view.context).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
+        val v = (6 * dp).toInt()
+        setPadding(0, v, 0, 0)
         addView(number, LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
         addView(seekBar, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
     })
@@ -313,12 +321,17 @@ fun SettingViewScope.seekbar(
 
 fun generateSeekbarTrackDrawable(context: Context): Drawable {
     val dp = context.resources.displayMetrics.density
+    val a = (2 * dp).toInt()
     val out = LayerDrawable(arrayOf(
-        generateBG(ColorThemer.COLOR_CARD_SUNK),
-        ClipDrawable(generateBG(ColorThemer.COLOR_TEXT), Gravity.START, GradientDrawable.Orientation.BL_TR.ordinal)
+        generateBG(ColorThemer.COLOR_BG_SUNK).apply {
+            setSize(0, a)
+        },
+        ClipDrawable(generateBG(ColorThemer.COLOR_TEXT).apply {
+            setSize(0, a)
+        }, Gravity.START, ClipDrawable.HORIZONTAL)
     ))
-    val h = (2 * dp).toInt()
-    val inset = (7 * dp).toInt()
+    val h = (0 * dp).toInt()
+    val inset = (12 * dp).toInt()
     out.setLayerInset(0, h, inset, h, inset)
     out.setLayerInset(1, h, inset, h, inset)
     out.setId(0, android.R.id.background)
@@ -327,7 +340,13 @@ fun generateSeekbarTrackDrawable(context: Context): Drawable {
 }
 
 fun generateSeekbarThumbDrawable(context: Context): Drawable {
-    return generateCircle(context, ColorThemer.COLOR_CARD, ColorThemer.COLOR_TEXT)
+    val dp = context.resources.displayMetrics.density
+    val r = (16 * dp).toInt()
+    return GradientDrawable().apply {
+        shape = GradientDrawable.OVAL
+        setColor(ColorThemer.COLOR_TEXT)
+        setSize(r, r)
+    }
 }
 
 private fun generateSwitchTrackDrawable(): Drawable {
@@ -339,15 +358,15 @@ private fun generateSwitchTrackDrawable(): Drawable {
 
 private fun generateSwitchThumbDrawable(context: Context): Drawable {
     val out = StateListDrawable()
-    out.addState(intArrayOf(android.R.attr.state_checked), generateCircle(context, ColorThemer.COLOR_CARD, ColorThemer.COLOR_TEXT))
-    out.addState(StateSet.WILD_CARD, generateCircle(context, ColorThemer.COLOR_CARD, 0x2affffff))
+    out.addState(intArrayOf(android.R.attr.state_checked), generateCircle(context, ColorThemer.COLOR_BG, ColorThemer.COLOR_TEXT))
+    out.addState(StateSet.WILD_CARD, generateCircle(context, ColorThemer.COLOR_BG, ColorThemer.COLOR_CARD))
     return out
 }
 
 private fun generateCircle(context: Context, color: Int, insideColor: Int): Drawable {
     val dp = context.resources.displayMetrics.density
     val r = (12 * dp).toInt()
-    val inset = (5 * dp).toInt()
+    val inset = (4 * dp).toInt()
     return LayerDrawable(arrayOf(
         GradientDrawable().apply {
             shape = GradientDrawable.OVAL
@@ -361,14 +380,12 @@ private fun generateCircle(context: Context, color: Int, insideColor: Int): Draw
         },
     )).apply {
         setLayerInset(0, inset, inset, inset, inset)
-        val i = inset + (4 * dp).toInt()
+        val i = inset + (2 * dp).toInt()
         setLayerInset(1, i, i, i, i)
     }
 }
 
-private fun generateBG(color: Int): Drawable {
-    return GradientDrawable().apply {
-        cornerRadius = Float.MAX_VALUE
-        setColor(color)
-    }
+private fun generateBG(color: Int) = GradientDrawable().apply {
+    cornerRadius = Float.MAX_VALUE
+    setColor(color)
 }

@@ -59,6 +59,9 @@ class HomeScreen : Activity() {
     private lateinit var suggestionsView: SuggestionsView
     private lateinit var pinnedGrid: PinnedGridView
 
+    private val screenBackground = FillDrawable(0)
+    private var screenBackgroundAlpha = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -81,12 +84,17 @@ class HomeScreen : Activity() {
                     sheetBehavior.state = STATE_COLLAPSED
             }
 
+        homeScreen.background = screenBackground
         IconLoader.updateIconPacks(this, ionApplication.settings)
         applyCustomizations()
     }
 
     override fun onStart() {
         super.onStart()
+        ionApplication.settings.consumeUpdate {
+            IconLoader.updateIconPacks(this, ionApplication.settings)
+            applyCustomizations()
+        }
         AppLoader.track {
             drawerArea.onAppsChanged()
             pinnedGrid.updateGridApps()
@@ -116,15 +124,15 @@ class HomeScreen : Activity() {
 
     override fun onResume() {
         super.onResume()
-        ionApplication.settings.consumeUpdate {
-            IconLoader.updateIconPacks(this, ionApplication.settings)
-            applyCustomizations()
-        }
         summaryView.updateEvents(EventsLoader.load(this))
     }
 
     @Suppress("DEPRECATION")
     private fun applyCustomizations() {
+        val settings = ionApplication.settings
+        screenBackground.color = ColorThemer.background(this)
+        screenBackgroundAlpha = settings["color:bg:alpha", 0xdd]
+        screenBackground.alpha = screenBackgroundAlpha
         val dp = resources.displayMetrics.density
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val f = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
@@ -134,7 +142,6 @@ class HomeScreen : Activity() {
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             window.decorView.systemUiVisibility = if (ColorThemer.foreground(this).let(ColorThemer::lightness) > 0.5f) 0 else View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         }
-        homeScreen.background = FillDrawable(ColorThemer.backgroundOverlay(this))
         pinnedGrid.applyCustomizations()
         drawerArea.applyCustomizations()
         musicView.applyCustomizations()
@@ -221,10 +228,14 @@ class HomeScreen : Activity() {
                         }
 
                         override fun onSlide(view: View, slideOffset: Float) {
-                            val inv = 1f - slideOffset
-                            drawerArea.alpha = 1f - (inv * inv)
-                            desktop.translationY = slideOffset * offset / 2
-                            desktop.alpha = inv
+                            drawerArea.alpha = slideOffset * slideOffset / 0.6f - 0.4f
+                            val a = (slideOffset * 2f).coerceAtMost(1f)
+                            screenBackground.alpha = (screenBackgroundAlpha * (1f - a) + 255 * a).toInt()
+                            desktop.alpha = 1f - a
+                            desktop.translationY = slideOffset * offset * 0.75f
+                            val scale = 1f - slideOffset * 0.02f
+                            desktop.scaleX = scale
+                            desktop.scaleY = scale
                         }
                     })
                 }
