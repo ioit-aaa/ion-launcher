@@ -266,6 +266,7 @@ object ColorPicker {
             setOnClickListener {
                 target.setText(formatColorString(color))
             }
+            contentDescription = formatColorString(color)
         }, GridLayout.LayoutParams().apply {
             val m = (8 * dp).toInt()
             width = 0

@@ -322,13 +322,16 @@ fun SettingViewScope.seekbar(
 fun generateSeekbarTrackDrawable(context: Context): Drawable {
     val dp = context.resources.displayMetrics.density
     val a = (2 * dp).toInt()
+
+    @SuppressLint("RtlHardcoded")
+    // For some reason it flips the drawable in RTL mode, so .LEFT gives the desired behavior
     val out = LayerDrawable(arrayOf(
         generateBG(ColorThemer.COLOR_BG_SUNK).apply {
             setSize(0, a)
         },
         ClipDrawable(generateBG(ColorThemer.COLOR_TEXT).apply {
             setSize(0, a)
-        }, Gravity.START, ClipDrawable.HORIZONTAL)
+        }, Gravity.LEFT, ClipDrawable.HORIZONTAL)
     ))
     val h = (0 * dp).toInt()
     val inset = (12 * dp).toInt()

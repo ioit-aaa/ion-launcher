@@ -10,6 +10,7 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.R
@@ -51,10 +52,7 @@ class WidgetChooserAdapter(
             val p = (16 * dp).toInt()
             setPadding(p, p, p, p)
         }
-        val icon = ImageView(context).apply {
-            val p = (8 * dp).toInt()
-            setPadding(p, p, p, p)
-        }
+        val icon = ImageView(context)
         val v = LinearLayout(context).apply {
             layoutParams = RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT)
             background = GradientDrawable().apply {
@@ -69,8 +67,13 @@ class WidgetChooserAdapter(
                 LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp.toInt()))
             addView(LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
-                addView(icon, LinearLayout.LayoutParams(h, h))
-                addView(label, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, h))
+                val p = (8 * dp).toInt()
+                setPadding(p, p, p, p)
+                val hh = h - p * 2
+                addView(icon, LinearLayout.LayoutParams(hh, hh).apply {
+                    marginEnd = p
+                })
+                addView(label, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, hh))
             }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, h))
         }
         return VH(v, label, preview, icon).apply {
@@ -104,10 +107,12 @@ class WidgetChooserAdapter(
 
         if (i == 1) {
             holder.icon.setImageDrawable(null)
+            holder.icon.isVisible = false
             holder.preview.setImageDrawable(null)
             holder.label.text = context.getString(R.string.nothing)
             return
         }
+        holder.icon.isVisible = true
         val p = providers[i - 2]
         val pm = context.packageManager
         holder.label.text = p.loadLabel(pm)
