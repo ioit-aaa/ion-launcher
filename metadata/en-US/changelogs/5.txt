@@ -1,0 +1,7 @@
+Improved settings UI
+Tweaked item long-press menus
+Tweaked app drawer sliding animation
+Made app drawer background opaque
+
+Fixed icon glitchiness when dragging apps
+Fixed some things not updating after changing settings
