@@ -39,7 +39,7 @@ class SuggestionsView(
         val dp = resources.displayMetrics.density
         val height = (36 * dp).toInt()
         val l = LayoutParams(0, height, 1f).apply {
-            leftMargin = (12 * dp).toInt()
+            marginStart = (12 * dp).toInt()
         }
         for ((i, s) in suggestions.withIndex()) {
             addView(createItemView(s, i, suggestions.size), if (i == 0) LayoutParams(0, LayoutParams.MATCH_PARENT, 1f) else l)
