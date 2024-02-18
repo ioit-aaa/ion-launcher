@@ -7,6 +7,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.graphics.Typeface
 import android.graphics.drawable.ClipDrawable
 import android.graphics.drawable.Drawable
@@ -24,6 +25,7 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.EditText
 import android.widget.ImageView
@@ -33,6 +35,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.StringRes
+import androidx.core.graphics.luminance
 import androidx.core.widget.NestedScrollView
 import androidx.core.widget.doOnTextChanged
 import one.zagura.IonLauncher.R
@@ -57,8 +60,8 @@ fun Activity.setupWindow() {
     else
         window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
 
-    window.setBackgroundDrawable(FillDrawable(ColorThemer.COLOR_BG))
-    val bc = ColorThemer.COLOR_BG and 0xffffff or 0x55000000
+    window.setBackgroundDrawable(FillDrawable(resources.getColor(R.color.color_bg)))
+    val bc = resources.getColor(R.color.color_bg) and 0xffffff or 0x55000000
     window.statusBarColor = bc
     window.navigationBarColor = bc
 }
@@ -76,16 +79,17 @@ inline fun Activity.setSettingsContentView(@StringRes titleId: Int, builder: Set
                 val h = (20 * dp).toInt()
                 setPadding(h, Utils.getStatusBarHeight(context), h, 0)
                 textSize = 22f
-                setTextColor(ColorThemer.COLOR_HINT)
-                background = FillDrawable(ColorThemer.COLOR_BG)
+                setTextColor(resources.getColor(R.color.color_hint))
+                background = FillDrawable(resources.getColor(R.color.color_bg))
                 setText(titleId)
             }, LayoutParams(MATCH_PARENT, (64 * dp).toInt() + Utils.getStatusBarHeight(context)))
             addView(View(context).apply {
-                background = FillDrawable(ColorThemer.COLOR_SEPARATOR)
+                background = FillDrawable(resources.getColor(R.color.color_separator))
             }, LayoutParams(MATCH_PARENT, dp.toInt()))
             builder(SettingsPageScope(this))
         }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
     })
+    Utils.setDarkStatusFG(window, resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_NO)
 }
 
 fun SettingsPageScope.title(@StringRes text: Int) {
@@ -95,7 +99,7 @@ fun SettingsPageScope.title(@StringRes text: Int) {
         val h = (20 * dp).toInt()
         setPadding(h, (24 * dp).toInt(), h, (6 * dp).toInt())
         setText(text)
-        setTextColor(ColorThemer.COLOR_HINT)
+        setTextColor(resources.getColor(R.color.color_hint))
         textSize = 14f
         typeface = Typeface.DEFAULT_BOLD
     }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
@@ -127,13 +131,13 @@ inline fun SettingsPageScope.setting(
         if (isVertical) {
             addView(TextView(context).apply {
                 setText(title)
-                setTextColor(ColorThemer.COLOR_TEXT)
+                setTextColor(resources.getColor(R.color.color_text))
                 textSize = 18f
             }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
             if (subtitle != null) {
                 val sub = TextView(context).apply {
                     text = subtitle
-                    setTextColor(ColorThemer.COLOR_HINT)
+                    setTextColor(resources.getColor(R.color.color_hint))
                     textSize = 14f
                 }
                 addView(sub, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
@@ -143,20 +147,20 @@ inline fun SettingsPageScope.setting(
             if (subtitle == null) {
                 addView(TextView(context).apply {
                     setText(title)
-                    setTextColor(ColorThemer.COLOR_TEXT)
+                    setTextColor(resources.getColor(R.color.color_text))
                     textSize = 18f
                 }, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
             } else {
                 val sub = TextView(context).apply {
                     text = subtitle
-                    setTextColor(ColorThemer.COLOR_HINT)
+                    setTextColor(resources.getColor(R.color.color_hint))
                     textSize = 14f
                 }
                 addView(LinearLayout(context).apply {
                     orientation = LinearLayout.VERTICAL
                     addView(TextView(context).apply {
                         setText(title)
-                        setTextColor(ColorThemer.COLOR_TEXT)
+                        setTextColor(resources.getColor(R.color.color_text))
                         textSize = 18f
                     }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
                     addView(sub, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
@@ -173,7 +177,7 @@ inline fun SettingsPageScope.setting(
 @SuppressLint("UseSwitchCompatOrMaterialCode")
 fun SettingViewScope.switch(settingId: String, default: Boolean, listener: (View, Boolean) -> Unit = { _, _ -> }) {
     val switch = Switch(view.context).apply {
-        trackDrawable = generateSwitchTrackDrawable()
+        trackDrawable = generateSwitchTrackDrawable(context)
         thumbDrawable = generateSwitchThumbDrawable(context)
         isChecked = context.ionApplication.settings[settingId, default]
         setOnCheckedChangeListener { v, isChecked ->
@@ -193,7 +197,7 @@ fun SettingViewScope.switch(settingId: String, default: Boolean, listener: (View
 @SuppressLint("UseSwitchCompatOrMaterialCode")
 fun SettingViewScope.permissionSwitch(default: Boolean, listener: (View) -> Unit): (Boolean) -> Unit {
     val switch = Switch(view.context).apply {
-        trackDrawable = generateSwitchTrackDrawable()
+        trackDrawable = generateSwitchTrackDrawable(context)
         thumbDrawable = generateSwitchThumbDrawable(context)
         isChecked = default
         isEnabled = !default
@@ -225,28 +229,33 @@ fun SettingViewScope.onClick(listener: (View) -> Unit) {
     val s = (24 * dp).toInt()
     view.addView(ImageView(view.context).apply {
         setImageResource(R.drawable.ic_arrow_right)
-        imageTintList = ColorStateList.valueOf(ColorThemer.COLOR_HINT)
+        imageTintList = ColorStateList.valueOf(resources.getColor(R.color.color_hint))
     }, LayoutParams(s, s))
 }
 
 fun SettingViewScope.color(settingId: String, default: Int) {
-    val dr = ShapeDrawable(OvalShape())
-    dr.paint.color = view.context.ionApplication.settings[settingId, default] or 0xff000000.toInt()
+    val dp = view.context.resources.displayMetrics.density
+    var color = view.context.ionApplication.settings[settingId, default] or 0xff000000.toInt()
+    val dr = GradientDrawable().apply {
+        setColor(color)
+        setStroke(dp.toInt(), 0xff000000.toInt())
+        cornerRadius = 8 * dp
+    }
+
     view.setOnClickListener {
         ColorPicker.show(
             it.context,
             it.context.ionApplication.settings[settingId, default]
         ) { newColor ->
-            dr.paint.color = newColor or 0xff000000.toInt()
-            dr.invalidateSelf()
+            color = newColor or 0xff000000.toInt()
+            dr.setColor(color)
             it.context.ionApplication.settings.edit(it.context) {
                 settingId set newColor
             }
             updateSubtitle(ColorPicker.formatColorString(newColor))
         }
     }
-    updateSubtitle(ColorPicker.formatColorString(dr.paint.color))
-    val dp = view.context.resources.displayMetrics.density
+    updateSubtitle(ColorPicker.formatColorString(color))
     val s = (32 * dp).toInt()
     view.addView(View(view.context).apply {
         background = dr
@@ -286,7 +295,7 @@ fun SettingViewScope.seekbar(
     with(number) {
         val r = 8 * dp
         background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null)).apply {
-            paint.color = ColorThemer.COLOR_BG_SUNK
+            paint.color = resources.getColor(R.color.color_bg_sunk)
         }
         val h = (12 * dp).toInt()
         val v = (6 * dp).toInt()
@@ -294,7 +303,7 @@ fun SettingViewScope.seekbar(
         textSize = 16f
         typeface = Typeface.DEFAULT_BOLD
         includeFontPadding = false
-        setTextColor(ColorThemer.COLOR_HINT)
+        setTextColor(resources.getColor(R.color.color_hint))
         setText(context.ionApplication.settings[settingId, default].toString())
         doOnTextChanged { text, _, _, _ ->
             val value = text.toString().toIntOrNull()
@@ -326,10 +335,10 @@ fun generateSeekbarTrackDrawable(context: Context): Drawable {
     @SuppressLint("RtlHardcoded")
     // For some reason it flips the drawable in RTL mode, so .LEFT gives the desired behavior
     val out = LayerDrawable(arrayOf(
-        generateBG(ColorThemer.COLOR_BG_SUNK).apply {
+        generateBG(context.resources.getColor(R.color.color_bg_sunk)).apply {
             setSize(0, a)
         },
-        ClipDrawable(generateBG(ColorThemer.COLOR_TEXT).apply {
+        ClipDrawable(generateBG(context.resources.getColor(R.color.color_text)).apply {
             setSize(0, a)
         }, Gravity.LEFT, ClipDrawable.HORIZONTAL)
     ))
@@ -347,22 +356,22 @@ fun generateSeekbarThumbDrawable(context: Context): Drawable {
     val r = (16 * dp).toInt()
     return GradientDrawable().apply {
         shape = GradientDrawable.OVAL
-        setColor(ColorThemer.COLOR_TEXT)
+        setColor(context.resources.getColor(R.color.color_text))
         setSize(r, r)
     }
 }
 
-private fun generateSwitchTrackDrawable(): Drawable {
+private fun generateSwitchTrackDrawable(context: Context): Drawable {
     val out = StateListDrawable()
-    out.addState(intArrayOf(android.R.attr.state_checked), generateBG(ColorThemer.COLOR_HINT))
-    out.addState(StateSet.WILD_CARD, generateBG(0x0effffff))
+    out.addState(intArrayOf(android.R.attr.state_checked), generateBG(context.resources.getColor(R.color.color_hint)))
+    out.addState(StateSet.WILD_CARD, generateBG(context.resources.getColor(R.color.color_card)))
     return out
 }
 
 private fun generateSwitchThumbDrawable(context: Context): Drawable {
     val out = StateListDrawable()
-    out.addState(intArrayOf(android.R.attr.state_checked), generateCircle(context, ColorThemer.COLOR_BG, ColorThemer.COLOR_TEXT))
-    out.addState(StateSet.WILD_CARD, generateCircle(context, ColorThemer.COLOR_BG, ColorThemer.COLOR_CARD))
+    out.addState(intArrayOf(android.R.attr.state_checked), generateCircle(context, context.resources.getColor(R.color.color_bg), context.resources.getColor(R.color.color_text)))
+    out.addState(StateSet.WILD_CARD, generateCircle(context, context.resources.getColor(R.color.color_bg), context.resources.getColor(R.color.color_card)))
     return out
 }
 

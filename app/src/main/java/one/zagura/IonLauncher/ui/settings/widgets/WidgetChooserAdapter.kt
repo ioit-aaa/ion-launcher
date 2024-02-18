@@ -42,7 +42,7 @@ class WidgetChooserAdapter(
         if (type == 1)
             return TitleViewHolder(parent.context)
         val label = TextView(parent.context).apply {
-            setTextColor(ColorThemer.COLOR_TEXT)
+            setTextColor(resources.getColor(R.color.color_text))
             textSize = 12f
             gravity = Gravity.CENTER_VERTICAL
         }
@@ -57,13 +57,13 @@ class WidgetChooserAdapter(
             layoutParams = RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT)
             background = GradientDrawable().apply {
                 cornerRadius = 12 * dp
-                setStroke((dp).toInt(), ColorThemer.COLOR_SEPARATOR)
+                setStroke((dp).toInt(), resources.getColor(R.color.color_separator))
             }
             orientation = LinearLayout.VERTICAL
             val h = (48 * dp).toInt()
             addView(preview, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, parent.resources.displayMetrics.widthPixels / 2 - h))
             addView(
-                View(context).apply { background = FillDrawable(ColorThemer.COLOR_SEPARATOR) },
+                View(context).apply { background = FillDrawable(resources.getColor(R.color.color_separator)) },
                 LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp.toInt()))
             addView(LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL

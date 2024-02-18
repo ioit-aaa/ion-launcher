@@ -1,6 +1,7 @@
 package one.zagura.IonLauncher.ui.settings.suggestions
 
 import android.app.Activity
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,6 +23,8 @@ class SuggestionsActivity : Activity() {
             layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         }
         setContentView(recycler)
+
+        Utils.setDarkStatusFG(window, resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_NO)
 
         recycler.adapter = SuggestionsAdapter().apply {
             update(SuggestionsManager.getResource())

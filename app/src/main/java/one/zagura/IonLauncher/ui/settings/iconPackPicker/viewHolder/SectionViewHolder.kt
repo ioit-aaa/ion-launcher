@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Typeface
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.provider.ColorThemer
 
 class SectionViewHolder(context: Context) : RecyclerView.ViewHolder(TextView(context)) {
@@ -15,7 +16,7 @@ class SectionViewHolder(context: Context) : RecyclerView.ViewHolder(TextView(con
             setPadding(h, (24 * dp).toInt(), h, (6 * dp).toInt())
             textSize = 14f
             typeface = Typeface.DEFAULT_BOLD
-            setTextColor(ColorThemer.COLOR_HINT)
+            setTextColor(resources.getColor(R.color.color_hint))
         }
     }
 

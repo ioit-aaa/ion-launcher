@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
@@ -127,21 +128,17 @@ class HomeScreen : Activity() {
         summaryView.updateEvents(EventsLoader.load(this))
     }
 
-    @Suppress("DEPRECATION")
     private fun applyCustomizations() {
         val settings = ionApplication.settings
         screenBackground.color = ColorThemer.background(this)
         screenBackgroundAlpha = settings["color:bg:alpha", 0xdd]
         screenBackground.alpha = screenBackgroundAlpha
         val dp = resources.displayMetrics.density
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val f = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-            window.insetsController?.setSystemBarsAppearance(if (ColorThemer.foreground(this).luminance > 0.5f) 0 else f, f)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            window.decorView.systemUiVisibility = if (ColorThemer.foreground(this).luminance > 0.5f) 0 else View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            window.decorView.systemUiVisibility = if (ColorThemer.foreground(this).let(ColorThemer::lightness) > 0.5f) 0 else View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-        }
+        Utils.setDarkStatusFG(window, ColorThemer.foreground(this).let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                it.luminance < 0.5f
+            else ColorThemer.foreground(this).let(ColorThemer::lightness) < 0.5f
+        })
         pinnedGrid.applyCustomizations()
         drawerArea.applyCustomizations()
         musicView.applyCustomizations()

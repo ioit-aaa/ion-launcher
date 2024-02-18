@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="color_bg">#101010</color>
+    <color name="color_bg_sunk">#000000</color>
+    <color name="color_card">#222222</color>
+    <color name="color_separator">#444444</color>
+    <color name="color_hint">#969696</color>
+    <color name="color_text">#fefefe</color>
+
+    <color name="color_button">#222222</color>
+    <color name="color_button_text">#fefefe</color>
+</resources>

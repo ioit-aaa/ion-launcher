@@ -19,7 +19,9 @@ import android.os.VibratorManager
 import android.text.format.DateFormat
 import android.util.DisplayMetrics
 import android.view.View
+import android.view.Window
 import android.view.WindowInsets
+import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.annotation.RequiresPermission
 import one.zagura.IonLauncher.data.items.LauncherItem
@@ -46,6 +48,18 @@ object Utils {
                 View.DRAG_FLAG_OPAQUE or View.DRAG_FLAG_GLOBAL
             )
         else view.startDrag(clipData, shadow, localState, 0)
+    }
+
+    @Suppress("DEPRECATION")
+    fun setDarkStatusFG(window: Window, isDark: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val f = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+            window.insetsController?.setSystemBarsAppearance(if (isDark) f else 0, f)
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            window.decorView.systemUiVisibility = if (isDark) View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR else 0
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = if (isDark) View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR else 0
+        }
     }
 
     @SuppressLint("InternalInsetResource", "DiscouragedApi")

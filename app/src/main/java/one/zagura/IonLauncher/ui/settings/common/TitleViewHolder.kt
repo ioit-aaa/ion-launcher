@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.util.FillDrawable
 import one.zagura.IonLauncher.util.Utils
@@ -19,12 +20,12 @@ class TitleViewHolder(context: Context) : RecyclerView.ViewHolder(LinearLayout(c
         val h = (20 * dp).toInt()
         setPadding(h, Utils.getStatusBarHeight(context), h, 0)
         textSize = 22f
-        setTextColor(ColorThemer.COLOR_HINT)
-        background = FillDrawable(ColorThemer.COLOR_BG)
+        setTextColor(resources.getColor(R.color.color_hint))
+        background = FillDrawable(resources.getColor(R.color.color_bg))
     }
 
     private val separator = View(context).apply {
-        background = FillDrawable(ColorThemer.COLOR_SEPARATOR)
+        background = FillDrawable(resources.getColor(R.color.color_separator))
     }
 
     init {

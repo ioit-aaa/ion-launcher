@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.ui.settings.iconPackPicker.IconPackPickerActivity
 
@@ -35,7 +36,7 @@ class IconPackViewHolder(context: Context, val type: Int) : RecyclerView.ViewHol
         with(text) {
             textSize = 18f
             ellipsize = TextUtils.TruncateAt.END
-            setTextColor(ColorThemer.COLOR_TEXT)
+            setTextColor(resources.getColor(R.color.color_text))
         }
     }
 

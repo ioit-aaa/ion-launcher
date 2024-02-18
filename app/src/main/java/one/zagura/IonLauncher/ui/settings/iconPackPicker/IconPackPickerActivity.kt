@@ -2,6 +2,7 @@ package one.zagura.IonLauncher.ui.settings.iconPackPicker
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -32,6 +33,8 @@ class IconPackPickerActivity : Activity() {
             layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         }
         setContentView(recycler)
+
+        Utils.setDarkStatusFG(window, resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_NO)
 
         val iconPacks = IconTheming.getAvailableIconPacks(packageManager).mapTo(LinkedList()) {
             IconPack(

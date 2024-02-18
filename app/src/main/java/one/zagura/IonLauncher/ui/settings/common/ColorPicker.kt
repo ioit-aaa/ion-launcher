@@ -24,6 +24,7 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toColorInt
 import androidx.core.widget.doOnTextChanged
+import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.provider.ColorThemer
 
 object ColorPicker {
@@ -66,7 +67,7 @@ object ColorPicker {
         val colorText = EditText(context).apply {
             hint = formatColorString(ColorThemer.DEFAULT_BG)
             setTextColor(ColorThemer.contrast(0, 0.9, 0))
-            setHintTextColor(ColorThemer.COLOR_HINT)
+            setHintTextColor(resources.getColor(R.color.color_hint))
             val p = (12 * dp).toInt()
             setPadding(p, p, p, p)
             setSingleLine()
@@ -128,7 +129,7 @@ object ColorPicker {
             setContentView(content, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
             val r = 24 * dp
             window!!.setBackgroundDrawable(ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null)).apply {
-                paint.color = ColorThemer.COLOR_BG
+                paint.color = context.resources.getColor(R.color.color_bg)
             })
         }
 
@@ -166,7 +167,7 @@ object ColorPicker {
             val v = (4 * dp).toInt()
             setPadding(0, v, 0, v)
             addView(TextView(context).apply {
-                setTextColor(ColorThemer.COLOR_TEXT)
+                setTextColor(resources.getColor(R.color.color_text))
                 text = "L"
             })
             addView(lightness, l)
@@ -177,7 +178,7 @@ object ColorPicker {
             val v = (4 * dp).toInt()
             setPadding(0, v, 0, v)
             addView(TextView(context).apply {
-                setTextColor(ColorThemer.COLOR_TEXT)
+                setTextColor(resources.getColor(R.color.color_text))
                 text = "S"
             })
             addView(saturation, l)
@@ -188,7 +189,7 @@ object ColorPicker {
             val v = (4 * dp).toInt()
             setPadding(0, v, 0, v)
             addView(TextView(context).apply {
-                setTextColor(ColorThemer.COLOR_TEXT)
+                setTextColor(resources.getColor(R.color.color_text))
                 text = "H"
             })
             addView(hue, l)
@@ -200,11 +201,11 @@ object ColorPicker {
             orientation = LinearLayout.HORIZONTAL
             addView(TextView(context).apply {
                 setText(android.R.string.ok)
-                setTextColor(ColorThemer.COLOR_TEXT)
+                setTextColor(resources.getColor(R.color.color_button_text))
                 background = RippleDrawable(
-                    ColorStateList.valueOf(ColorThemer.COLOR_SEPARATOR),
+                    ColorStateList.valueOf(resources.getColor(R.color.color_separator)),
                     ShapeDrawable(RoundRectShape(floatArrayOf(br, br, 0f, 0f, 0f, 0f, br, br), null, null)).apply {
-                        paint.color = ColorThemer.COLOR_CARD
+                        paint.color = resources.getColor(R.color.color_button)
                     }, null)
                 setPadding(h, v, h, v)
                 gravity = Gravity.CENTER_HORIZONTAL
@@ -220,11 +221,11 @@ object ColorPicker {
             })
             addView(TextView(context).apply {
                 setText(android.R.string.cancel)
-                setTextColor(ColorThemer.COLOR_TEXT)
+                setTextColor(resources.getColor(R.color.color_button_text))
                 background = RippleDrawable(
-                    ColorStateList.valueOf(ColorThemer.COLOR_SEPARATOR),
+                    ColorStateList.valueOf(resources.getColor(R.color.color_separator)),
                     ShapeDrawable(RoundRectShape(floatArrayOf(0f, 0f, br, br, br, br, 0f, 0f), null, null)).apply {
-                        paint.color = ColorThemer.COLOR_CARD
+                        paint.color = resources.getColor(R.color.color_button)
                     }, null)
                 setPadding(h, v, h, v)
                 gravity = Gravity.CENTER_HORIZONTAL

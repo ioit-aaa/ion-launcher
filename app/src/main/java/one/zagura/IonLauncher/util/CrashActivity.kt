@@ -12,6 +12,7 @@ import android.view.ViewGroup.LayoutParams
 import android.widget.TextView
 import androidx.core.widget.NestedScrollView
 import one.zagura.IonLauncher.BuildConfig
+import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.provider.ColorThemer
 import kotlin.system.exitProcess
 
@@ -23,7 +24,7 @@ class CrashActivity : Activity() {
             val t = intent.extras!!["throwable"] as Throwable
 
             val stackTrace = TextView(this).apply {
-                setTextColor(ColorThemer.COLOR_TEXT)
+                setTextColor(resources.getColor(R.color.color_text))
                 typeface = Typeface.MONOSPACE
                 val dp = resources.displayMetrics.density
                 val p = (12 * dp).toInt()
@@ -59,7 +60,7 @@ class CrashActivity : Activity() {
             setContentView(NestedScrollView(this).apply {
                 addView(stackTrace, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
             })
-            window.decorView.background = FillDrawable(ColorThemer.COLOR_BG)
+            window.decorView.background = FillDrawable(resources.getColor(R.color.color_bg))
         } catch (e: Throwable) {
             e.printStackTrace()
         }

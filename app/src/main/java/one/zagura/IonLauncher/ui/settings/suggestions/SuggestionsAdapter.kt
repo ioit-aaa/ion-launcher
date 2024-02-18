@@ -12,6 +12,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.text.buildSpannedString
 import androidx.recyclerview.widget.RecyclerView
+import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.data.items.StaticShortcut
 import one.zagura.IonLauncher.provider.ColorThemer
@@ -41,7 +42,7 @@ class SuggestionsAdapter : RecyclerView.Adapter<SuggestionsAdapter.ViewHolder>()
             textSize = 16f
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.END
-            setTextColor(ColorThemer.COLOR_TEXT)
+            setTextColor(resources.getColor(R.color.color_text))
             layoutParams = MarginLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
                 leftMargin = (12 * dp).toInt()
             }
@@ -64,7 +65,7 @@ class SuggestionsAdapter : RecyclerView.Adapter<SuggestionsAdapter.ViewHolder>()
         holder.icon.setImageDrawable(IconLoader.loadIcon(holder.itemView.context, item))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && item is StaticShortcut) {
             holder.label.text = buildSpannedString {
-                append(item.appLabel + ": ", ForegroundColorSpan(ColorThemer.COLOR_HINT), 0)
+                append(item.appLabel + ": ", ForegroundColorSpan(holder.itemView.resources.getColor(R.color.color_hint)), 0)
                 append(item.label)
             }
         }

@@ -40,8 +40,7 @@ object LongPressMenu {
                     context.startActivity(
                         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
-                            .setData(Uri.parse("package:${item.packageName}")),
-                        LauncherItem.createOpeningAnimation(it),
+                            .setData(Uri.parse("package:${item.packageName}"))
                     )
                 }
                 if (HiddenApps.isHidden(context.ionApplication.settings, item)) addOption(R.string.unhide, place = Place.Last) {

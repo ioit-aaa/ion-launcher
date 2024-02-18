@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Process
 import androidx.recyclerview.widget.GridLayoutManager
@@ -42,6 +43,8 @@ class WidgetChooserActivity : Activity() {
             }
         }
         setContentView(recycler)
+
+        Utils.setDarkStatusFG(window, resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_NO)
 
         host = AppWidgetHost(this, Widget.HOST_ID)
 
