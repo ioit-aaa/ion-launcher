@@ -62,14 +62,14 @@ class SettingsActivity : Activity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 var bg: View? = null
                 setting(R.string.monochrome_icons) {
-                    switch("icon:monochrome", true) { _, isChecked ->
+                    switch("icon:monochrome", false) { _, isChecked ->
                         bg?.isVisible = isChecked
                     }
                 }
                 bg = setting(R.string.monochrome_bg) {
                     switch("icon:monochrome-bg", true)
                 }
-                bg.isVisible = ionApplication.settings["icon:monochrome", true]
+                bg.isVisible = ionApplication.settings["icon:monochrome", false]
             }
             title(R.string.suggestions)
             setting(R.string.count, isVertical = true) {

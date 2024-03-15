@@ -182,7 +182,7 @@ object IconLoader {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val monochrome = icon.monochrome
-            if (monochrome != null && context.ionApplication.settings["icon:monochrome", true]) {
+            if (monochrome != null && context.ionApplication.settings["icon:monochrome", false]) {
                 if (!context.ionApplication.settings["icon:monochrome-bg", true]) {
                     monochrome.setTint(ColorThemer.foreground(context))
                     val w = monochrome.intrinsicWidth
