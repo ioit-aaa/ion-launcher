@@ -12,7 +12,9 @@ import android.net.wifi.WifiManager
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Process
+import android.os.UserHandle
 import androidx.annotation.RequiresApi
+import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.UpdatingResource
@@ -37,7 +39,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
     private lateinit var contextMap: ContextMap<LauncherItem>
     private val contextLock = ReentrantLock()
 
-    private var suggestions = emptyList<LauncherItem>()
+    private var suggestions: MutableList<LauncherItem> = ArrayList()
     override fun getResource(): List<LauncherItem> = suggestions
 
     fun onItemOpened(context: Context, item: LauncherItem) {
@@ -58,6 +60,10 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
 
     fun onAppsLoaded(context: Context) {
         updateSuggestions(context)
+    }
+
+    fun onAppUninstalled(context: Context, packageName: String, user: UserHandle) {
+        this.suggestions.removeAll { it is App && it.packageName == packageName && it.userHandle == user }
     }
 
     private fun updateSuggestions(context: Context) {
@@ -95,7 +101,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
             }
             this.suggestions = sortedEntries.mapTo(ArrayList()) { it.key }.run {
                 addAll(timeBased)
-                distinct()
+                toMutableSet().toMutableList()
             }
             update(this.suggestions)
         }

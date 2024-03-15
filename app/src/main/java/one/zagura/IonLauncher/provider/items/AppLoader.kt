@@ -72,6 +72,7 @@ object AppLoader : UpdatingResource<List<App>>() {
         override fun onPackageRemoved(packageName: String, user: UserHandle) {
             apps.removeAll { it.packageName == packageName && it.userHandle == user }
             update(apps)
+            SuggestionsManager.onAppUninstalled(context, packageName, user)
             IconLoader.removePackage(packageName)
         }
 
