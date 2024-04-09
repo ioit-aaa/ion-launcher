@@ -1,0 +1,9 @@
+Added suggestions color settings
+Added light mode
+
+Tweaked color previews
+Made suggestion pills match app icons in thickness
+Optimized performance
+
+Fixed some bugs in RTL
+Fixed suggestions not updating when app uninstalled
