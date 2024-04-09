@@ -13,7 +13,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.isVisible
-import androidx.core.view.setPadding
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Dock
@@ -37,7 +36,7 @@ class SuggestionsView(
         }
         isVisible = true
         val dp = resources.displayMetrics.density
-        val height = (36 * dp).toInt()
+        val height = (48 * dp).toInt()
         val l = LayoutParams(0, height, 1f).apply {
             marginStart = (12 * dp).toInt()
         }
@@ -51,20 +50,21 @@ class SuggestionsView(
         orientation = HORIZONTAL
         val r = 99 * dp
         background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
-        backgroundTintList = ColorStateList.valueOf(ColorThemer.foreground(context))
-        val height = (36 * dp).toInt()
+        backgroundTintList = ColorStateList.valueOf(ColorThemer.pillBackground(context))
+        val height = (48 * dp).toInt()
+        val p = (dp * 8).toInt()
         addView(ImageView(context).apply {
             setImageDrawable(IconLoader.loadIcon(context, s))
-            setPadding((dp * 4).toInt())
-        }, LayoutParams(height, LayoutParams.MATCH_PARENT))
+            setPadding(p, p, 0, p)
+        }, LayoutParams(height - p, LayoutParams.MATCH_PARENT))
         addView(TextView(context).apply {
             text = s.label
-            setTextColor(ColorThemer.background(context))
             gravity = Gravity.CENTER_VERTICAL
             ellipsize = TextUtils.TruncateAt.END
             setSingleLine()
+            setTextColor(ColorThemer.pillForeground(context))
         }, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT).apply {
-            val m = (2 * dp).toInt()
+            val m = (4 * dp).toInt()
             leftMargin = m
             rightMargin = m
         })
@@ -100,6 +100,4 @@ class SuggestionsView(
             .take(suggestionCount)
             .toList()
     }
-
-
 }

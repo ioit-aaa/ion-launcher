@@ -14,15 +14,21 @@ object ColorThemer {
         return context.ionApplication.settings["color:bg", DEFAULT_BG] or 0xff000000.toInt()
     }
     fun foreground(context: Context): Int {
-        val c = context.ionApplication.settings["color:fg", DEFAULT_FG]
-        return c or 0xff000000.toInt()
-    }
-    fun hint(context: Context): Int {
-        val c = context.ionApplication.settings["color:fg", DEFAULT_FG] and 0xffffff
-        return c or 0x91000000.toInt()
+        return context.ionApplication.settings["color:fg", DEFAULT_FG] or 0xff000000.toInt()
     }
 
-    const val COLOR_TEXT = 0xfffefefe.toInt()
+    fun hint(context: Context): Int {
+        return context.ionApplication.settings["color:fg", DEFAULT_FG] and 0xffffff or 0x91000000.toInt()
+    }
+
+    fun pillBackground(context: Context): Int {
+        val s = context.ionApplication.settings
+        return s["pill:bg", DEFAULT_BG] and 0xffffff or (s["pill:bg:alpha", 0xff] shl 24)
+    }
+
+    fun pillForeground(context: Context): Int {
+        return context.ionApplication.settings["pill:fg", DEFAULT_FG] or 0xff000000.toInt()
+    }
 
     fun level(color: Int, level: Double): Int {
         val lab = DoubleArray(3)

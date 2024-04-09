@@ -75,6 +75,15 @@ class SettingsActivity : Activity() {
             setting(R.string.count, isVertical = true) {
                 seekbar("suggestion:count", 3, min = 0, max = 4)
             }
+            setting(R.string.background, subtitle = "") {
+                color("pill:bg", ColorThemer.DEFAULT_FG)
+            }
+            setting(R.string.foreground, subtitle = "") {
+                color("pill:fg", ColorThemer.DEFAULT_BG)
+            }
+            setting(R.string.background_opacity, isVertical = true) {
+                seekbar("pill:bg:alpha", 0xff, min = 0, max = 0xff)
+            }
             if (BuildConfig.DEBUG) {
                 setting(R.string.suggestions) {
                     onClick(SuggestionsActivity::class.java)
