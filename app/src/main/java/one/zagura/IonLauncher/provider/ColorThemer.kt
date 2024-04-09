@@ -23,11 +23,11 @@ object ColorThemer {
 
     fun pillBackground(context: Context): Int {
         val s = context.ionApplication.settings
-        return s["pill:bg", DEFAULT_BG] and 0xffffff or (s["pill:bg:alpha", 0xff] shl 24)
+        return s["pill:bg", DEFAULT_FG] and 0xffffff or (s["pill:bg:alpha", 0xff] shl 24)
     }
 
     fun pillForeground(context: Context): Int {
-        return context.ionApplication.settings["pill:fg", DEFAULT_FG] or 0xff000000.toInt()
+        return context.ionApplication.settings["pill:fg", DEFAULT_BG] or 0xff000000.toInt()
     }
 
     fun level(color: Int, level: Double): Int {

@@ -8,39 +8,36 @@ import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.provider.HiddenApps
 import one.zagura.IonLauncher.provider.UpdatingResource
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
-import one.zagura.IonLauncher.ui.ionApplication
+import one.zagura.IonLauncher.ui.IonLauncherApp
+import java.util.TreeSet
 
 object AppLoader : UpdatingResource<List<App>>() {
     override fun getResource() = apps
 
-    private var apps = ArrayList<App>()
+    private var apps: MutableList<App> = ArrayList()
 
-    fun reloadApps(context: Context) {
-        val userManager = context.getSystemService(Context.USER_SERVICE) as UserManager
-        val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
-        val collection = ArrayList<App>()
+    fun reloadApps(ionApplication: IonLauncherApp) {
+        ionApplication.task {
+            val userManager = ionApplication.getSystemService(Context.USER_SERVICE) as UserManager
+            val launcherApps = ionApplication.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+            val collection = TreeSet<App> { a, b -> a.label.compareTo(b.label) }
 
-        for (user in userManager.userProfiles) {
-            val appList = launcherApps.getActivityList(null, user)
-            for (i in appList.indices) {
-                val packageName = appList[i].applicationInfo.packageName
-                val name = appList[i].name
-                val label = appList[i].label.toString().ifEmpty { packageName }
-                val app = App(packageName, name, user, label)
-                if (!HiddenApps.isHidden(context.ionApplication.settings, app))
-                    collection.add(app)
+            for (user in userManager.userProfiles) {
+                val appList = launcherApps.getActivityList(null, user)
+                for (i in appList.indices) {
+                    val packageName = appList[i].applicationInfo.packageName
+                    val name = appList[i].name
+                    val label = appList[i].label.toString().ifEmpty { packageName }
+                    val app = App(packageName, name, user, label)
+                    if (!HiddenApps.isHidden(ionApplication.settings, app))
+                        collection.add(app)
+                }
             }
+            apps = collection.toMutableList()
+            update(apps)
+            SuggestionsManager.onAppsLoaded(ionApplication)
         }
-        apps = collection
-        resort()
-        update(apps)
-        SuggestionsManager.onAppsLoaded(context)
     }
-
-    private fun resort() {
-        apps.sortBy { it.label }
-    }
-
 
     fun loadApp(
         context: Context,
@@ -48,9 +45,13 @@ object AppLoader : UpdatingResource<List<App>>() {
         name: String,
         user: UserHandle,
     ): App? {
-        val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
-        val info = launcherApps.getActivityList(packageName, user)?.find { it.name == name } ?: return null
-        return App(packageName, name, user, info.label.toString())
+        return apps.find { it.packageName == packageName && it.name == name && it.userHandle == user } ?: run {
+            val launcherApps =
+                context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+            val info = launcherApps.getActivityList(packageName, user)?.find { it.name == name }
+                ?: return null
+            App(packageName, name, user, info.label.toString())
+        }
     }
 
     fun onHide(app: App) {
@@ -59,27 +60,27 @@ object AppLoader : UpdatingResource<List<App>>() {
     }
 
     fun onShow(app: App) {
-        if (!apps.contains(app))
-            apps.add(app)
-        resort()
+        val i = apps.binarySearchBy(app.label) { it.label }
+        if (i < 0)
+            apps.add(-i - 1, app)
         update(apps)
     }
 
     class AppCallback(
-        val context: Context,
+        val ionApplication: IonLauncherApp,
     ) : LauncherApps.Callback() {
 
         override fun onPackageRemoved(packageName: String, user: UserHandle) {
             apps.removeAll { it.packageName == packageName && it.userHandle == user }
             update(apps)
-            SuggestionsManager.onAppUninstalled(context, packageName, user)
+            SuggestionsManager.onAppUninstalled(ionApplication, packageName, user)
             IconLoader.removePackage(packageName)
         }
 
-        override fun onPackageAdded(packageName: String?, user: UserHandle?) = reloadApps(context)
+        override fun onPackageAdded(packageName: String?, user: UserHandle?) = reloadApps(ionApplication)
 
         override fun onPackageChanged(packageName: String, user: UserHandle?) {
-            reloadApps(context)
+            reloadApps(ionApplication)
             IconLoader.removePackage(packageName)
         }
 
@@ -87,16 +88,16 @@ object AppLoader : UpdatingResource<List<App>>() {
             packageNames: Array<out String>?,
             user: UserHandle?,
             replacing: Boolean
-        ) = reloadApps(context)
+        ) = reloadApps(ionApplication)
 
         override fun onPackagesUnavailable(
             packageNames: Array<out String>?,
             user: UserHandle?,
             replacing: Boolean
-        ) = reloadApps(context)
+        ) = reloadApps(ionApplication)
 
-        override fun onPackagesSuspended(packageNames: Array<out String>?, user: UserHandle?) = reloadApps(context)
+        override fun onPackagesSuspended(packageNames: Array<out String>?, user: UserHandle?) = reloadApps(ionApplication)
 
-        override fun onPackagesUnsuspended(packageNames: Array<out String>?, user: UserHandle?) = reloadApps(context)
+        override fun onPackagesUnsuspended(packageNames: Array<out String>?, user: UserHandle?) = reloadApps(ionApplication)
     }
 }

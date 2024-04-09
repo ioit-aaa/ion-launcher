@@ -13,7 +13,7 @@ import android.widget.TextView
 import androidx.core.widget.NestedScrollView
 import one.zagura.IonLauncher.BuildConfig
 import one.zagura.IonLauncher.R
-import one.zagura.IonLauncher.provider.ColorThemer
+import one.zagura.IonLauncher.ui.ionApplication
 import kotlin.system.exitProcess
 
 class CrashActivity : Activity() {
@@ -107,6 +107,7 @@ class CrashActivity : Activity() {
         fun init(context: Context) {
             Thread.setDefaultUncaughtExceptionHandler { _, throwable ->
                 try {
+                    context.ionApplication.settings.saveNow(context)
                     context.startActivity(Intent(context, CrashActivity::class.java)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         .putExtra("throwable", throwable))

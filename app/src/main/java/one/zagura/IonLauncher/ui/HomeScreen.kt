@@ -98,8 +98,10 @@ class HomeScreen : Activity() {
             applyCustomizations()
         }
         AppLoader.track(false) {
-            drawerArea.onAppsChanged()
-            pinnedGrid.updateGridApps()
+            runOnUiThread {
+                drawerArea.onAppsChanged()
+                pinnedGrid.updateGridApps()
+            }
         }
         NotificationService.MediaObserver.track {
             musicView.updateTrack(it)
@@ -157,7 +159,7 @@ class HomeScreen : Activity() {
         val v = (dp * 6).toInt()
         suggestionsView.setPadding(m, v, m, v)
         suggestionsView.updateLayoutParams {
-            height = (SuggestionsView.ITEM_HEIGHT * dp).toInt() + v * 2
+            height = (ionApplication.settings["dock:icon-size", 48] * dp).toInt() + v * 2
         }
         val widget = Widgets.getWidget(this)
         if (widget != widgetView?.widget) {

@@ -27,10 +27,6 @@ class SuggestionsView(
     val showDropTargets: () -> Unit,
 ) : LinearLayout(context) {
 
-    companion object {
-        val ITEM_HEIGHT = 48
-    }
-
     fun update() {
         removeAllViews()
         context.ionApplication.task {
@@ -42,7 +38,7 @@ class SuggestionsView(
                 }
                 isVisible = true
                 val dp = resources.displayMetrics.density
-                val height = (ITEM_HEIGHT * dp).toInt()
+                val height = (context.ionApplication.settings["dock:icon-size", 48] * dp).toInt()
                 val l = LayoutParams(0, height, 1f).apply {
                     marginStart = (12 * dp).toInt()
                 }
@@ -59,7 +55,7 @@ class SuggestionsView(
         val r = 99 * dp
         background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
         backgroundTintList = ColorStateList.valueOf(ColorThemer.pillBackground(context))
-        val height = (ITEM_HEIGHT * dp).toInt()
+        val height = (context.ionApplication.settings["dock:icon-size", 48] * dp).toInt()
         val p = (dp * 8).toInt()
         addView(ImageView(context).apply {
             setImageDrawable(IconLoader.loadIcon(context, s))

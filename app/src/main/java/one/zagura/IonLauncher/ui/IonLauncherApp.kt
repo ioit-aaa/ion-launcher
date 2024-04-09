@@ -42,8 +42,8 @@ class IonLauncherApp : Application() {
         }
     )
 
-    fun <T> task(task: () -> T) {
-        workerPool.submit(task)
+    fun task(task: () -> Unit) {
+        workerPool.execute(task)
     }
 
     override fun onCreate() {
@@ -58,12 +58,12 @@ class IonLauncherApp : Application() {
 
     @RequiresApi(Build.VERSION_CODES.N)
     object AppReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) = AppLoader.reloadApps(context)
+        override fun onReceive(context: Context, intent: Intent) = AppLoader.reloadApps(context.ionApplication)
     }
 
     private fun setupApps() {
         val launcherApps = getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
-        launcherApps.registerCallback(AppLoader.AppCallback(applicationContext))
+        launcherApps.registerCallback(AppLoader.AppCallback(this))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             registerReceiver(
                 AppReceiver,
