@@ -32,7 +32,8 @@ object SettingsProvider : BasicProvider<ActionItem> {
     private fun action(context: Context, action: String): ActionItem? {
         val item = context.packageManager.queryIntentActivities(Intent(action), 0)
             .firstOrNull() ?: return null
-        return ActionItem(action, item.loadLabel(context.packageManager).toString())
+        val label = item.loadLabel(context.packageManager).toString()
+        return ActionItem(action, label)
     }
 
     override fun getBaseData() = list

@@ -27,21 +27,29 @@ class SuggestionsView(
     val showDropTargets: () -> Unit,
 ) : LinearLayout(context) {
 
+    companion object {
+        val ITEM_HEIGHT = 48
+    }
+
     fun update() {
         removeAllViews()
-        val suggestions = loadSuggestions()
-        if (suggestions.isEmpty()) {
-            isVisible = false
-            return
-        }
-        isVisible = true
-        val dp = resources.displayMetrics.density
-        val height = (48 * dp).toInt()
-        val l = LayoutParams(0, height, 1f).apply {
-            marginStart = (12 * dp).toInt()
-        }
-        for ((i, s) in suggestions.withIndex()) {
-            addView(createItemView(s, i, suggestions.size), if (i == 0) LayoutParams(0, LayoutParams.MATCH_PARENT, 1f) else l)
+        context.ionApplication.task {
+            val suggestions = loadSuggestions()
+            post {
+                if (suggestions.isEmpty()) {
+                    isVisible = false
+                    return@post
+                }
+                isVisible = true
+                val dp = resources.displayMetrics.density
+                val height = (ITEM_HEIGHT * dp).toInt()
+                val l = LayoutParams(0, height, 1f).apply {
+                    marginStart = (12 * dp).toInt()
+                }
+                for ((i, s) in suggestions.withIndex()) {
+                    addView(createItemView(s, i, suggestions.size), if (i == 0) LayoutParams(0, LayoutParams.MATCH_PARENT, 1f) else l)
+                }
+            }
         }
     }
 
@@ -51,7 +59,7 @@ class SuggestionsView(
         val r = 99 * dp
         background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
         backgroundTintList = ColorStateList.valueOf(ColorThemer.pillBackground(context))
-        val height = (48 * dp).toInt()
+        val height = (ITEM_HEIGHT * dp).toInt()
         val p = (dp * 8).toInt()
         addView(ImageView(context).apply {
             setImageDrawable(IconLoader.loadIcon(context, s))

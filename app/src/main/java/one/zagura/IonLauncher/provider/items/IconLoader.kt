@@ -39,23 +39,31 @@ import one.zagura.IonLauncher.util.IconTheming
 import one.zagura.IonLauncher.util.NonDrawable
 import one.zagura.IonLauncher.util.Settings
 import java.io.FileNotFoundException
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 object IconLoader {
     private val cacheApps = HashMap<App, Drawable>()
-    private val cacheContacts = HashMap<ContactItem, Drawable>()
+    private val cacheContacts = HashMap<String, Drawable>() // only use lookup key
     private val cacheShortcuts = HashMap<StaticShortcut, Drawable>()
     private var iconPacks = emptyList<IconTheming.IconPackInfo>()
 
+    private val iconPacksLock = ReentrantLock()
+
     fun updateIconPacks(context: Context, settings: Settings) {
-        iconPacks = settings.getStrings("icon_packs").orEmpty().mapNotNull { iconPackPackage ->
-            try {
-                IconTheming.getIconPackInfo(context.packageManager, iconPackPackage)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
+        clearCache()
+        context.ionApplication.task {
+            iconPacksLock.withLock {
+                iconPacks = settings.getStrings("icon_packs").orEmpty().mapNotNull { iconPackPackage ->
+                    try {
+                        IconTheming.getIconPackInfo(context.packageManager, iconPackPackage)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        null
+                    }
+                }
             }
         }
-        clearCache()
     }
 
     @SuppressLint("NewApi")
@@ -66,42 +74,52 @@ object IconLoader {
         is StaticShortcut -> loadIcon(context, item)
     }
 
-    fun loadIcon(context: Context, item: ActionItem): Drawable =
-        context.packageManager.queryIntentActivities(Intent(item.action), 0)
-            .firstOrNull()?.loadIcon(context.packageManager)
-            ?.let { themeIcon(context, it) }
-            ?: NonDrawable
+    fun loadIcon(context: Context, item: ActionItem): Drawable {
+        val initIcon = context.packageManager.queryIntentActivities(Intent(item.action), 0)
+            .firstOrNull()?.loadIcon(context.packageManager) ?: return NonDrawable
+        return iconPacksLock.withLock {
+            themeIcon(context, initIcon)
+        }
+    }
 
     fun loadIcon(context: Context, app: App): Drawable {
         return cacheApps.getOrPut(app) {
-            val externalIcon = iconPacks.firstNotNullOfOrNull {
-                it.getDrawable(app.packageName, app.name, context.resources.displayMetrics.densityDpi)
-            }
-            if (externalIcon != null)
-                return@getOrPut externalIcon.apply {
-                    setGrayscale(context.ionApplication.settings["icon:grayscale", true])
+            iconPacksLock.withLock {
+                val externalIcon = iconPacks.firstNotNullOfOrNull {
+                    it.getDrawable(
+                        app.packageName,
+                        app.name,
+                        context.resources.displayMetrics.densityDpi
+                    )
                 }
-            val launcherApps =
-                context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
-            launcherApps.getActivityList(app.packageName, app.userHandle)
-                ?.find { it.name == app.name }
-                ?.getIcon(context.resources.displayMetrics.densityDpi)
-                ?.let { themeIcon(context, it) }
-                ?: return NonDrawable
+                if (externalIcon != null)
+                    return@getOrPut externalIcon.apply {
+                        setGrayscale(context.ionApplication.settings["icon:grayscale", true])
+                    }
+                val launcherApps =
+                    context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+                launcherApps.getActivityList(app.packageName, app.userHandle)
+                    ?.find { it.name == app.name }
+                    ?.getIcon(context.resources.displayMetrics.densityDpi)
+                    ?.let { themeIcon(context, it) }
+                    ?: return NonDrawable
+            }
         }
     }
 
     fun loadIcon(context: Context, contact: ContactItem): Drawable {
-        return cacheContacts.getOrPut(contact) {
+        return cacheContacts.getOrPut(contact.lookupKey) {
             if (contact.iconUri != null) try {
                 val inputStream = context.contentResolver.openInputStream(contact.iconUri)
-                val pic = Drawable.createFromStream(inputStream, contact.iconUri.toString()) ?: NonDrawable
+                val pic = Drawable.createFromStream(inputStream, contact.iconUri.toString())
+                    ?: NonDrawable
                 pic.setBounds(0, 0, pic.intrinsicWidth, pic.intrinsicHeight)
                 val path = Path().apply {
                     val w = pic.bounds.width()
                     val p = w / 32f
                     val r = w / 10f
-                    addRoundRect(p, p, w - p, w - p, floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
+                    addRoundRect(p, p, w - p, w - p,
+                        floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
                 }
                 return@getOrPut ClippedDrawable(pic, path)
             } catch (_: FileNotFoundException) {}
@@ -230,10 +248,7 @@ object IconLoader {
         val scaledBitmap =
             Bitmap.createBitmap(iconPackInfo.size, iconPackInfo.size, Bitmap.Config.ARGB_8888)
         Canvas(scaledBitmap).run {
-            val uniformOptions = BitmapFactory.Options().apply {
-                inScaled = false
-            }
-            val back = iconPackInfo.getBackBitmap(uniformOptions)
+            val back = iconPackInfo.back
             if (back != null) {
                 drawBitmap(
                     back,
@@ -241,7 +256,6 @@ object IconLoader {
                     Rect(0, 0, iconPackInfo.size, iconPackInfo.size),
                     p
                 )
-                back.recycle()
             }
             val scaledOrig =
                 Bitmap.createBitmap(iconPackInfo.size, iconPackInfo.size, Bitmap.Config.ARGB_8888)
@@ -256,7 +270,7 @@ object IconLoader {
                     scaledOrig.width - orig.width / 2f - scaledOrig.width / 2f,
                     p
                 )
-                val mask = iconPackInfo.getMaskBitmap(uniformOptions)
+                val mask = iconPackInfo.mask
                 if (mask != null) {
                     drawBitmap(
                         mask,
@@ -264,7 +278,6 @@ object IconLoader {
                         Rect(0, 0, iconPackInfo.size, iconPackInfo.size),
                         maskP
                     )
-                    mask.recycle()
                 }
             }
             drawBitmap(
@@ -273,7 +286,7 @@ object IconLoader {
                 0f,
                 p
             )
-            val front = iconPackInfo.getFrontBitmap(uniformOptions)
+            val front = iconPackInfo.front
             if (front != null) {
                 drawBitmap(
                     front,
@@ -281,7 +294,6 @@ object IconLoader {
                     Rect(0, 0, iconPackInfo.size, iconPackInfo.size),
                     p
                 )
-                front.recycle()
             }
             orig.recycle()
             scaledOrig.recycle()

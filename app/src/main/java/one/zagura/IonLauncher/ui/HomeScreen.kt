@@ -20,6 +20,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.luminance
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
@@ -55,10 +56,10 @@ class HomeScreen : Activity() {
     private lateinit var drawerArea: DrawerArea
 
     private lateinit var summaryView: SummaryView
-    private var widgetView: WidgetView? = null
     private lateinit var musicView: MusicView
-    private lateinit var suggestionsView: SuggestionsView
+    private var widgetView: WidgetView? = null
     private lateinit var pinnedGrid: PinnedGridView
+    private lateinit var suggestionsView: SuggestionsView
 
     private val screenBackground = FillDrawable(0)
     private var screenBackgroundAlpha = 0
@@ -96,22 +97,24 @@ class HomeScreen : Activity() {
             IconLoader.updateIconPacks(this, ionApplication.settings)
             applyCustomizations()
         }
-        AppLoader.track {
+        AppLoader.track(false) {
             drawerArea.onAppsChanged()
             pinnedGrid.updateGridApps()
         }
-        // Just in case it died for some reason
-        if (NotificationService.hasPermission(this))
-            startService(Intent(this, NotificationService::class.java))
         NotificationService.MediaObserver.track {
             musicView.updateTrack(it)
         }
         widgetView?.startListening()
         suggestionsView.update()
+        pinnedGrid.updateGridApps()
         homeScreen.post {
+            drawerArea.onAppsChanged()
             // windowToken might not be loaded, so we post this to the view
             val wallpaperManager = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
             wallpaperManager.setWallpaperOffsets(homeScreen.windowToken, 0.5f, 0.5f)
+            // Just in case it died for some reason (in post cause lower priority)
+            if (NotificationService.hasPermission(this))
+                startService(Intent(this, NotificationService::class.java))
         }
     }
 
@@ -119,13 +122,18 @@ class HomeScreen : Activity() {
         super.onStop()
         AppLoader.release()
         NotificationService.MediaObserver.release()
-        SuggestionsManager.saveToStorage(this)
         widgetView?.stopListening()
+        SuggestionsManager.saveToStorage(this)
     }
 
     override fun onResume() {
         super.onResume()
-        summaryView.updateEvents(EventsLoader.load(this))
+        ionApplication.task {
+            val events = EventsLoader.load(this)
+            runOnUiThread {
+                summaryView.updateEvents(events)
+            }
+        }
     }
 
     private fun applyCustomizations() {
@@ -148,6 +156,9 @@ class HomeScreen : Activity() {
         musicView.setPadding(m, 0, m, m - (8 * dp).toInt())
         val v = (dp * 6).toInt()
         suggestionsView.setPadding(m, v, m, v)
+        suggestionsView.updateLayoutParams {
+            height = (SuggestionsView.ITEM_HEIGHT * dp).toInt() + v * 2
+        }
         val widget = Widgets.getWidget(this)
         if (widget != widgetView?.widget) {
             if (widgetView != null) {
@@ -189,7 +200,7 @@ class HomeScreen : Activity() {
                 MarginLayoutParams(LayoutParams.MATCH_PARENT, pinnedGrid.calculateGridHeight()))
             addView(
                 suggestionsView,
-                MarginLayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+                MarginLayoutParams(LayoutParams.MATCH_PARENT, 0))
             setPadding(0, 0, 0, Utils.getNavigationBarHeight(this@HomeScreen))
         }
 

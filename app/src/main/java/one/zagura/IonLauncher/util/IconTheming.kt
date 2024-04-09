@@ -69,21 +69,9 @@ object IconTheming {
         var areUnthemedIconsChanged: Boolean = false
             internal set
 
-        internal var back: Int = 0
-        internal var mask: Int = 0
-        internal var front: Int = 0
-
-        fun getBackBitmap(
-            uniformOptions: BitmapFactory.Options
-        ): Bitmap? = BitmapFactory.decodeResource(res, back, uniformOptions)
-
-        fun getMaskBitmap(
-            uniformOptions: BitmapFactory.Options
-        ): Bitmap? = BitmapFactory.decodeResource(res, mask, uniformOptions)
-
-        fun getFrontBitmap(
-            uniformOptions: BitmapFactory.Options
-        ): Bitmap? = BitmapFactory.decodeResource(res, front, uniformOptions)
+        internal var back: Bitmap? = null
+        internal var mask: Bitmap? = null
+        internal var front: Bitmap? = null
     }
 
     @SuppressLint("DiscouragedApi")
@@ -93,6 +81,9 @@ object IconTheming {
     ): IconPackInfo {
         val res = packageManager.getResourcesForApplication(iconPackPackageName)
         val info = IconPackInfo(res, iconPackPackageName)
+        val uniformOptions = BitmapFactory.Options().apply {
+            inScaled = false
+        }
         try {
             val n = res.getIdentifier("appfilter", "xml", iconPackPackageName)
             val x = if (n != 0)
@@ -123,24 +114,27 @@ object IconTheming {
                                 if (key != null && value != null)
                                     info.calendarPrefixes[key] = value
                             }
-                            "iconback" -> info.iconModificationInfo.back = loadIconMod(
-                                x.getAttributeValue(0),
-                                res,
-                                iconPackPackageName,
-                                info
-                            )
-                            "iconmask" -> info.iconModificationInfo.mask = loadIconMod(
-                                x.getAttributeValue(0),
-                                res,
-                                iconPackPackageName,
-                                info
-                            )
-                            "iconupon" -> info.iconModificationInfo.front = loadIconMod(
-                                x.getAttributeValue(0),
-                                res,
-                                iconPackPackageName,
-                                info
-                            )
+                            "iconback" -> info.iconModificationInfo.back =
+                                BitmapFactory.decodeResource(res, loadIconMod(
+                                    x.getAttributeValue(0),
+                                    res,
+                                    iconPackPackageName,
+                                    info
+                                ), uniformOptions)
+                            "iconmask" -> info.iconModificationInfo.mask =
+                                BitmapFactory.decodeResource(res, loadIconMod(
+                                    x.getAttributeValue(0),
+                                    res,
+                                    iconPackPackageName,
+                                    info
+                                ), uniformOptions)
+                            "iconupon" -> info.iconModificationInfo.front =
+                                BitmapFactory.decodeResource(res, loadIconMod(
+                                    x.getAttributeValue(0),
+                                    res,
+                                    iconPackPackageName,
+                                    info
+                                ), uniformOptions)
                         }
                     } catch (_: Exception) {}
                 }

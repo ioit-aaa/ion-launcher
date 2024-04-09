@@ -3,6 +3,7 @@ package one.zagura.IonLauncher.data.items
 import android.app.ActivityOptions
 import android.content.ContentUris
 import android.content.Context
+import android.content.Intent
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
@@ -139,11 +140,10 @@ sealed class LauncherItem {
                     ContactItem(name, lookupKey, phone, starred, iconUri)
                 }
                 ACTION -> {
-                    val i = data.indexOf('/')
-                    if (i == -1)
-                        return null
-                    val action = data.substring(1, i)
-                    val label = data.substring(i + 1)
+                    val action = data.substring(1)
+                    val item = context.packageManager.queryIntentActivities(Intent(action), 0)
+                        .firstOrNull() ?: return null
+                    val label = item.loadLabel(context.packageManager).toString()
                     ActionItem(action, label)
                 }
                 else -> null

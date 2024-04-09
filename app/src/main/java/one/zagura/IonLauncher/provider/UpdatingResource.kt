@@ -2,9 +2,10 @@ package one.zagura.IonLauncher.provider
 
 abstract class UpdatingResource<T> {
     private var callback: (T) -> Unit = {}
-    fun track(callback: (T) -> Unit) {
+    fun track(doNow: Boolean = true, callback: (T) -> Unit) {
         this.callback = callback
-        callback(getResource())
+        if (doNow)
+            callback(getResource())
     }
     fun release() {
         this.callback = {}

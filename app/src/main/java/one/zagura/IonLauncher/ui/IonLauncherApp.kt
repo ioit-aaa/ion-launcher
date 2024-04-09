@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.content.pm.LauncherApps
 import android.os.Build
 import androidx.annotation.RequiresApi
+import kotlinx.coroutines.CoroutineDispatcher
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.items.IconLoader
 import one.zagura.IonLauncher.provider.notification.NotificationService
@@ -16,6 +17,13 @@ import one.zagura.IonLauncher.provider.search.Search
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.util.CrashActivity
 import one.zagura.IonLauncher.util.Settings
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 
 val Context.ionApplication
     get() = applicationContext as IonLauncherApp
@@ -25,6 +33,18 @@ val Activity.ionApplication
 class IonLauncherApp : Application() {
 
     val settings = Settings("settings")
+
+    private val workerPool: ExecutorService = ThreadPoolExecutor(
+        2, 4, 60L, TimeUnit.SECONDS, SynchronousQueue(), ThreadFactory {
+            Thread(it).apply {
+                isDaemon = false
+            }
+        }
+    )
+
+    fun <T> task(task: () -> T) {
+        workerPool.submit(task)
+    }
 
     override fun onCreate() {
         super.onCreate()

@@ -18,6 +18,7 @@ import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.UpdatingResource
+import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.Settings
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
@@ -43,7 +44,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
     override fun getResource(): List<LauncherItem> = suggestions
 
     fun onItemOpened(context: Context, item: LauncherItem) {
-        thread(isDaemon = false, name = "SuggestionManager: saving opening context") {
+        context.ionApplication.task {
             contextLock.withLock {
                 val data = ContextArray()
                 getCurrentContext(context, data)

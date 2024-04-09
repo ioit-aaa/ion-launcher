@@ -131,6 +131,8 @@ class MusicView(c: Context) : LinearLayout(c) {
         with(subtitle) {
             text = "${data.album} • ${data.artist}"
         }
+
+        updatePlayButton()
     }
 
     fun applyCustomizations() {
@@ -144,14 +146,16 @@ class MusicView(c: Context) : LinearLayout(c) {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) {
-            if (musicService.isMusicActive) {
-                play.setImageResource(R.drawable.ic_pause)
-                play.contentDescription = resources.getString(R.string.pause)
-            } else {
-                play.setImageResource(R.drawable.ic_play)
-                play.contentDescription = resources.getString(R.string.play)
-            }
+        if (hasFocus) updatePlayButton()
+    }
+
+    private fun updatePlayButton() {
+        if (musicService.isMusicActive) {
+            play.setImageResource(R.drawable.ic_pause)
+            play.contentDescription = resources.getString(R.string.pause)
+        } else {
+            play.setImageResource(R.drawable.ic_play)
+            play.contentDescription = resources.getString(R.string.play)
         }
     }
 }
