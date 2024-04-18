@@ -1,7 +1,10 @@
 package one.zagura.IonLauncher.ui.settings.iconPackPicker
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.view.MotionEvent
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.ui.settings.common.TitleViewHolder
@@ -18,6 +21,8 @@ class IconPackPickerAdapter(
     private val systemPack: IconPackPickerActivity.IconPack,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+    lateinit var itemTouchHelper: ItemTouchHelper
+
     override fun getItemViewType(i: Int) = when (i) {
         0 -> TITLE
         1, 2 + chosenIconPacks.size + 1 -> SECTION
@@ -25,11 +30,17 @@ class IconPackPickerAdapter(
         else -> ICON_PACK
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreateViewHolder(parent: ViewGroup, type: Int) = when (type) {
         TITLE -> TitleViewHolder(parent.context)
         SECTION -> SectionViewHolder(parent.context)
         SYSTEM_ICON_PACK -> IconPackViewHolder(parent.context, SYSTEM_ICON_PACK)
         else -> IconPackViewHolder(parent.context, type).apply {
+            dragIndicator.setOnTouchListener { _, event ->
+                if (event.action == MotionEvent.ACTION_DOWN)
+                    itemTouchHelper.startDrag(this)
+                false
+            }
             itemView.setOnClickListener {
                 Utils.click(it.context)
                 val i = bindingAdapterPosition

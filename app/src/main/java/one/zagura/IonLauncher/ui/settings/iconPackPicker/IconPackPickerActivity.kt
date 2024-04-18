@@ -80,6 +80,7 @@ class IconPackPickerActivity : Activity() {
         val adapter = IconPackPickerAdapter(settings, chosenIconPacks, iconPacks, systemPack)
         recycler.adapter = adapter
         val th = ItemTouchHelper(TouchCallback(adapter))
+        adapter.itemTouchHelper = th
         th.attachToRecyclerView(recycler)
     }
 
