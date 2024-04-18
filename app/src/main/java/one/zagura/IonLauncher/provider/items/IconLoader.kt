@@ -204,7 +204,7 @@ object IconLoader {
                 if (!context.ionApplication.settings["icon:monochrome-bg", true]) {
                     monochrome.setTint(ColorThemer.foreground(context))
                     val w = monochrome.intrinsicWidth
-                    return InsetDrawable(monochrome, -w / 6)
+                    return InsetDrawable(monochrome, -w / 5)
                 }
                 monochrome.setTint(ColorThemer.background(context))
                 fg = monochrome
