@@ -8,6 +8,7 @@ import one.zagura.IonLauncher.ui.settings.common.TitleViewHolder
 import one.zagura.IonLauncher.ui.settings.iconPackPicker.viewHolder.IconPackViewHolder
 import one.zagura.IonLauncher.ui.settings.iconPackPicker.viewHolder.SectionViewHolder
 import one.zagura.IonLauncher.util.Settings
+import one.zagura.IonLauncher.util.Utils
 import java.util.*
 
 class IconPackPickerAdapter(
@@ -28,7 +29,24 @@ class IconPackPickerAdapter(
         TITLE -> TitleViewHolder(parent.context)
         SECTION -> SectionViewHolder(parent.context)
         SYSTEM_ICON_PACK -> IconPackViewHolder(parent.context, SYSTEM_ICON_PACK)
-        else -> IconPackViewHolder(parent.context, type)
+        else -> IconPackViewHolder(parent.context, type).apply {
+            itemView.setOnClickListener {
+                Utils.click(it.context)
+                val i = bindingAdapterPosition
+                if (i >= 2 && i < 2 + chosenIconPacks.size) {
+                    val iconPack = chosenIconPacks.removeAt(i - 2)
+                    availableIconPacks.add(0, iconPack)
+                    notifyItemMoved(i, 2 + chosenIconPacks.size + 2)
+                } else if (i >= 2 + chosenIconPacks.size + 2) {
+                    val iconPack = availableIconPacks.removeAt(i - (2 + chosenIconPacks.size + 2))
+                    chosenIconPacks.add(0, iconPack)
+                    notifyItemMoved(i, 2)
+                }
+                settings.edit(it.context) {
+                    "icon_packs" set chosenIconPacks.map(IconPackPickerActivity.IconPack::packageName).toTypedArray()
+                }
+            }
+        }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, i: Int) = when (i) {
