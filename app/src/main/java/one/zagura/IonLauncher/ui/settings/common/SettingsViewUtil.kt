@@ -94,6 +94,11 @@ inline fun Activity.setSettingsContentView(@StringRes titleId: Int, builder: Set
 
 fun SettingsPageScope.title(@StringRes text: Int) {
     val dp = view.resources.displayMetrics.density
+    view.addView(View(view.context).apply {
+        background = FillDrawable(resources.getColor(R.color.color_separator))
+    }, MarginLayoutParams(MATCH_PARENT, dp.toInt()).apply {
+        topMargin = (12 * dp).toInt()
+    })
     view.addView(TextView(view.context).apply {
         gravity = Gravity.CENTER_VERTICAL
         val h = (20 * dp).toInt()
