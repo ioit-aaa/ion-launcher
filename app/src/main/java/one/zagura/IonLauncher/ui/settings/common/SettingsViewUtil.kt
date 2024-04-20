@@ -10,12 +10,13 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Typeface
 import android.graphics.drawable.ClipDrawable
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.StateListDrawable
-import android.graphics.drawable.shapes.OvalShape
 import android.graphics.drawable.shapes.RoundRectShape
 import android.os.Build
 import android.util.StateSet
@@ -25,7 +26,7 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.view.WindowInsetsController
+import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowManager
 import android.widget.EditText
 import android.widget.ImageView
@@ -35,13 +36,12 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.StringRes
-import androidx.core.graphics.luminance
 import androidx.core.widget.NestedScrollView
 import androidx.core.widget.doOnTextChanged
 import one.zagura.IonLauncher.R
-import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.FillDrawable
+import one.zagura.IonLauncher.util.NonDrawable
 import one.zagura.IonLauncher.util.Utils
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -85,7 +85,9 @@ inline fun Activity.setSettingsContentView(@StringRes titleId: Int, builder: Set
             }, LayoutParams(MATCH_PARENT, (64 * dp).toInt() + Utils.getStatusBarHeight(context)))
             addView(View(context).apply {
                 background = FillDrawable(resources.getColor(R.color.color_separator))
-            }, LayoutParams(MATCH_PARENT, dp.toInt()))
+            }, MarginLayoutParams(MATCH_PARENT, dp.toInt()).apply {
+                bottomMargin = (12 * dp).toInt()
+            })
             builder(SettingsPageScope(this))
         }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
     })
@@ -192,6 +194,9 @@ fun SettingViewScope.switch(settingId: String, default: Boolean, listener: (View
         switch.isChecked = !switch.isChecked
     }
     view.addView(switch)
+    view.background = RippleDrawable(
+        ColorStateList.valueOf(view.resources.getColor(R.color.color_separator)),
+        ColorDrawable(view.resources.getColor(R.color.color_bg)), null)
 }
 
 @SuppressLint("UseSwitchCompatOrMaterialCode")
@@ -213,6 +218,9 @@ fun SettingViewScope.permissionSwitch(default: Boolean, listener: (View) -> Unit
         switch.isChecked = true
     }
     view.addView(switch)
+    view.background = RippleDrawable(
+        ColorStateList.valueOf(view.resources.getColor(R.color.color_separator)),
+        ColorDrawable(view.resources.getColor(R.color.color_bg)), null)
     return {
         switch.isChecked = it
         switch.isEnabled = !it
@@ -231,6 +239,9 @@ fun SettingViewScope.onClick(listener: (View) -> Unit) {
         setImageResource(R.drawable.ic_arrow_right)
         imageTintList = ColorStateList.valueOf(resources.getColor(R.color.color_hint))
     }, LayoutParams(s, s))
+    view.background = RippleDrawable(
+        ColorStateList.valueOf(view.resources.getColor(R.color.color_separator)),
+        ColorDrawable(view.resources.getColor(R.color.color_bg)), null)
 }
 
 fun SettingViewScope.color(settingId: String, default: Int) {

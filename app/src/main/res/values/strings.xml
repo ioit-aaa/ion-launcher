@@ -39,4 +39,5 @@
     <string name="widgets">Widgets</string>
     <string name="choose_widget">Choose Widget</string>
     <string name="nothing">Nothing</string>
+    <string name="color">Color</string>
 </resources>

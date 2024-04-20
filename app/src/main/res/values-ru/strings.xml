@@ -40,4 +40,5 @@
     <string name="widgets">Виджеты</string>
     <string name="choose_widget">Выбрать виджет</string>
     <string name="nothing">Ничего</string>
+    <string name="color">Цвет</string>
 </resources>

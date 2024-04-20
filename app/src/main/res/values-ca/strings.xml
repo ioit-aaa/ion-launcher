@@ -40,4 +40,5 @@
     <string name="widgets">Widgets</string>
     <string name="choose_widget">Escollir widget</string>
     <string name="nothing">Res</string>
+    <string name="color">Color</string>
 </resources>

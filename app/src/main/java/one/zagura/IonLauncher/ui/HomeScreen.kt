@@ -4,19 +4,16 @@ import android.app.Activity
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.MarginLayoutParams
-import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.luminance
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -29,13 +26,13 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Widgets
 import one.zagura.IonLauncher.provider.items.AppLoader
-import one.zagura.IonLauncher.provider.summary.EventsLoader
 import one.zagura.IonLauncher.provider.items.IconLoader
 import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
+import one.zagura.IonLauncher.provider.summary.EventsLoader
 import one.zagura.IonLauncher.ui.drawer.DrawerArea
-import one.zagura.IonLauncher.ui.view.PinnedGridView
 import one.zagura.IonLauncher.ui.view.MusicView
+import one.zagura.IonLauncher.ui.view.PinnedGridView
 import one.zagura.IonLauncher.ui.view.SuggestionsView
 import one.zagura.IonLauncher.ui.view.SummaryView
 import one.zagura.IonLauncher.ui.view.WidgetView
@@ -71,8 +68,10 @@ class HomeScreen : Activity() {
         val h = Utils.getDisplayHeight(this) * 2
         setContentView(homeScreen, FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, h, Gravity.BOTTOM))
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
+            window.isStatusBarContrastEnforced = false
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
             window.setDecorFitsSystemWindows(false)
         else window.setFlags(
@@ -159,7 +158,7 @@ class HomeScreen : Activity() {
         val v = (dp * 6).toInt()
         suggestionsView.setPadding(m, v, m, v)
         suggestionsView.updateLayoutParams {
-            height = (ionApplication.settings["dock:icon-size", 48] * dp).toInt() + v * 2
+            height = (settings["dock:icon-size", 48] * dp).toInt() + v * 2
         }
         val widget = Widgets.getWidget(this)
         if (widget != widgetView?.widget) {
