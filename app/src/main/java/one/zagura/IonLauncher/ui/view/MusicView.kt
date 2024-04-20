@@ -129,7 +129,13 @@ class MusicView(c: Context) : LinearLayout(c) {
             text = data.name
         }
         with(subtitle) {
-            text = "${data.album} • ${data.artist}"
+            if (data.album != null && data.artist != null)
+                text = "${data.album} • ${data.artist}"
+            else {
+                val t = data.album ?: data.artist
+                if (t == null) isVisible = true
+                else text = t
+            }
         }
 
         updatePlayButton()
