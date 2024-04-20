@@ -16,7 +16,6 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.StateListDrawable
 import android.graphics.drawable.shapes.RoundRectShape
 import android.os.Build
 import android.util.StateSet
@@ -28,12 +27,12 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowManager
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
-import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.core.widget.NestedScrollView
@@ -41,7 +40,6 @@ import androidx.core.widget.doOnTextChanged
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.FillDrawable
-import one.zagura.IonLauncher.util.NonDrawable
 import one.zagura.IonLauncher.util.Utils
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -101,7 +99,7 @@ fun SettingsPageScope.title(@StringRes text: Int) {
         val h = (20 * dp).toInt()
         setPadding(h, (24 * dp).toInt(), h, (6 * dp).toInt())
         setText(text)
-        setTextColor(resources.getColor(R.color.color_hint))
+        setTextColor(resources.getColor(R.color.color_heading))
         textSize = 14f
         typeface = Typeface.DEFAULT_BOLD
     }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
@@ -178,9 +176,11 @@ inline fun SettingsPageScope.setting(
 
 @SuppressLint("UseSwitchCompatOrMaterialCode")
 fun SettingViewScope.switch(settingId: String, default: Boolean, listener: (View, Boolean) -> Unit = { _, _ -> }) {
-    val switch = Switch(view.context).apply {
-        trackDrawable = generateSwitchTrackDrawable(context)
-        thumbDrawable = generateSwitchThumbDrawable(context)
+    val switch = CheckBox(view.context).apply {
+        buttonTintList = ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), StateSet.WILD_CARD),
+            intArrayOf(context.resources.getColor(R.color.color_text), context.resources.getColor(R.color.color_disabled))
+        )
         isChecked = context.ionApplication.settings[settingId, default]
         setOnCheckedChangeListener { v, isChecked ->
             Utils.click(v.context)
@@ -195,15 +195,17 @@ fun SettingViewScope.switch(settingId: String, default: Boolean, listener: (View
     }
     view.addView(switch)
     view.background = RippleDrawable(
-        ColorStateList.valueOf(view.resources.getColor(R.color.color_separator)),
+        ColorStateList.valueOf(view.resources.getColor(R.color.color_disabled)),
         ColorDrawable(view.resources.getColor(R.color.color_bg)), null)
 }
 
 @SuppressLint("UseSwitchCompatOrMaterialCode")
 fun SettingViewScope.permissionSwitch(default: Boolean, listener: (View) -> Unit): (Boolean) -> Unit {
-    val switch = Switch(view.context).apply {
-        trackDrawable = generateSwitchTrackDrawable(context)
-        thumbDrawable = generateSwitchThumbDrawable(context)
+    val switch = CheckBox(view.context).apply {
+        buttonTintList = ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), StateSet.WILD_CARD),
+            intArrayOf(context.resources.getColor(R.color.color_text), context.resources.getColor(R.color.color_disabled))
+        )
         isChecked = default
         isEnabled = !default
         setOnCheckedChangeListener { v, isChecked ->
@@ -219,7 +221,7 @@ fun SettingViewScope.permissionSwitch(default: Boolean, listener: (View) -> Unit
     }
     view.addView(switch)
     view.background = RippleDrawable(
-        ColorStateList.valueOf(view.resources.getColor(R.color.color_separator)),
+        ColorStateList.valueOf(view.resources.getColor(R.color.color_disabled)),
         ColorDrawable(view.resources.getColor(R.color.color_bg)), null)
     return {
         switch.isChecked = it
@@ -240,7 +242,7 @@ fun SettingViewScope.onClick(listener: (View) -> Unit) {
         imageTintList = ColorStateList.valueOf(resources.getColor(R.color.color_hint))
     }, LayoutParams(s, s))
     view.background = RippleDrawable(
-        ColorStateList.valueOf(view.resources.getColor(R.color.color_separator)),
+        ColorStateList.valueOf(view.resources.getColor(R.color.color_disabled)),
         ColorDrawable(view.resources.getColor(R.color.color_bg)), null)
 }
 
@@ -249,8 +251,8 @@ fun SettingViewScope.color(settingId: String, default: Int) {
     var color = view.context.ionApplication.settings[settingId, default] or 0xff000000.toInt()
     val dr = GradientDrawable().apply {
         setColor(color)
-        setStroke(dp.toInt(), 0xff000000.toInt())
-        cornerRadius = 8 * dp
+        setStroke(dp.coerceAtMost(2f).toInt(), 0x33000000)
+        cornerRadius = 5 * dp
     }
 
     view.setOnClickListener {
@@ -340,6 +342,12 @@ fun SettingViewScope.seekbar(
 }
 
 fun generateSeekbarTrackDrawable(context: Context): Drawable {
+
+    fun generateBG(color: Int) = GradientDrawable().apply {
+        cornerRadius = Float.MAX_VALUE
+        setColor(color)
+    }
+
     val dp = context.resources.displayMetrics.density
     val a = (2 * dp).toInt()
 
@@ -349,7 +357,7 @@ fun generateSeekbarTrackDrawable(context: Context): Drawable {
         generateBG(context.resources.getColor(R.color.color_bg_sunk)).apply {
             setSize(0, a)
         },
-        ClipDrawable(generateBG(context.resources.getColor(R.color.color_text)).apply {
+        ClipDrawable(generateBG(context.resources.getColor(R.color.color_hint)).apply {
             setSize(0, a)
         }, Gravity.LEFT, ClipDrawable.HORIZONTAL)
     ))
@@ -364,51 +372,10 @@ fun generateSeekbarTrackDrawable(context: Context): Drawable {
 
 fun generateSeekbarThumbDrawable(context: Context): Drawable {
     val dp = context.resources.displayMetrics.density
-    val r = (16 * dp).toInt()
+    val r = (18 * dp).toInt()
     return GradientDrawable().apply {
         shape = GradientDrawable.OVAL
         setColor(context.resources.getColor(R.color.color_text))
         setSize(r, r)
     }
-}
-
-private fun generateSwitchTrackDrawable(context: Context): Drawable {
-    val out = StateListDrawable()
-    out.addState(intArrayOf(android.R.attr.state_checked), generateBG(context.resources.getColor(R.color.color_hint)))
-    out.addState(StateSet.WILD_CARD, generateBG(context.resources.getColor(R.color.color_card)))
-    return out
-}
-
-private fun generateSwitchThumbDrawable(context: Context): Drawable {
-    val out = StateListDrawable()
-    out.addState(intArrayOf(android.R.attr.state_checked), generateCircle(context, context.resources.getColor(R.color.color_bg), context.resources.getColor(R.color.color_text)))
-    out.addState(StateSet.WILD_CARD, generateCircle(context, context.resources.getColor(R.color.color_bg), context.resources.getColor(R.color.color_card)))
-    return out
-}
-
-private fun generateCircle(context: Context, color: Int, insideColor: Int): Drawable {
-    val dp = context.resources.displayMetrics.density
-    val r = (12 * dp).toInt()
-    val inset = (4 * dp).toInt()
-    return LayerDrawable(arrayOf(
-        GradientDrawable().apply {
-            shape = GradientDrawable.OVAL
-            setColor(color)
-            setSize(r, r)
-        },
-        GradientDrawable().apply {
-            shape = GradientDrawable.OVAL
-            setColor(insideColor)
-            setSize(r, r)
-        },
-    )).apply {
-        setLayerInset(0, inset, inset, inset, inset)
-        val i = inset + (2 * dp).toInt()
-        setLayerInset(1, i, i, i, i)
-    }
-}
-
-private fun generateBG(color: Int) = GradientDrawable().apply {
-    cornerRadius = Float.MAX_VALUE
-    setColor(color)
 }

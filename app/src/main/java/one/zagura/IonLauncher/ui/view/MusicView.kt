@@ -39,7 +39,6 @@ class MusicView(c: Context) : LinearLayout(c) {
     }
 
     private val play = ImageView(context).apply {
-        setImageResource(R.drawable.ic_play)
         contentDescription = resources.getString(R.string.play)
         setOnClickListener {
             it as ImageView
