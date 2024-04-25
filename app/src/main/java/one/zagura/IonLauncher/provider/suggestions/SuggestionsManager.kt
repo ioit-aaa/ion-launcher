@@ -13,7 +13,6 @@ import android.os.BatteryManager
 import android.os.Build
 import android.os.Process
 import android.os.UserHandle
-import androidx.annotation.RequiresApi
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.items.AppLoader
@@ -24,7 +23,6 @@ import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-import kotlin.concurrent.thread
 import kotlin.concurrent.withLock
 import kotlin.math.abs
 import kotlin.math.pow
@@ -65,6 +63,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
 
     fun onAppUninstalled(context: Context, packageName: String, user: UserHandle) {
         this.suggestions.removeAll { it is App && it.packageName == packageName && it.userHandle == user }
+        update(suggestions)
     }
 
     private fun updateSuggestions(context: Context) {
@@ -104,8 +103,8 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
                 addAll(timeBased)
                 toMutableSet().toMutableList()
             }
-            update(this.suggestions)
         }
+        update(this.suggestions)
     }
 
     private fun getCurrentContext(context: Context, out: ContextArray) {
