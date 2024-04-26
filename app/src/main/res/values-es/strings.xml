@@ -41,4 +41,11 @@
     <string name="choose_widget">Elegir widget</string>
     <string name="nothing">Nada</string>
     <string name="color">Color</string>
+    <string name="wallpaper">Fondo de pantalla</string>
+    <string name="apply">Aplicar</string>
+    <string-array name="wall_opts">
+        <item>Pantalla de inicio</item>
+        <item>Pantalla de bloqueo</item>
+        <item>Ambas</item>
+    </string-array>
 </resources>

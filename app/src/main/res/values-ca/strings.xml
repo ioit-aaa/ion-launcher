@@ -41,4 +41,11 @@
     <string name="choose_widget">Escollir widget</string>
     <string name="nothing">Res</string>
     <string name="color">Color</string>
+    <string name="wallpaper">Fons de pantalla</string>
+    <string name="apply">Aplicar</string>
+    <string-array name="wall_opts">
+        <item>Pantalla d\'inici</item>
+        <item>Pantalla de bloqueig</item>
+        <item>Ambdues</item>
+    </string-array>
 </resources>

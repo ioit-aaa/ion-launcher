@@ -41,4 +41,11 @@
     <string name="choose_widget">Выбрать виджет</string>
     <string name="nothing">Ничего</string>
     <string name="color">Цвет</string>
+    <string name="wallpaper">Фон экрана</string>
+    <string name="apply">Использовать</string>
+    <string-array name="wall_opts">
+        <item>Домашний экран</item>
+        <item>Экран блокировки</item>
+        <item>Оба</item>
+    </string-array>
 </resources>

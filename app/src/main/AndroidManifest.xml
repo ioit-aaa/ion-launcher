@@ -58,6 +58,21 @@
         </activity>
 
         <activity
+            android:name=".ui.extra.WallpaperApplicationActivity"
+            android:label="@string/wallpaper"
+            android:theme="@style/IonLauncher.Settings"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.ATTACH_DATA"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.ALTERNATIVE"/>
+                <data android:mimeType="image/*"/>
+                <data android:scheme="content"/>
+                <data android:scheme="file"/>
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name=".ui.settings.SettingsActivity"
             android:theme="@style/IonLauncher.Settings"
             android:label="@string/tweaks"

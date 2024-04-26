@@ -1,0 +1,107 @@
+package one.zagura.IonLauncher.ui.extra
+
+import android.app.Activity
+import android.app.AlertDialog
+import android.app.WallpaperManager
+import android.content.res.ColorStateList
+import android.graphics.Typeface
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.RippleDrawable
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.RoundRectShape
+import android.os.Build
+import android.os.Bundle
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.WindowManager
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.TextView
+import one.zagura.IonLauncher.R
+import one.zagura.IonLauncher.ui.ionApplication
+import one.zagura.IonLauncher.util.Utils
+
+class WallpaperApplicationActivity : Activity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val data = intent.data ?: return
+        val wallpaper = Drawable.createFromStream(contentResolver.openInputStream(data), null)
+            ?: return finish()
+        setContentView(createView(wallpaper))
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+            window.isStatusBarContrastEnforced = false
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+            window.setDecorFitsSystemWindows(false)
+        else window.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+        )
+    }
+
+    private fun createView(wallpaper: Drawable): View {
+        return FrameLayout(this).apply {
+            val wallView = WallpaperDragView(context, wallpaper)
+            val dp = resources.displayMetrics.density
+            addView(wallView, ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+            addView(View(context).apply {
+                background = LayerDrawable(arrayOf(
+                    GradientDrawable().apply {
+                        setStroke(dp.toInt(), 0x44000000, dp * 4, dp * 4)
+                    },
+                    GradientDrawable().apply {
+                        setStroke(dp.toInt(), 0x55ffffff, dp * 4, dp * 4)
+                    },
+                )).apply {
+                    setLayerInsetLeft(0, -dp.toInt())
+                    setLayerInsetLeft(1, -dp.toInt())
+                    setLayerInsetTop(1, 4 * dp.toInt())
+                }
+            }, FrameLayout.LayoutParams(dp.toInt(), MATCH_PARENT, Gravity.CENTER))
+            addView(LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+                val h = (18 * dp).toInt()
+                val v = (8 * dp).toInt()
+                setPadding(h, v, h, v + Utils.getNavigationBarHeight(context))
+                addView(TextView(context).apply {
+                    setText(R.string.apply)
+                    textSize = 14f
+                    setTextColor(getColor(R.color.color_button_text))
+                    val r = 99 * dp
+                    background = RippleDrawable(
+                        ColorStateList.valueOf(resources.getColor(R.color.color_separator)),
+                        ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null)).apply {
+                            paint.color = resources.getColor(R.color.color_button)
+                        }, null)
+                    val h = (24 * dp).toInt()
+                    val v = (12 * dp).toInt()
+                    setPadding(h, v, h, v)
+                    gravity = Gravity.CENTER_HORIZONTAL
+                    typeface = Typeface.DEFAULT_BOLD
+                    setSingleLine()
+                    isAllCaps = true
+                    setOnClickListener {
+                        AlertDialog.Builder(it.context).setItems(R.array.wall_opts) { _, i ->
+                            ionApplication.task {
+                                wallView.applyWallpaper(when (i) {
+                                    0 -> WallpaperManager.FLAG_SYSTEM
+                                    1 -> WallpaperManager.FLAG_LOCK
+                                    else -> WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK
+                                })
+                            }
+                            finish()
+                        }.create().show()
+                    }
+                }, ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+            }, FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, Gravity.BOTTOM))
+        }
+    }
+}
