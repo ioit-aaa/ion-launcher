@@ -6,13 +6,13 @@ import android.content.Intent
 import android.content.pm.LauncherApps
 import android.content.res.Resources
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.drawable.AdaptiveIconDrawable
@@ -202,11 +202,11 @@ object IconLoader {
             val monochrome = icon.monochrome
             if (monochrome != null && context.ionApplication.settings["icon:monochrome", false]) {
                 if (!context.ionApplication.settings["icon:monochrome-bg", true]) {
-                    monochrome.setTint(ColorThemer.foreground(context))
+                    monochrome.colorFilter = PorterDuffColorFilter(ColorThemer.foreground(context), PorterDuff.Mode.SRC_IN)
                     val w = monochrome.intrinsicWidth
                     return InsetDrawable(monochrome, -w / 5)
                 }
-                monochrome.setTint(ColorThemer.background(context))
+                monochrome.colorFilter = PorterDuffColorFilter(ColorThemer.background(context), PorterDuff.Mode.SRC_IN)
                 fg = monochrome
                 bg = FillDrawable(ColorThemer.foreground(context))
             }
