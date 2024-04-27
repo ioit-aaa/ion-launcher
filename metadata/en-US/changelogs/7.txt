@@ -1,0 +1,8 @@
+Added "set as wallpaper" activity
+
+Reorganized settings
+Improved icon pack picker
+Tweaked monochrome icon size
+
+Fixed some monochrome icons not getting properly tinted
+Fixed media player behavior when there's no artist or album name
