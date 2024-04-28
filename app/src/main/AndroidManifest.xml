@@ -23,8 +23,8 @@
 
     <application
         android:name=".ui.IonLauncherApp"
-        android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_ion"
+        android:roundIcon="@mipmap/ic_ion"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:enableOnBackInvokedCallback="true"
