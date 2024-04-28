@@ -20,6 +20,7 @@ import one.zagura.IonLauncher.provider.items.IconLoader
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.LiveWallpaper
 import one.zagura.IonLauncher.util.NonDrawable
+import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.Utils
 import kotlin.math.abs
 
@@ -65,14 +66,13 @@ class PinnedGridView(
         setPadding(p, p, p, p)
     }
 
-    fun applyCustomizations() {
-        val dp = resources.displayMetrics.density
+    fun applyCustomizations(settings: Settings) {
         updateLayoutParams {
             height = calculateGridHeight()
         }
-        columns = context.ionApplication.settings["dock:columns", 5]
-        rows = context.ionApplication.settings["dock:rows", 2]
-        iconSize = context.ionApplication.settings["dock:icon-size", 48]
+        columns = settings["dock:columns", 5]
+        rows = settings["dock:rows", 2]
+        iconSize = settings["dock:icon-size", 48]
 
         val fg = ColorThemer.foreground(context)
         gridPaint.color = fg and 0xffffff or 0xdd000000.toInt()

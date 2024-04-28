@@ -105,6 +105,12 @@ class DrawerArea(
         }
     }
 
+    fun focusSearch() {
+        entry.requestFocus()
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(entry, 0)
+    }
+
     fun clearSearch() {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(windowToken, 0)

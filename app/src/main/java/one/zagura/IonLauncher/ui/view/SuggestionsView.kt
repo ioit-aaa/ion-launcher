@@ -13,12 +13,14 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.isVisible
+import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Dock
 import one.zagura.IonLauncher.provider.items.IconLoader
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.ui.ionApplication
+import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.Utils
 
 @SuppressLint("ViewConstructor")
@@ -26,6 +28,8 @@ class SuggestionsView(
     context: Context,
     val showDropTargets: () -> Unit,
 ) : LinearLayout(context) {
+
+    private var sideButton: View? = null
 
     fun update() {
         removeAllViews()
@@ -43,8 +47,36 @@ class SuggestionsView(
                     marginStart = (12 * dp).toInt()
                 }
                 for ((i, s) in suggestions.withIndex()) {
-                    addView(createItemView(s, i, suggestions.size), if (i == 0) LayoutParams(0, LayoutParams.MATCH_PARENT, 1f) else l)
+                    addView(createItemView(s, i, suggestions.size), if (i == 0) LayoutParams(0, height, 1f) else l)
                 }
+                if (sideButton != null)
+                    addView(sideButton)
+                alpha = 0f
+                scaleY = 0.8f
+                isVisible = true
+                animate().scaleY(1f).alpha(1f).duration = 100L
+            }
+        }
+    }
+
+    fun applyCustomizations(settings: Settings, onSearch: (View) -> Unit) {
+        if (!settings["layout:search-in-suggestions", false])
+            sideButton = null
+        else {
+            val dp = resources.displayMetrics.density
+            sideButton = ImageView(context).apply {
+                setImageResource(R.drawable.ic_search)
+                val p = (8 * dp).toInt()
+                setPadding(p, p, p, p)
+                val r = 99 * dp
+                background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
+                backgroundTintList = ColorStateList.valueOf(ColorThemer.pillBackground(context))
+                imageTintList = ColorStateList.valueOf(ColorThemer.pillForeground(context))
+                val height = (settings["dock:icon-size", 48] * dp).toInt()
+                layoutParams = LayoutParams(height, height).apply {
+                    marginStart = (12 * dp).toInt()
+                }
+                setOnClickListener(onSearch)
             }
         }
     }
@@ -56,7 +88,7 @@ class SuggestionsView(
         background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
         backgroundTintList = ColorStateList.valueOf(ColorThemer.pillBackground(context))
         val height = (context.ionApplication.settings["dock:icon-size", 48] * dp).toInt()
-        val p = (dp * 8).toInt()
+        val p = (8 * dp).toInt()
         addView(ImageView(context).apply {
             setImageDrawable(IconLoader.loadIcon(context, s))
             setPadding(p, p, 0, p)

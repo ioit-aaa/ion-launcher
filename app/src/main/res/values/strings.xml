@@ -42,6 +42,7 @@
     <string name="color">Color</string>
     <string name="wallpaper">Wallpaper</string>
     <string name="apply">Apply</string>
+    <string name="show_search_in_suggestions">Search button in suggestions row</string>
     <string-array name="wall_opts">
         <item>Home Screen</item>
         <item>Lock Screen</item>

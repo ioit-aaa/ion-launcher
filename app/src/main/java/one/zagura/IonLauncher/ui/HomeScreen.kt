@@ -148,10 +148,14 @@ class HomeScreen : Activity() {
                 it.luminance < 0.5f
             else ColorThemer.foreground(this).let(ColorThemer::lightness) < 0.5f
         })
-        pinnedGrid.applyCustomizations()
+        pinnedGrid.applyCustomizations(settings)
         drawerArea.applyCustomizations()
         musicView.applyCustomizations()
         summaryView.applyCustomizations()
+        suggestionsView.applyCustomizations(settings) {
+            sheetBehavior.state = STATE_EXPANDED
+            drawerArea.focusSearch()
+        }
         val m = pinnedGrid.calculateSideMargin()
         summaryView.setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 2), m, m)
         musicView.setPadding(m, 0, m, m - (8 * dp).toInt())

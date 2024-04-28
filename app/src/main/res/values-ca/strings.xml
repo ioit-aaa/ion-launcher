@@ -43,6 +43,7 @@
     <string name="color">Color</string>
     <string name="wallpaper">Fons de pantalla</string>
     <string name="apply">Aplicar</string>
+    <string name="show_search_in_suggestions">Botó de cerca en fila de suggeriments</string>
     <string-array name="wall_opts">
         <item>Pantalla d\'inici</item>
         <item>Pantalla de bloqueig</item>

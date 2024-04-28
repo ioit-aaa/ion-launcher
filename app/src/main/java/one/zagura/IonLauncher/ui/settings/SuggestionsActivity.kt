@@ -10,6 +10,7 @@ import one.zagura.IonLauncher.ui.settings.common.onClick
 import one.zagura.IonLauncher.ui.settings.common.seekbar
 import one.zagura.IonLauncher.ui.settings.common.setSettingsContentView
 import one.zagura.IonLauncher.ui.settings.common.setting
+import one.zagura.IonLauncher.ui.settings.common.switch
 import one.zagura.IonLauncher.ui.settings.common.title
 import one.zagura.IonLauncher.ui.settings.suggestions.SuggestionsActivity
 
@@ -25,6 +26,9 @@ class SuggestionsActivity : Activity() {
             }
             setting(R.string.count, isVertical = true) {
                 seekbar("suggestion:count", 3, min = 0, max = 4)
+            }
+            setting(R.string.show_search_in_suggestions) {
+                switch("layout:search-in-suggestions", false)
             }
             title(R.string.color)
             setting(R.string.background, subtitle = "") {

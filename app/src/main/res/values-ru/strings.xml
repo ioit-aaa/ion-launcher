@@ -43,6 +43,7 @@
     <string name="color">Цвет</string>
     <string name="wallpaper">Фон экрана</string>
     <string name="apply">Использовать</string>
+    <string name="show_search_in_suggestions">Кнопка поиск в ряду рекомендаций</string>
     <string-array name="wall_opts">
         <item>Домашний экран</item>
         <item>Экран блокировки</item>
