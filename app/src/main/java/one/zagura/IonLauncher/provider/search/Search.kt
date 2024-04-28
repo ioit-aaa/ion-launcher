@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
+import java.util.TreeSet
 
 object Search {
 
@@ -28,16 +29,8 @@ object Search {
     }
 
     fun query(query: String): List<LauncherItem> {
-        val suggestions = SuggestionsManager.getResource().let {
-            it.subList(0, it.size.coerceAtMost(6))
-        }
-        val results = ArrayList<Pair<LauncherItem, Float>>()
+        val results = TreeSet<Pair<LauncherItem, Float>> { a, b -> a.second.compareTo(b.second) }
         providers.flatMapTo(results) { it.query(query) }
-        results.sortByDescending { (item, matchness) ->
-            val i = suggestions.indexOf(item)
-            val suggestionFactor = if (i == -1) 0f else (suggestions.size - i).toFloat() / suggestions.size
-            matchness + suggestionFactor
-        }
         return results.map { it.first }
     }
 }

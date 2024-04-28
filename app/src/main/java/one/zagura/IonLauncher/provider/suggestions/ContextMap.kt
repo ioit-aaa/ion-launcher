@@ -1,5 +1,7 @@
 package one.zagura.IonLauncher.provider.suggestions
 
+import java.util.TreeSet
+
 class ContextMap<T>(
     val differentiator: (Int, Short, Short) -> Float
 ) : Map<T, List<ContextArray>> {
@@ -43,36 +45,41 @@ class ContextMap<T>(
     private fun trimContextListIfTooBig(list: List<ContextArray>, maxContexts: Int): List<ContextArray> {
         val s = list.size
         return if (list.size > maxContexts) {
-            val matches = list.mapIndexedTo(ArrayList()) { ai, a ->
-                a to list.mapIndexedTo(ArrayList()) { i, b ->
-                    i to if (i == ai) 0f else calculateDistance(a, b)
+            val matches = TreeSet<Pair<ContextArray, Pair<Int, Float>>> { (aa, a), (bb, b) ->
+                (a.second * 1000f + (aa.hour / 24f + aa.dayOfYear) / 365f).compareTo(b.second * 1000f + (bb.hour / 24f + bb.dayOfYear) / 365f)
+            }
+            list.mapIndexedTo(matches) { ai, a ->
+                var closest = -1 to Float.MAX_VALUE
+                for ((i, item) in list.withIndex()) {
+                    if (i == ai)
+                        continue
+                    val d = calculateDistance(a, item)
+                    if (d < closest.second)
+                        closest = i to d
                 }
-                .also { it.removeAt(ai) }
-                .minBy { (_, c) -> c }
+                a to closest
             }
-            matches.sortBy { (_, closest) ->
-                closest.second
-            }
-            var amountOfFiledMixAttempts = 0
+            val matchesList = matches.toMutableList()
+            var amountOfFailedMixAttempts = 0
             var iOffset = 0
-            while (matches.size > maxContexts || amountOfFiledMixAttempts > matches.size) {
-                val match = matches.removeAt(0)
+            while (matchesList.size > maxContexts && amountOfFailedMixAttempts < matchesList.size) {
+                val match = matchesList.removeAt(0)
                 iOffset++
                 val (matchData, matchLoc) = match
-                if (matchLoc.first == -1) {
-                    amountOfFiledMixAttempts++
-                    matches.add(match)
+                val trueI = matchLoc.first - iOffset
+                if (trueI < 0) {
+                    amountOfFailedMixAttempts++
+                    matchesList.add(match)
                     continue
                 }
-                val trueI = matchLoc.first - iOffset
-                val (arr, loc) = matches[trueI]
+                val (arr, loc) = matchesList[trueI]
                 arr.data.forEachIndexed { i, f ->
                     arr.data[i] = ((f.toInt() + matchData.data[i].toInt()) / 2).toShort()
                 }
-                matches[trueI] = arr to loc.copy(first = -1)
+                matchesList[trueI] = arr to loc.copy(first = -1)
             }
-            println("context map trim -> initial size: $s, new size: ${matches.size}")
-            matches.map { it.first }
+            println("context map trim -> initial size: $s, new size: ${matchesList.size}")
+            matchesList.map { it.first }
         } else list
     }
 

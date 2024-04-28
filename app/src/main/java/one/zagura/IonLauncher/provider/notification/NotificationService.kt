@@ -16,20 +16,20 @@ import one.zagura.IonLauncher.provider.UpdatingResource
 class NotificationService : NotificationListenerService() {
 
     override fun onCreate() {
-        if (!hasPermission(applicationContext))
+        if (!hasPermission(applicationContext)) {
             stopSelf()
+            return
+        }
         val msm = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
-        msm.addOnActiveSessionsChangedListener(onMediaControllersUpdated, componentName)
+        msm.addOnActiveSessionsChangedListener(MediaObserver::onMediaControllersUpdated, componentName)
+        MediaObserver.updateMediaItem(applicationContext)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         val msm = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
-        msm.removeOnActiveSessionsChangedListener(onMediaControllersUpdated)
-    }
-
-    private val onMediaControllersUpdated = { it: MutableList<MediaController>? ->
-        MediaObserver.onMediaControllersUpdated(it)
+        msm.removeOnActiveSessionsChangedListener(MediaObserver::onMediaControllersUpdated)
+        MediaObserver.onMediaControllersUpdated(null)
     }
 
     object MediaObserver : UpdatingResource<MediaPlayerData?>() {

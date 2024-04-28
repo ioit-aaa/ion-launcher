@@ -52,8 +52,6 @@ class IonLauncherApp : Application() {
         settings.init(applicationContext)
         SuggestionsManager.onCreate(applicationContext)
         setupApps()
-
-        NotificationService.MediaObserver.updateMediaItem(this)
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
