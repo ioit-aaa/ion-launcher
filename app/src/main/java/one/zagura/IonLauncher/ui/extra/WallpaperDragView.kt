@@ -6,8 +6,10 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.view.MotionEvent
 import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.core.graphics.applyCanvas
 
 @SuppressLint("ViewConstructor")
@@ -60,10 +62,20 @@ class WallpaperDragView(
         return true
     }
 
-    fun applyWallpaper(which: Int) {
+    private fun generateWallpaper(): Bitmap {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         bitmap.applyCanvas(wallpaper::draw)
+        return bitmap
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun applyWallpaper(which: Int) {
         val wm = WallpaperManager.getInstance(context)
-        wm.setBitmap(bitmap, null, true, which)
+        wm.setBitmap(generateWallpaper(), null, true, which)
+    }
+
+    fun applyWallpaper() {
+        val wm = WallpaperManager.getInstance(context)
+        wm.setBitmap(generateWallpaper())
     }
 }

@@ -3,7 +3,6 @@ package one.zagura.IonLauncher.provider.search
 import android.content.Context
 import android.os.Build
 import one.zagura.IonLauncher.data.items.LauncherItem
-import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import java.util.TreeSet
 
 object Search {

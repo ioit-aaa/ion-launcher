@@ -7,7 +7,6 @@ import org.json.JSONObject
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.thread
 import kotlin.concurrent.withLock
 
 class Settings(

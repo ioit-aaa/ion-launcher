@@ -61,9 +61,8 @@ class WallpaperApplicationActivity : Activity() {
                         setStroke(dp.toInt(), 0x55ffffff, dp * 4, dp * 4)
                     },
                 )).apply {
-                    setLayerInsetLeft(0, -dp.toInt())
-                    setLayerInsetLeft(1, -dp.toInt())
-                    setLayerInsetTop(1, 4 * dp.toInt())
+                    setLayerInset(1, -dp.toInt(), 4 * dp.toInt(), 0, 0)
+                    setLayerInset(0, -dp.toInt(), 0, 0, 0)
                 }
             }, FrameLayout.LayoutParams(dp.toInt(), MATCH_PARENT, Gravity.CENTER))
             addView(LinearLayout(context).apply {
@@ -74,7 +73,7 @@ class WallpaperApplicationActivity : Activity() {
                 addView(TextView(context).apply {
                     setText(R.string.apply)
                     textSize = 14f
-                    setTextColor(getColor(R.color.color_button_text))
+                    setTextColor(resources.getColor(R.color.color_button_text))
                     val r = 99 * dp
                     background = RippleDrawable(
                         ColorStateList.valueOf(resources.getColor(R.color.color_separator)),
@@ -89,16 +88,18 @@ class WallpaperApplicationActivity : Activity() {
                     setSingleLine()
                     isAllCaps = true
                     setOnClickListener {
-                        AlertDialog.Builder(it.context).setItems(R.array.wall_opts) { _, i ->
-                            ionApplication.task {
-                                wallView.applyWallpaper(when (i) {
-                                    0 -> WallpaperManager.FLAG_SYSTEM
-                                    1 -> WallpaperManager.FLAG_LOCK
-                                    else -> WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK
-                                })
-                            }
-                            finish()
-                        }.create().show()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            AlertDialog.Builder(it.context).setItems(R.array.wall_opts) { _, i ->
+                                ionApplication.task {
+                                    wallView.applyWallpaper(when (i) {
+                                        0 -> WallpaperManager.FLAG_SYSTEM
+                                        1 -> WallpaperManager.FLAG_LOCK
+                                        else -> WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK
+                                    })
+                                }
+                                finish()
+                            }.create().show()
+                        } else wallView.applyWallpaper()
                     }
                 }, ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
             }, FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, Gravity.BOTTOM))
