@@ -50,20 +50,24 @@ value class ContextArray private constructor(
 
         const val CONTEXT_DATA_SIZE = 7
 
+        /**
+         * @return [0, 1]
+         */
         fun differentiator(i: Int, a: Short, b: Short): Float {
             val w = when (i) {
-                CONTEXT_DATA_HOUR_OF_DAY -> 1f / (24 * 60)
-                CONTEXT_DATA_BATTERY -> 1f / 100f
+                CONTEXT_DATA_HOUR_OF_DAY -> 1f / (24f * 60f)
+                CONTEXT_DATA_BATTERY -> 1f / 100f / 5f // (not as important usually)
                 CONTEXT_DATA_DAY_OF_YEAR -> 1f / 365f
+                CONTEXT_DATA_IS_WEEK_DAY -> 1f / 6f
                 else -> 1f
             }
-            val base = abs(a * w - b * w)
+            val base = abs(a - b) * w
             val dist = when (i) {
                 CONTEXT_DATA_HOUR_OF_DAY -> min(base, 1f - base)
                 else -> base
             }
-            val inv = 1 - dist
-            return 1 - (inv * inv)
+            val inv = 1f - dist
+            return 1f - (inv * inv * inv)
         }
     }
 }

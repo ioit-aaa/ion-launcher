@@ -30,7 +30,7 @@ import kotlin.math.pow
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
-object SuggestionsManager : UpdatingResource<Set<LauncherItem>>() {
+object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
 
     private val suggestionData = Settings("suggestionData")
 
@@ -39,14 +39,14 @@ object SuggestionsManager : UpdatingResource<Set<LauncherItem>>() {
     private lateinit var contextMap: ContextMap<LauncherItem>
     private val contextLock = ReentrantLock()
 
-    private var suggestions: MutableSet<LauncherItem> = LinkedHashSet()
-    override fun getResource(): Set<LauncherItem> = suggestions
+    private var suggestions: ArrayList<LauncherItem> = ArrayList()
+    override fun getResource(): List<LauncherItem> = suggestions
 
     fun onItemOpened(context: Context, item: LauncherItem) {
         context.ionApplication.task {
+            val data = ContextArray()
+            getCurrentContext(context, data)
             contextLock.withLock {
-                val data = ContextArray()
-                getCurrentContext(context, data)
                 contextMap.push(item, data, MAX_CONTEXT_COUNT)
             }
             updateSuggestions(context)
@@ -71,13 +71,22 @@ object SuggestionsManager : UpdatingResource<Set<LauncherItem>>() {
         val currentData = ContextArray()
         getCurrentContext(context, currentData)
 
-        val newSuggestions = contextLock.withLock {
-            contextMap.entries.sortedBy { (_, data) ->
-                contextMap.calculateDistance(currentData, data)
+        val newSuggestions = TreeSet<Pair<LauncherItem, Float>> { a, b ->
+            when {
+                a.first == b.first -> 0
+                a.second < b.second -> -1
+                else -> 1
             }
-        }.mapTo(LinkedHashSet(contextMap.entries.size)) { it.key }
+        }
+        contextLock.withLock {
+            for ((item, data) in contextMap.entries) {
+                val d = contextMap.calculateDistance(currentData, data)
+                if (d < 0.0002f)
+                    newSuggestions.add(item to d / 0.0002f)
+            }
+        }
 
-        if (newSuggestions.size < 5 && hasPermission(context)) {
+        if (newSuggestions.size < 12 && hasPermission(context)) {
             @SuppressLint("InlinedApi")
             val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
@@ -93,17 +102,18 @@ object SuggestionsManager : UpdatingResource<Set<LauncherItem>>() {
                     this[it.packageName] = it
                 }
             }
-            val timeBased = AppLoader.getResource().sortedBy {
-                val stat = stats[it.packageName] ?: return@sortedBy 1f
+            for (app in AppLoader.getResource()) {
+                val stat = stats[app.packageName] ?: continue
                 val lastUse = stat.lastTimeUsed
-                val c = (System.currentTimeMillis() - lastUse).toDuration(DurationUnit.MILLISECONDS)
-                val normalized = c.minus(c.inWholeDays.toDuration(DurationUnit.DAYS))
-                (normalized.inWholeMinutes / 40f).coerceAtMost(1f).pow(2)
+                val sinceLastUse = (System.currentTimeMillis() - lastUse).toDuration(DurationUnit.MILLISECONDS)
+                val normalized = sinceLastUse.minus(sinceLastUse.inWholeDays.toDuration(DurationUnit.DAYS))
+                if (normalized.inWholeMinutes > 24)
+                    continue
+                val d = (normalized.inWholeMinutes / 48f + 0.5f).pow(2)
+                newSuggestions.add(app to d)
             }
-            newSuggestions.addAll(timeBased)
         }
-
-        suggestions = newSuggestions
+        suggestions = newSuggestions.mapTo(ArrayList()) { it.first }
         update(suggestions)
     }
 
@@ -138,7 +148,7 @@ object SuggestionsManager : UpdatingResource<Set<LauncherItem>>() {
 
     private fun loadFromStorage(context: Context): ContextMap<LauncherItem> {
         return contextLock.withLock {
-            val contextMap = ContextMap<LauncherItem>(ContextArray::differentiator)
+            val contextMap = ContextMap<LauncherItem>()
             suggestionData.getStrings("stats:app_open_ctx")?.let {
                 val dayOfYear = Calendar.getInstance()[Calendar.DAY_OF_YEAR]
                 it.forEach { itemRepresentation ->
@@ -156,7 +166,7 @@ object SuggestionsManager : UpdatingResource<Set<LauncherItem>>() {
                         .chunked(ContextArray.CONTEXT_DATA_SIZE)
                         .map(::ContextArray)
                         .filter { abs(dayOfYear - it.dayOfYear) < 30 }
-                        .toList()
+                        .toCollection(ArrayList())
 
                     LauncherItem.decode(context, itemRepresentation)?.let { item ->
                         contextMap[item] = openingContext

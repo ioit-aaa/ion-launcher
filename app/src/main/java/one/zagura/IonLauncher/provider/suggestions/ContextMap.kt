@@ -1,14 +1,13 @@
 package one.zagura.IonLauncher.provider.suggestions
 
+import java.util.ArrayList
 import java.util.TreeSet
 
-class ContextMap<T>(
-    val differentiator: (Int, Short, Short) -> Float
-) : Map<T, List<ContextArray>> {
+class ContextMap<T> : Map<T, List<ContextArray>> {
 
-    private var contexts = HashMap<T, List<ContextArray>>()
+    private var contexts = HashMap<T, ArrayList<ContextArray>>()
 
-    operator fun set(item: T, value: List<ContextArray>) {
+    operator fun set(item: T, value: ArrayList<ContextArray>) {
         contexts[item] = value
     }
 
@@ -29,28 +28,39 @@ class ContextMap<T>(
     fun calculateDistance(currentContext: ContextArray, multipleContexts: List<ContextArray>): Float {
         if (multipleContexts.isEmpty())
             return Float.MAX_VALUE
-        return multipleContexts.map { d ->
-            calculateDistance(currentContext, d)
-        }.reduce(Float::times)
+        var a = 1f
+        for (d in multipleContexts)
+            a *= calculateDistance(currentContext, d)
+        return a
     }
 
     private fun calculateDistance(a: ContextArray, b: ContextArray): Float {
         var sum = 0f
         a.data.forEachIndexed { i, fl ->
-            sum = differentiator(i, fl, b.data[i])
+            sum += ContextArray.differentiator(i, fl, b.data[i])
         }
-        return sum
+        return sum / a.data.size
     }
 
-    private fun trimContextListIfTooBig(list: List<ContextArray>, maxContexts: Int): List<ContextArray> {
-        val s = list.size
-        return if (list.size > maxContexts) {
+    fun push(item: T, data: ContextArray, maxContexts: Int) {
+        val itemContexts = contexts[item]
+        if (itemContexts == null) {
+            contexts[item] = arrayListOf(data)
+            return
+        }
+        itemContexts.add(data)
+        val s = itemContexts.size
+        if (s > maxContexts) {
             val matches = TreeSet<Pair<ContextArray, Pair<Int, Float>>> { (aa, a), (bb, b) ->
-                (a.second * 1000f + (aa.hour / 24f + aa.dayOfYear) / 365f).compareTo(b.second * 1000f + (bb.hour / 24f + bb.dayOfYear) / 365f)
+                when {
+                    aa.data === bb.data -> 0
+                    a.second < b.second -> -1
+                    else -> 1
+                }
             }
-            list.mapIndexedTo(matches) { ai, a ->
+            itemContexts.mapIndexedTo(matches) { ai, a ->
                 var closest = -1 to Float.MAX_VALUE
-                for ((i, item) in list.withIndex()) {
+                for ((i, item) in itemContexts.withIndex()) {
                     if (i == ai)
                         continue
                     val d = calculateDistance(a, item)
@@ -78,12 +88,10 @@ class ContextMap<T>(
                 }
                 matchesList[trueI] = arr to loc.copy(first = -1)
             }
-            println("context map trim -> initial size: $s, new size: ${matchesList.size}")
-            matchesList.map { it.first }
-        } else list
-    }
-
-    fun push(item: T, data: ContextArray, maxContexts: Int) {
-        contexts[item] = contexts[item]?.plus(data)?.let { trimContextListIfTooBig(it, maxContexts) } ?: listOf(data)
+            itemContexts.clear()
+            matchesList.mapTo(itemContexts) { it.first }
+            itemContexts.trimToSize()
+            println("context map trim -> initial size: $s, new size: ${itemContexts.size}")
+        }
     }
 }

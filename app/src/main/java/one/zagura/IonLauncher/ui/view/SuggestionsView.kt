@@ -32,7 +32,7 @@ class SuggestionsView(
     private var sideButton: View? = null
     private var lastSuggestions = emptyList<LauncherItem>()
 
-    fun update(allSuggestions: Set<LauncherItem>) {
+    fun update(allSuggestions: List<LauncherItem>) {
         context.ionApplication.task {
             val suggestions = loadSuggestions(allSuggestions)
             if (suggestions.isEmpty()) post {
@@ -126,7 +126,7 @@ class SuggestionsView(
         }
     }
 
-    private fun loadSuggestions(allSuggestions: Set<LauncherItem>): List<LauncherItem> {
+    private fun loadSuggestions(allSuggestions: List<LauncherItem>): List<LauncherItem> {
         val suggestionCount = context.ionApplication.settings["suggestion:count", 3]
         if (suggestionCount == 0)
             return emptyList()
