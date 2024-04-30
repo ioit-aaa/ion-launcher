@@ -78,17 +78,22 @@ class Settings(
 
         operator fun set(key: String, value: Array<String>?) {
             if (value == null) settings.lists.keys.remove(key)
-            else settings.lists[key] = value.map(::SingleString).toTypedArray()
+            else settings.lists[key] = Array(value.size) { SingleString(value[it]) }
+        }
+
+        operator fun set(key: String, value: List<String>?) {
+            if (value == null) settings.lists.keys.remove(key)
+            else settings.lists[key] = Array(value.size) { SingleString(value[it]) }
         }
 
         fun setStrings(key: String, value: Array<String>?) {
             if (value == null) settings.lists.keys.remove(key)
-            else settings.lists[key] = value.map(::SingleString).toTypedArray()
+            else settings.lists[key] = Array(value.size) { SingleString(value[it]) }
         }
 
         fun setInts(key: String, value: IntArray?) {
             if (value == null) settings.lists.keys.remove(key)
-            else settings.lists[key] = value.map(::SingleInt).toTypedArray()
+            else settings.lists[key] = Array(value.size) { SingleInt(value[it]) }
         }
 
         @JvmName("set1")
@@ -105,6 +110,9 @@ class Settings(
 
         @JvmName("set1")
         inline infix fun String.set(value: Array<String>?) = set(this, value)
+
+        @JvmName("set1")
+        inline infix fun String.set(value: List<String>?) = set(this, value)
     }
 
     fun edit(context: Context, block: SettingsEditor.() -> Unit) {
@@ -142,8 +150,8 @@ class Settings(
     fun getFloat(key: String): Float? = singles[key]?.toFloat()
     fun getBoolean(key: String): Boolean? = singles[key]?.toBool()
     fun getString(key: String): String? = singles[key]?.toString()
-    fun getStrings(key: String): Array<String>? = lists[key]?.map { it.toString() }?.toTypedArray()
-    fun getInts(key: String): IntArray? = lists[key]?.map { it.toInt() }?.toIntArray()
+    fun getStrings(key: String): Array<String>? = lists[key]?.let { l -> Array(l.size) { l[it].toString() } }
+    fun getInts(key: String): IntArray? = lists[key]?.let { l -> IntArray(l.size) { l[it].toInt() } }
 
     fun init(context: Context) {
         fileLock.withLock {
@@ -168,13 +176,9 @@ class Settings(
         } or
         fill(lists, root.getJSONArray("list")) {
             val json = getJSONArray(it)
-            val list = ArrayList<String>()
-            var i = 0
-            while (i < json.length()) {
-                list.add(json.getString(i))
-                i++
+            Array(json.length()) {
+                parseString(json.getString(it))
             }
-            list.map(::parseString).toTypedArray()
         }
     }
 

@@ -27,15 +27,15 @@ object ShortcutLoader {
         }
     }
 
-    fun getStaticShortcuts(context: Context, app: App): List<StaticShortcut> {
+    fun getStaticShortcuts(context: Context, app: App, out: MutableCollection<in StaticShortcut>) {
         val query = LauncherApps.ShortcutQuery()
             .setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_MANIFEST)
             .setPackage(app.packageName)
         val launcherApps = context.getSystemService(LauncherApps::class.java)
-        return try {
-            launcherApps.getShortcuts(query, Process.myUserHandle())?.map {
-                StaticShortcut(app.packageName, it.id, app.userHandle, it.shortLabel.toString(), app.label)
-            }.orEmpty()
-        } catch (_: Exception) { emptyList() }
+        try {
+            launcherApps.getShortcuts(query, Process.myUserHandle())?.forEach {
+                out.add(StaticShortcut(app.packageName, it.id, app.userHandle, it.shortLabel.toString(), app.label))
+            }
+        } catch (_: Exception) {}
     }
 }

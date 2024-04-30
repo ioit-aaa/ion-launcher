@@ -8,8 +8,7 @@ interface BasicProvider<T : LauncherItem> : SearchProvider {
     fun getBaseData(): List<T>
     fun extraFactor(query: String, item: T): Float
 
-    override fun query(query: String): List<Pair<LauncherItem, Float>> {
-        val results = ArrayList<Pair<T, Float>>()
+    override fun query(query: String, out: MutableCollection<Pair<LauncherItem, Float>>) {
         for (item in getBaseData()) {
             val extraFactor = extraFactor(query, item)
             val initialsFactor =
@@ -19,8 +18,7 @@ interface BasicProvider<T : LauncherItem> : SearchProvider {
                     initialsFactor +
                     extraFactor
             if (r > .8f)
-                results += item to r
+                out.add(item to r)
         }
-        return results
     }
 }

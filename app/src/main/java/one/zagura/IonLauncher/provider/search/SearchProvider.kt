@@ -8,7 +8,7 @@ sealed interface SearchProvider {
     fun updateData(context: Context) {}
     fun clearData() {}
 
-    fun query(query: String): List<Pair<LauncherItem, Float>>
+    fun query(query: String, out: MutableCollection<Pair<LauncherItem, Float>>)
 
     companion object {
         /**

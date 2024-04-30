@@ -35,8 +35,7 @@ class NotificationService : NotificationListenerService() {
     object MediaObserver : UpdatingResource<MediaPlayerData?>() {
         override fun getResource() = mediaItem
 
-        var mediaItem: MediaPlayerData? = null
-            private set
+        private var mediaItem: MediaPlayerData? = null
 
         private fun onUpdate(data: MediaPlayerData?) {
             update(data)

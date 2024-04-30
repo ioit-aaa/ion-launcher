@@ -14,7 +14,10 @@ object ShortcutsProvider : BasicProvider<StaticShortcut> {
     private var shortcuts = emptyList<StaticShortcut>()
 
     override fun updateData(context: Context) {
-        shortcuts = AppLoader.getResource().flatMap { ShortcutLoader.getStaticShortcuts(context, it) }
+        val s = ArrayList<StaticShortcut>()
+        AppLoader.getResource().forEach { ShortcutLoader.getStaticShortcuts(context, it, s) }
+        s.trimToSize()
+        shortcuts = s
     }
 
     override fun clearData() {

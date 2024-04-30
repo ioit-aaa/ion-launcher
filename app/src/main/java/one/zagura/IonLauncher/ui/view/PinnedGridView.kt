@@ -275,6 +275,7 @@ class PinnedGridView(
                 replacePreview = null
                 showDropTargets = false
                 LongPressMenu.onDragEnded()
+                items.trimToSize()
             }
             DragEvent.ACTION_DROP -> {
                 LiveWallpaper.drop(context, windowToken, event.x.toInt(), event.y.toInt())

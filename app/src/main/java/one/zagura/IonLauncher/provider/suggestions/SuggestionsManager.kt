@@ -174,12 +174,9 @@ object SuggestionsManager : UpdatingResource<Set<LauncherItem>>() {
             suggestionData.edit(context) {
                 "stats:app_open_ctx" set contextMap
                     .map { it.key.toString() }
-                    .toTypedArray()
                 contextMap.forEach { (item, data) ->
                     "stats:app_open_ctx:$item" set data
-                        .flatMap { it.data.toList() }
-                        .map { it.toString(16) }
-                        .toTypedArray()
+                        .flatMap { it.data.map { it.toString(16) } }
                 }
             }
         }

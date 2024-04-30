@@ -54,7 +54,7 @@ class IconPackPickerAdapter(
                     notifyItemMoved(i, 2)
                 }
                 settings.edit(it.context) {
-                    "icon_packs" set chosenIconPacks.map(IconPackPickerActivity.IconPack::packageName).toTypedArray()
+                    "icon_packs" set chosenIconPacks.map(IconPackPickerActivity.IconPack::packageName)
                 }
             }
         }
@@ -114,7 +114,7 @@ class IconPackPickerAdapter(
         }
         notifyItemMoved(fromPosition, toPosition)
         settings.edit(context) {
-            "icon_packs" set chosenIconPacks.map(IconPackPickerActivity.IconPack::packageName).toTypedArray()
+            "icon_packs" set chosenIconPacks.map(IconPackPickerActivity.IconPack::packageName)
         }
         return true
     }
