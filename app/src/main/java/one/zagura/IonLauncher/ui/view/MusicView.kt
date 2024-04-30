@@ -3,7 +3,11 @@ package one.zagura.IonLauncher.ui.view
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Path
 import android.graphics.Typeface
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.RoundRectShape
 import android.media.AudioManager
 import android.text.TextUtils
 import android.view.Gravity
@@ -14,16 +18,25 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.media.MediaPlayerData
 import one.zagura.IonLauncher.provider.ColorThemer
+import one.zagura.IonLauncher.util.ClippedDrawable
+import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.Utils
+import kotlin.math.min
 
 class MusicView(c: Context) : LinearLayout(c) {
 
     private val musicService = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-    private val image = ImageView(context)
+    private val image = ImageView(context).apply {
+        val dp = context.resources.displayMetrics.density
+        scaleType = ImageView.ScaleType.CENTER_CROP
+        val p = (6 * dp).toInt()
+        setPadding(p, p, p, p)
+    }
 
     private val title = TextView(context).apply {
         textSize = 14f
@@ -56,7 +69,7 @@ class MusicView(c: Context) : LinearLayout(c) {
             }
         }
         val dp = context.resources.displayMetrics.density
-        val p = (4 * dp).toInt()
+        val p = (10 * dp).toInt()
         setPadding(p, p, p, p)
     }
 
@@ -69,15 +82,20 @@ class MusicView(c: Context) : LinearLayout(c) {
             play.setImageResource(R.drawable.ic_pause)
         }
         val dp = context.resources.displayMetrics.density
-        val p = (4 * dp).toInt()
+        val p = (10 * dp).toInt()
         setPadding(p, p, p, p)
         contentDescription = resources.getString(R.string.next_track)
     }
 
-    private val controls = LinearLayout(context).apply {
+    init {
+        val dp = resources.displayMetrics.density
+
         orientation = HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
-        val dp = context.resources.displayMetrics.density
+        val r = 99 * dp
+        background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
+
+        addView(image)
 
         val textLayout = LinearLayout(context).apply {
             this.orientation = VERTICAL
@@ -85,27 +103,15 @@ class MusicView(c: Context) : LinearLayout(c) {
             addView(title, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
             addView(subtitle, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
         }
-        val linearLayout = LinearLayout(context).apply {
-            this.orientation = HORIZONTAL
-            layoutDirection = LAYOUT_DIRECTION_LTR
-            addView(play, LayoutParams((36 * dp).toInt(), MATCH_PARENT).apply {
-                setMargins((10 * dp).toInt(), 0, (12 * dp).toInt(), 0)
-            })
-            addView(next, LayoutParams((36 * dp).toInt(), MATCH_PARENT))
-        }
 
         addView(textLayout, LayoutParams(0, WRAP_CONTENT, 1f))
-        addView(linearLayout, LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
-    }
-
-    init {
-        val dp = resources.displayMetrics.density
-        orientation = VERTICAL
-        val s = (48 * dp).toInt()
-        addView(image, LayoutParams(s, s))
-        addView(controls, LayoutParams(MATCH_PARENT, MATCH_PARENT).apply {
-            topMargin = (8 * dp).toInt()
+        addView(play, LayoutParams((36 * dp).toInt(), MATCH_PARENT).apply {
+            leftMargin = (10 * dp).toInt()
         })
+        addView(next, LayoutParams((36 * dp).toInt(), MATCH_PARENT).apply {
+            rightMargin = (4 * dp).toInt()
+        })
+
         isVisible = false
     }
 
@@ -118,33 +124,53 @@ class MusicView(c: Context) : LinearLayout(c) {
         isVisible = true
 
         setOnClickListener { data.onTap?.send() }
-        image.setImageBitmap(data.cover)
-        if (data.cover != null) {
-            image.scaleType = if (data.cover.width > data.cover.height)
-                ImageView.ScaleType.FIT_END
-            else ImageView.ScaleType.FIT_START
+        if (data.cover == null)
+            image.isVisible = false
+        else {
+            image.isVisible = true
+            val drawable = BitmapDrawable(data.cover)
+            drawable.setBounds(0, 0, data.cover.width, data.cover.height)
+            val path = Path().apply {
+                val w = data.cover.width / 2f
+                val h = data.cover.height / 2f
+                addCircle(w, h, min(w, h), Path.Direction.CW)
+            }
+            image.setImageDrawable(ClippedDrawable(drawable, path))
         }
         with(title) {
-            text = data.name
+            text = data.title
         }
         with(subtitle) {
-            isVisible = data.album != null || data.artist != null
-            text = if (data.album != null && data.artist != null)
-                "${data.album} • ${data.artist}"
-            else
-                data.album ?: data.artist
+            isVisible = data.subtitle != null
+            text = data.subtitle
         }
 
         updatePlayButton()
     }
 
-    fun applyCustomizations() {
-        val titleColor = ColorThemer.foreground(context)
-        val textColor = ColorThemer.hint(context)
+    fun applyCustomizations(settings: Settings) {
+        val dp = resources.displayMetrics.density
+        val bgColor = ColorThemer.foreground(context)
+        val titleColor = ColorThemer.background(context)
+        val textColor = ColorThemer.reverseHint(context)
+        backgroundTintList = ColorStateList.valueOf(bgColor)
         title.setTextColor(titleColor)
         subtitle.setTextColor(textColor)
         play.imageTintList = ColorStateList.valueOf(titleColor)
         next.imageTintList = ColorStateList.valueOf(titleColor)
+        val s = (settings["dock:icon-size", 48] * dp).toInt()
+        image.updateLayoutParams {
+            width = s
+            height = s
+        }
+        play.updateLayoutParams {
+            width = s
+            height = s
+        }
+        next.updateLayoutParams {
+            width = s
+            height = s
+        }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

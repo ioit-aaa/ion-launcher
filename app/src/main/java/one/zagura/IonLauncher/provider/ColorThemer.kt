@@ -18,7 +18,11 @@ object ColorThemer {
     }
 
     fun hint(context: Context): Int {
-        return context.ionApplication.settings["color:fg", DEFAULT_FG] and 0xffffff or 0x91000000.toInt()
+        return context.ionApplication.settings["color:fg", DEFAULT_FG] and 0xffffff or 0xaa000000.toInt()
+    }
+
+    fun reverseHint(context: Context): Int {
+        return context.ionApplication.settings["color:bg", DEFAULT_BG] and 0xffffff or 0xaa000000.toInt()
     }
 
     fun pillBackground(context: Context): Int {

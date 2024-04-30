@@ -18,10 +18,10 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Dock
 import one.zagura.IonLauncher.provider.items.IconLoader
-import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.Utils
+import java.util.ArrayList
 
 @SuppressLint("ViewConstructor")
 class SuggestionsView(
@@ -30,31 +30,32 @@ class SuggestionsView(
 ) : LinearLayout(context) {
 
     private var sideButton: View? = null
+    private var lastSuggestions = emptyList<LauncherItem>()
 
-    fun update() {
-        removeAllViews()
+    fun update(allSuggestions: Set<LauncherItem>) {
         context.ionApplication.task {
-            val suggestions = loadSuggestions()
-            post {
-                if (suggestions.isEmpty()) {
-                    isVisible = false
-                    return@post
-                }
+            val suggestions = loadSuggestions(allSuggestions)
+            if (suggestions.isEmpty()) post {
+                removeAllViews()
+                isVisible = false
+            }
+            else if (lastSuggestions == suggestions) post {
                 isVisible = true
+                return@post
+            }
+            else post {
                 val dp = resources.displayMetrics.density
                 val height = (context.ionApplication.settings["dock:icon-size", 48] * dp).toInt()
                 val l = LayoutParams(0, height, 1f).apply {
                     marginStart = (12 * dp).toInt()
                 }
+                removeAllViews()
                 for ((i, s) in suggestions.withIndex()) {
                     addView(createItemView(s, i, suggestions.size), if (i == 0) LayoutParams(0, height, 1f) else l)
                 }
                 if (sideButton != null)
                     addView(sideButton)
-                alpha = 0f
-                scaleY = 0.8f
                 isVisible = true
-                animate().scaleY(1f).alpha(1f).duration = 100L
             }
         }
     }
@@ -125,15 +126,19 @@ class SuggestionsView(
         }
     }
 
-    private fun loadSuggestions(): List<LauncherItem> {
+    private fun loadSuggestions(allSuggestions: Set<LauncherItem>): List<LauncherItem> {
         val suggestionCount = context.ionApplication.settings["suggestion:count", 3]
         if (suggestionCount == 0)
             return emptyList()
         val dockItems = Dock.getItems(context)
-        return SuggestionsManager.getResource()
-            .asSequence()
-            .filter { !dockItems.contains(it) }
-            .take(suggestionCount)
-            .toList()
+        val suggestions = ArrayList<LauncherItem>(suggestionCount)
+        for (s in allSuggestions) {
+            if (dockItems.contains(s))
+                continue
+            suggestions.add(s)
+            if (suggestions.size == suggestionCount)
+                break
+        }
+        return suggestions
     }
 }

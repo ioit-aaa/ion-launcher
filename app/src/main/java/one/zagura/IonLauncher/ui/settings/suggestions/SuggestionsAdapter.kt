@@ -20,7 +20,7 @@ import one.zagura.IonLauncher.ui.HomeScreen
 
 class SuggestionsAdapter : RecyclerView.Adapter<SuggestionsAdapter.ViewHolder>() {
 
-    var items = emptyList<LauncherItem>()
+    var items = emptySet<LauncherItem>()
 
     class ViewHolder(
         view: View,
@@ -59,7 +59,7 @@ class SuggestionsAdapter : RecyclerView.Adapter<SuggestionsAdapter.ViewHolder>()
     }
 
     override fun onBindViewHolder(holder: ViewHolder, i: Int) {
-        val item = items[i]
+        val item = items.elementAt(i)
         holder.label.text = item.label
         holder.icon.setImageDrawable(IconLoader.loadIcon(holder.itemView.context, item))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && item is StaticShortcut) {
@@ -70,7 +70,7 @@ class SuggestionsAdapter : RecyclerView.Adapter<SuggestionsAdapter.ViewHolder>()
         }
     }
 
-    fun update(items: List<LauncherItem>) {
+    fun update(items: Set<LauncherItem>) {
         this.items = items
         notifyDataSetChanged()
     }

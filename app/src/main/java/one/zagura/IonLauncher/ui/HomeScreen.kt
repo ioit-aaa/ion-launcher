@@ -88,6 +88,16 @@ class HomeScreen : Activity() {
         homeScreen.background = screenBackground
         IconLoader.updateIconPacks(this, ionApplication.settings)
         applyCustomizations()
+        SuggestionsManager.track {
+            runOnUiThread {
+                suggestionsView.update(it)
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        SuggestionsManager.release()
     }
 
     override fun onStart() {
@@ -106,7 +116,6 @@ class HomeScreen : Activity() {
             musicView.updateTrack(it)
         }
         widgetView?.startListening()
-        suggestionsView.update()
         pinnedGrid.updateGridApps()
         homeScreen.post {
             drawerArea.onAppsChanged()
@@ -150,7 +159,7 @@ class HomeScreen : Activity() {
         })
         pinnedGrid.applyCustomizations(settings)
         drawerArea.applyCustomizations()
-        musicView.applyCustomizations()
+        musicView.applyCustomizations(settings)
         summaryView.applyCustomizations()
         suggestionsView.applyCustomizations(settings) {
             sheetBehavior.state = STATE_EXPANDED
@@ -158,8 +167,12 @@ class HomeScreen : Activity() {
         }
         val m = pinnedGrid.calculateSideMargin()
         summaryView.setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 2), m, m)
-        musicView.setPadding(m, 0, m, m - (8 * dp).toInt())
         val v = (dp * 6).toInt()
+        musicView.updateLayoutParams<MarginLayoutParams> {
+            leftMargin = m
+            rightMargin = m
+            bottomMargin = v
+        }
         suggestionsView.setPadding(m, v, m, v)
         suggestionsView.updateLayoutParams {
             height = (settings["dock:icon-size", 48] * dp).toInt() + v * 2

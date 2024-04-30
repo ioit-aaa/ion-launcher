@@ -19,15 +19,18 @@ object MediaItemCreator {
             ?: mediaMetadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION)
             ?: null
 
+        val subtitle = if (album != null && artist != null)
+            "$album • $artist"
+        else album ?: artist
+
         val coverBmp = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
             ?: mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART)
             ?: mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
             ?: null
 
         return MediaPlayerData(
-            name = title.toString(),
-            album = album,
-            artist = artist,
+            title = title.toString(),
+            subtitle = subtitle,
             cover = coverBmp,
             onTap = controller.sessionActivity,
         )

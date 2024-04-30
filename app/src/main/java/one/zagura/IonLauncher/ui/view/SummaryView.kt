@@ -8,6 +8,7 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.os.Build
 import android.text.format.DateFormat
+import android.util.TypedValue
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -93,8 +94,9 @@ class SummaryView(c: Context) : View(c) {
         } else
             DateFormat.getMediumDateFormat(context)
                 .format(Calendar.getInstance().time)
-        val e = ArrayList<CompiledEvent>()
-        Alarm.get(context)?.let {
+        val alarm = Alarm.get(context)
+        val e = ArrayList<CompiledEvent>(events.size + (alarm?.let { 1 } ?: 0))
+        alarm?.let {
             e.add(CompiledEvent.Alarm(
                 it.open,
                 context.getString(R.string.upcoming_alarm),
@@ -149,26 +151,26 @@ class SummaryView(c: Context) : View(c) {
     }
 
     private val titlePaint = Paint().apply {
-        textSize = 14 * resources.displayMetrics.scaledDensity
+        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
         textAlign = Paint.Align.LEFT
         isAntiAlias = true
         isSubpixelText = true
         typeface = Typeface.DEFAULT_BOLD
     }
     private val datePaint = Paint().apply {
-        textSize = 14 * resources.displayMetrics.scaledDensity
+        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
         textAlign = Paint.Align.LEFT
         isAntiAlias = true
         isSubpixelText = true
     }
     private val textPaint = Paint().apply {
-        textSize = 14 * resources.displayMetrics.scaledDensity
+        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
         textAlign = Paint.Align.LEFT
         isAntiAlias = true
         isSubpixelText = true
     }
     private val rightTextPaint = Paint().apply {
-        textSize = 12 * resources.displayMetrics.scaledDensity
+        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12f, resources.displayMetrics)
         textAlign = Paint.Align.LEFT
         isAntiAlias = true
         isSubpixelText = true

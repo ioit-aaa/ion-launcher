@@ -23,13 +23,14 @@ import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.collections.LinkedHashSet
 import kotlin.concurrent.withLock
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
-object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
+object SuggestionsManager : UpdatingResource<Set<LauncherItem>>() {
 
     private val suggestionData = Settings("suggestionData")
 
@@ -38,8 +39,8 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
     private lateinit var contextMap: ContextMap<LauncherItem>
     private val contextLock = ReentrantLock()
 
-    private var suggestions: MutableList<LauncherItem> = ArrayList()
-    override fun getResource(): List<LauncherItem> = suggestions
+    private var suggestions: MutableSet<LauncherItem> = LinkedHashSet()
+    override fun getResource(): Set<LauncherItem> = suggestions
 
     fun onItemOpened(context: Context, item: LauncherItem) {
         context.ionApplication.task {
@@ -62,12 +63,21 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
     }
 
     fun onAppUninstalled(context: Context, packageName: String, user: UserHandle) {
-        this.suggestions.removeAll { it is App && it.packageName == packageName && it.userHandle == user }
-        update(suggestions)
+        if (this.suggestions.removeAll { it is App && it.packageName == packageName && it.userHandle == user })
+            update(suggestions)
     }
 
     private fun updateSuggestions(context: Context) {
-        val timeBased = if (hasPermission(context)) {
+        val currentData = ContextArray()
+        getCurrentContext(context, currentData)
+
+        val newSuggestions = contextLock.withLock {
+            contextMap.entries.sortedBy { (_, data) ->
+                contextMap.calculateDistance(currentData, data)
+            }
+        }.mapTo(LinkedHashSet(contextMap.entries.size)) { it.key }
+
+        if (newSuggestions.size < 5 && hasPermission(context)) {
             @SuppressLint("InlinedApi")
             val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
@@ -83,28 +93,18 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
                     this[it.packageName] = it
                 }
             }
-            AppLoader.getResource().sortedBy {
+            val timeBased = AppLoader.getResource().sortedBy {
                 val stat = stats[it.packageName] ?: return@sortedBy 1f
                 val lastUse = stat.lastTimeUsed
                 val c = (System.currentTimeMillis() - lastUse).toDuration(DurationUnit.MILLISECONDS)
                 val normalized = c.minus(c.inWholeDays.toDuration(DurationUnit.DAYS))
                 (normalized.inWholeMinutes / 40f).coerceAtMost(1f).pow(2)
             }
-        } else emptyList()
-
-        val currentData = ContextArray()
-        getCurrentContext(context, currentData)
-
-        contextLock.withLock {
-            val sortedEntries = contextMap.entries.sortedBy { (_, data) ->
-                contextMap.calculateDistance(currentData, data)
-            }
-            this.suggestions = sortedEntries.mapTo(ArrayList()) { it.key }.run {
-                addAll(timeBased)
-                toMutableSet().toMutableList()
-            }
+            newSuggestions.addAll(timeBased)
         }
-        update(this.suggestions)
+
+        suggestions = newSuggestions
+        update(suggestions)
     }
 
     private fun getCurrentContext(context: Context, out: ContextArray) {
