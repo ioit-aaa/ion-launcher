@@ -2,6 +2,7 @@ package one.zagura.IonLauncher.provider.notification
 
 import android.media.MediaMetadata
 import android.media.session.MediaController
+import android.media.session.PlaybackState
 import one.zagura.IonLauncher.data.media.MediaPlayerData
 
 object MediaItemCreator {
@@ -33,6 +34,10 @@ object MediaItemCreator {
             subtitle = subtitle,
             cover = coverBmp,
             onTap = controller.sessionActivity,
+            isPlaying = { controller.playbackState?.state == PlaybackState.STATE_PLAYING },
+            play = controller.transportControls::play,
+            pause = controller.transportControls::pause,
+            next = controller.transportControls::skipToNext,
         )
     }
 }

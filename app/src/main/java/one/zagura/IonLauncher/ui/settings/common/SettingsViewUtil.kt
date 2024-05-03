@@ -234,6 +234,8 @@ fun SettingViewScope.permissionSwitch(default: Boolean, listener: (View) -> Unit
     }
 }
 
+fun SettingViewScope.onClick(activity: String) = onClick(Class.forName(activity))
+
 fun SettingViewScope.onClick(activity: Class<*>) = onClick {
     it.context.startActivity(Intent(it.context, activity))
 }

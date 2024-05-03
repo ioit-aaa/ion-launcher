@@ -100,10 +100,6 @@
             android:exported="true"/>
 
         <activity
-            android:name=".ui.settings.suggestions.SuggestionsActivity"
-            android:theme="@style/IonLauncher.Settings"/>
-
-        <activity
             android:name=".ui.settings.widgets.WidgetChooserActivity"
             android:theme="@style/IonLauncher.Settings"/>
 
@@ -118,7 +114,7 @@
         </activity>
 
         <activity
-            android:name=".ui.settings.FakeLauncherActivity"
+            android:name=".util.DummyActivity"
             android:enabled="false"
             android:exported="true">
             <intent-filter>

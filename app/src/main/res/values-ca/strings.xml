@@ -42,11 +42,11 @@
     <string name="nothing">Res</string>
     <string name="color">Color</string>
     <string name="wallpaper">Fons de pantalla</string>
+    <string name="home_screen">Pantalla d\'inici</string>
+    <string name="lock_screen">Pantalla de bloqueig</string>
+    <string name="both">Ambdues</string>
     <string name="apply">Aplicar</string>
     <string name="show_search_in_suggestions">Botó de cerca en fila de suggeriments</string>
-    <string-array name="wall_opts">
-        <item>Pantalla d\'inici</item>
-        <item>Pantalla de bloqueig</item>
-        <item>Ambdues</item>
-    </string-array>
+    <string name="monochrome_icons">Icones monocromes</string>
+    <string name="monochrome_bg">Fons d\'icones monocromes</string>
 </resources>

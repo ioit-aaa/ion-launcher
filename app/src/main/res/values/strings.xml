@@ -41,11 +41,11 @@
     <string name="nothing">Nothing</string>
     <string name="color">Color</string>
     <string name="wallpaper">Wallpaper</string>
+    <string name="home_screen">Home Screen</string>
+    <string name="lock_screen">Lock Screen</string>
+    <string name="both">Both</string>
     <string name="apply">Apply</string>
     <string name="show_search_in_suggestions">Search button in suggestions row</string>
-    <string-array name="wall_opts">
-        <item>Home Screen</item>
-        <item>Lock Screen</item>
-        <item>Both</item>
-    </string-array>
+    <string name="monochrome_icons">Monochrome Icons</string>
+    <string name="monochrome_bg">Monochrome Icons Background</string>
 </resources>

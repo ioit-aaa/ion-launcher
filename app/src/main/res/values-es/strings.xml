@@ -42,11 +42,11 @@
     <string name="nothing">Nada</string>
     <string name="color">Color</string>
     <string name="wallpaper">Fondo de pantalla</string>
+    <string name="home_screen">Pantalla de inicio</string>
+    <string name="lock_screen">Pantalla de bloqueo</string>
+    <string name="both">Ambas</string>
     <string name="apply">Aplicar</string>
     <string name="show_search_in_suggestions">Boton de busqueda en fila de sugerencias</string>
-    <string-array name="wall_opts">
-        <item>Pantalla de inicio</item>
-        <item>Pantalla de bloqueo</item>
-        <item>Ambas</item>
-    </string-array>
+    <string name="monochrome_icons">Iconos monocromos</string>
+    <string name="monochrome_bg">Fondo de iconos monocromos</string>
 </resources>

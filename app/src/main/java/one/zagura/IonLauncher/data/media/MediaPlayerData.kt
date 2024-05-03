@@ -8,4 +8,8 @@ data class MediaPlayerData(
     val subtitle: String?,
     val cover: Bitmap?,
     val onTap: PendingIntent?,
+    val isPlaying: (() -> Boolean)?,
+    val play: () -> Unit,
+    val pause: () -> Unit,
+    val next: () -> Unit,
 )

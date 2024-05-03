@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.settings.suggestions
+package one.zagura.IonLauncher.debug.suggestions
 
 import android.app.Activity
 import android.content.res.Configuration
@@ -9,7 +9,7 @@ import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.ui.settings.common.setupWindow
 import one.zagura.IonLauncher.util.Utils
 
-class SuggestionsActivity : Activity() {
+class DebugSuggestionsActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

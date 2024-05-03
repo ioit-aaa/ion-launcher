@@ -29,8 +29,6 @@ import kotlin.math.min
 
 class MusicView(c: Context) : LinearLayout(c) {
 
-    private val musicService = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
     private val image = ImageView(context).apply {
         val dp = context.resources.displayMetrics.density
         scaleType = ImageView.ScaleType.CENTER_CROP
@@ -53,21 +51,6 @@ class MusicView(c: Context) : LinearLayout(c) {
 
     private val play = ImageView(context).apply {
         contentDescription = resources.getString(R.string.play)
-        setOnClickListener {
-            it as ImageView
-            Utils.click(it.context)
-            if (musicService.isMusicActive) {
-                musicService.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE))
-                musicService.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PAUSE))
-                it.setImageResource(R.drawable.ic_play)
-                it.contentDescription = resources.getString(R.string.play)
-            } else {
-                musicService.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY))
-                musicService.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PLAY))
-                it.setImageResource(R.drawable.ic_pause)
-                it.contentDescription = resources.getString(R.string.pause)
-            }
-        }
         val dp = context.resources.displayMetrics.density
         val p = (10 * dp).toInt()
         setPadding(p, p, p, p)
@@ -75,12 +58,6 @@ class MusicView(c: Context) : LinearLayout(c) {
 
     private val next = ImageView(context).apply {
         setImageResource(R.drawable.ic_track_next)
-        setOnClickListener {
-            Utils.click(it.context)
-            musicService.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT))
-            musicService.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_NEXT))
-            play.setImageResource(R.drawable.ic_pause)
-        }
         val dp = context.resources.displayMetrics.density
         val p = (10 * dp).toInt()
         setPadding(p, p, p, p)
@@ -144,8 +121,47 @@ class MusicView(c: Context) : LinearLayout(c) {
             isVisible = data.subtitle != null
             text = data.subtitle
         }
+        next.setOnClickListener {
+            Utils.click(it.context)
+            data.next()
+        }
+        val isPlaying = data.isPlaying
+        if (isPlaying == null)
+            play.isVisible = false
+        else {
+            play.isVisible = true
+            play.setOnClickListener {
+                it as ImageView
+                Utils.click(it.context)
+                if (isPlaying()) {
+                    data.pause()
+                    it.setImageResource(R.drawable.ic_play)
+                    it.contentDescription = resources.getString(R.string.play)
+                } else {
+                    data.play()
+                    it.setImageResource(R.drawable.ic_pause)
+                    it.contentDescription = resources.getString(R.string.pause)
+                }
+            }
+        }
 
-        updatePlayButton()
+        setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus)
+                updatePlayButton(data)
+        }
+
+        updatePlayButton(data)
+    }
+
+    private fun updatePlayButton(data: MediaPlayerData) {
+        val isPlaying = data.isPlaying ?: return
+        if (isPlaying()) {
+            play.setImageResource(R.drawable.ic_pause)
+            play.contentDescription = resources.getString(R.string.pause)
+        } else {
+            play.setImageResource(R.drawable.ic_play)
+            play.contentDescription = resources.getString(R.string.play)
+        }
     }
 
     fun applyCustomizations(settings: Settings) {
@@ -170,21 +186,6 @@ class MusicView(c: Context) : LinearLayout(c) {
         next.updateLayoutParams {
             width = s
             height = s
-        }
-    }
-
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) updatePlayButton()
-    }
-
-    private fun updatePlayButton() {
-        if (musicService.isMusicActive) {
-            play.setImageResource(R.drawable.ic_pause)
-            play.contentDescription = resources.getString(R.string.pause)
-        } else {
-            play.setImageResource(R.drawable.ic_play)
-            play.contentDescription = resources.getString(R.string.play)
         }
     }
 }

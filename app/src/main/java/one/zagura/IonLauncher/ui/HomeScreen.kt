@@ -113,7 +113,7 @@ class HomeScreen : Activity() {
             }
         }
         NotificationService.MediaObserver.track {
-            musicView.updateTrack(it)
+            musicView.updateTrack(it.firstOrNull())
         }
         widgetView?.startListening()
         pinnedGrid.updateGridApps()

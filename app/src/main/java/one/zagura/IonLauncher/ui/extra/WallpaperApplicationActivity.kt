@@ -1,10 +1,11 @@
 package one.zagura.IonLauncher.ui.extra
 
 import android.app.Activity
-import android.app.AlertDialog
+import android.app.Dialog
 import android.app.WallpaperManager
 import android.content.res.ColorStateList
 import android.graphics.Typeface
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
@@ -89,16 +90,63 @@ class WallpaperApplicationActivity : Activity() {
                     isAllCaps = true
                     setOnClickListener {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            AlertDialog.Builder(it.context).setItems(R.array.wall_opts) { _, i ->
-                                ionApplication.task {
-                                    wallView.applyWallpaper(when (i) {
-                                        0 -> WallpaperManager.FLAG_SYSTEM
-                                        1 -> WallpaperManager.FLAG_LOCK
-                                        else -> WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK
-                                    })
-                                }
-                                finish()
-                            }.create().show()
+                            Dialog(context).apply {
+                                val r = 24 * dp
+                                window!!.setBackgroundDrawable(ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null)).apply {
+                                    paint.color = resources.getColor(R.color.color_bg)
+                                })
+                                setContentView(LinearLayout(context).apply {
+                                    orientation = LinearLayout.VERTICAL
+                                    val p = (15 * dp).toInt()
+                                    val tp = (12 * dp).toInt()
+                                    setPadding(p, p, p, p)
+                                    addView(TextView(context).apply {
+                                        setText(R.string.home_screen)
+                                        setTextColor(resources.getColor(R.color.color_text))
+                                        setPadding(tp, tp, tp, tp)
+                                        textSize = 16f
+                                        setOnClickListener {
+                                            ionApplication.task {
+                                                wallView.applyWallpaper(WallpaperManager.FLAG_SYSTEM)
+                                            }
+                                            finish()
+                                        }
+                                        background = RippleDrawable(
+                                            ColorStateList.valueOf(resources.getColor(R.color.color_disabled)),
+                                            ColorDrawable(resources.getColor(R.color.color_bg)), null)
+                                    }, ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+                                    addView(TextView(context).apply {
+                                        setText(R.string.lock_screen)
+                                        setTextColor(resources.getColor(R.color.color_text))
+                                        setPadding(tp, tp, tp, tp)
+                                        textSize = 16f
+                                        setOnClickListener {
+                                            ionApplication.task {
+                                                wallView.applyWallpaper(WallpaperManager.FLAG_LOCK)
+                                            }
+                                            finish()
+                                        }
+                                        background = RippleDrawable(
+                                            ColorStateList.valueOf(resources.getColor(R.color.color_disabled)),
+                                            ColorDrawable(resources.getColor(R.color.color_bg)), null)
+                                    }, ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+                                    addView(TextView(context).apply {
+                                        setText(R.string.both)
+                                        setTextColor(resources.getColor(R.color.color_text))
+                                        setPadding(tp, tp, tp, tp)
+                                        textSize = 16f
+                                        setOnClickListener {
+                                            ionApplication.task {
+                                                wallView.applyWallpaper(WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK)
+                                            }
+                                            finish()
+                                        }
+                                        background = RippleDrawable(
+                                            ColorStateList.valueOf(resources.getColor(R.color.color_disabled)),
+                                            ColorDrawable(resources.getColor(R.color.color_bg)), null)
+                                    }, ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+                                }, ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
+                            }.show()
                         } else wallView.applyWallpaper()
                     }
                 }, ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT))

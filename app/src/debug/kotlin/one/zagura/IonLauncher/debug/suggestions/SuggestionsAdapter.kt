@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.settings.suggestions
+package one.zagura.IonLauncher.debug.suggestions
 
 import android.os.Build
 import android.text.TextUtils

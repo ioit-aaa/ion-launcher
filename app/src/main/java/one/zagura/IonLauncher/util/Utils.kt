@@ -26,7 +26,6 @@ import android.view.WindowManager
 import androidx.annotation.RequiresPermission
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.items.IconLoader
-import one.zagura.IonLauncher.ui.settings.FakeLauncherActivity
 import java.util.Calendar
 
 
@@ -205,7 +204,7 @@ object Utils {
     }
 
     fun chooseDefaultLauncher(context: Context) {
-        val componentName = ComponentName(context, FakeLauncherActivity::class.java)
+        val componentName = ComponentName(context, DummyActivity::class.java)
         context.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
         val selector = Intent(Intent.ACTION_MAIN)
         selector.addCategory(Intent.CATEGORY_HOME)

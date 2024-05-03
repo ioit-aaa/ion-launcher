@@ -12,7 +12,6 @@ import one.zagura.IonLauncher.ui.settings.common.setSettingsContentView
 import one.zagura.IonLauncher.ui.settings.common.setting
 import one.zagura.IonLauncher.ui.settings.common.switch
 import one.zagura.IonLauncher.ui.settings.common.title
-import one.zagura.IonLauncher.ui.settings.suggestions.SuggestionsActivity
 
 class SuggestionsActivity : Activity() {
 
@@ -21,7 +20,7 @@ class SuggestionsActivity : Activity() {
         setSettingsContentView(R.string.suggestions) {
             if (BuildConfig.DEBUG) {
                 setting(R.string.suggestions) {
-                    onClick(SuggestionsActivity::class.java)
+                    onClick(BuildConfig.APPLICATION_ID + ".debug.suggestions.DebugSuggestionsActivity")
                 }
             }
             setting(R.string.count, isVertical = true) {

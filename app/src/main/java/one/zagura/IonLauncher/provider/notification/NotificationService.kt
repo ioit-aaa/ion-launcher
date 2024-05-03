@@ -5,7 +5,6 @@ import android.content.Context
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
-import android.media.session.PlaybackState
 import android.os.Build
 import android.service.notification.NotificationListenerService
 import androidx.core.app.NotificationManagerCompat
@@ -32,14 +31,10 @@ class NotificationService : NotificationListenerService() {
         MediaObserver.onMediaControllersUpdated(null)
     }
 
-    object MediaObserver : UpdatingResource<MediaPlayerData?>() {
-        override fun getResource() = mediaItem
+    object MediaObserver : UpdatingResource<Set<MediaPlayerData>>() {
+        override fun getResource() = mediaItems
 
-        private var mediaItem: MediaPlayerData? = null
-
-        private fun onUpdate(data: MediaPlayerData?) {
-            update(data)
-        }
+        private var mediaItems = emptySet<MediaPlayerData>()
 
         fun updateMediaItem(context: Context) {
             if (!hasPermission(context))
@@ -49,37 +44,38 @@ class NotificationService : NotificationListenerService() {
         }
 
         fun onMediaControllersUpdated(controllers: MutableList<MediaController>?) {
-            val old = mediaItem
+            val old = mediaItems
             if (controllers.isNullOrEmpty()) {
-                mediaItem = null
-                if (old != null)
-                    onUpdate(null)
+                mediaItems = emptySet()
+                if (old.isNotEmpty())
+                    update(mediaItems)
                 return
             }
-            val controller = pickController(controllers)
-            mediaItem = controller.metadata?.let {
-                MediaItemCreator.create(controller, it)
+            val set = HashSet<MediaPlayerData>()
+            for (controller in controllers) {
+                val metadata = controller.metadata ?: continue
+                val item = MediaItemCreator.create(controller, metadata)
+                set.add(item)
+                controller.registerCallback(object : MediaController.Callback() {
+                    var oldItem = item
+                    override fun onMetadataChanged(metadata: MediaMetadata?) {
+                        set.remove(oldItem)
+                        if (metadata != null) {
+                            val newItem = MediaItemCreator.create(controller, metadata)
+                            set.add(newItem)
+                            if (newItem == oldItem) {
+                                oldItem = newItem
+                                return
+                            }
+                            oldItem = newItem
+                        }
+                        update(mediaItems)
+                    }
+                })
             }
-            if (old != mediaItem)
-                onUpdate(mediaItem)
-            controller.registerCallback(object : MediaController.Callback() {
-                override fun onMetadataChanged(metadata: MediaMetadata?) {
-                    val old = mediaItem
-                    mediaItem = metadata?.let { MediaItemCreator.create(controller, it) }
-                    if (old != mediaItem)
-                        onUpdate(mediaItem)
-                }
-            })
-        }
-
-        private fun pickController(controllers: List<MediaController>): MediaController {
-            for (i in controllers.indices) {
-                val mc = controllers[i]
-                if (mc.playbackState?.state == PlaybackState.STATE_PLAYING) {
-                    return mc
-                }
-            }
-            return controllers[0]
+            mediaItems = set
+            if (old != mediaItems)
+                update(mediaItems)
         }
     }
 

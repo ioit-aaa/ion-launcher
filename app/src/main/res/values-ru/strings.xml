@@ -42,11 +42,11 @@
     <string name="nothing">Ничего</string>
     <string name="color">Цвет</string>
     <string name="wallpaper">Фон экрана</string>
+    <string name="home_screen">Домашний экран</string>
+    <string name="lock_screen">Экран блокировки</string>
+    <string name="both">Оба</string>
     <string name="apply">Использовать</string>
     <string name="show_search_in_suggestions">Кнопка поиск в ряду рекомендаций</string>
-    <string-array name="wall_opts">
-        <item>Домашний экран</item>
-        <item>Экран блокировки</item>
-        <item>Оба</item>
-    </string-array>
+    <string name="monochrome_icons">Монохромные иконки</string>
+    <string name="monochrome_bg">Фон монохромных иконок</string>
 </resources>
