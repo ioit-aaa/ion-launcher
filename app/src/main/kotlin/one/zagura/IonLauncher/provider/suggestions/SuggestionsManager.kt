@@ -23,7 +23,6 @@ import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-import kotlin.collections.LinkedHashSet
 import kotlin.concurrent.withLock
 import kotlin.math.abs
 import kotlin.math.pow
@@ -81,12 +80,12 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
         contextLock.withLock {
             for ((item, data) in contextMap.entries) {
                 val d = contextMap.calculateDistance(currentData, data)
-                if (d < 0.0002f)
-                    newSuggestions.add(item to d / 0.0002f)
+                if (d < 0.0003f)
+                    newSuggestions.add(item to d / 0.0003f)
             }
         }
 
-        if (newSuggestions.size < 12 && hasPermission(context)) {
+        if (newSuggestions.size < 16 && hasPermission(context)) {
             @SuppressLint("InlinedApi")
             val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 

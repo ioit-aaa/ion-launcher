@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
@@ -33,7 +34,7 @@ import one.zagura.IonLauncher.provider.summary.EventsLoader
 import one.zagura.IonLauncher.ui.drawer.DrawerArea
 import one.zagura.IonLauncher.ui.view.MusicView
 import one.zagura.IonLauncher.ui.view.PinnedGridView
-import one.zagura.IonLauncher.ui.view.SuggestionsView
+import one.zagura.IonLauncher.ui.view.SuggestionRowView
 import one.zagura.IonLauncher.ui.view.SummaryView
 import one.zagura.IonLauncher.ui.view.WidgetView
 import one.zagura.IonLauncher.util.FillDrawable
@@ -56,7 +57,7 @@ class HomeScreen : Activity() {
     private lateinit var musicView: MusicView
     private var widgetView: WidgetView? = null
     private lateinit var pinnedGrid: PinnedGridView
-    private lateinit var suggestionsView: SuggestionsView
+    private lateinit var suggestionsView: SuggestionRowView
 
     private val screenBackground = FillDrawable(0)
     private var screenBackgroundAlpha = 0
@@ -161,10 +162,7 @@ class HomeScreen : Activity() {
         drawerArea.applyCustomizations()
         musicView.applyCustomizations(settings)
         summaryView.applyCustomizations()
-        suggestionsView.applyCustomizations(settings) {
-            sheetBehavior.state = STATE_EXPANDED
-            drawerArea.focusSearch()
-        }
+        suggestionsView.applyCustomizations(settings)
         val m = pinnedGrid.calculateSideMargin()
         summaryView.setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 2), m, m)
         val v = (dp * 6).toInt()
@@ -202,7 +200,8 @@ class HomeScreen : Activity() {
 
         summaryView = SummaryView(this)
         musicView = MusicView(this)
-        suggestionsView = SuggestionsView(this, ::showDropTargets)
+//        suggestionsView = SuggestionsView(this, ::showDropTargets)
+        suggestionsView = SuggestionRowView(this, ::showDropTargets, ::search)
         pinnedGrid = PinnedGridView(this)
 
         desktop = LinearLayout(this).apply {
@@ -279,6 +278,11 @@ class HomeScreen : Activity() {
 
     private fun onDrawerItemOpened(item: LauncherItem) {
         sheetBehavior.state = STATE_COLLAPSED
+    }
+
+    private fun search() {
+        sheetBehavior.state = STATE_EXPANDED
+        drawerArea.focusSearch()
     }
 
     @Deprecated("Deprecated in Java")

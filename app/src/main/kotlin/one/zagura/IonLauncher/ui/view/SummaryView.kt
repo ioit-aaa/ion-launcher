@@ -171,10 +171,9 @@ class SummaryView(c: Context) : View(c) {
     }
     private val rightTextPaint = Paint().apply {
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12f, resources.displayMetrics)
-        textAlign = Paint.Align.LEFT
+        textAlign = Paint.Align.RIGHT
         isAntiAlias = true
         isSubpixelText = true
-        textAlign = Paint.Align.RIGHT
         typeface = Typeface.MONOSPACE
     }
     private val colorPaint = Paint().apply {
