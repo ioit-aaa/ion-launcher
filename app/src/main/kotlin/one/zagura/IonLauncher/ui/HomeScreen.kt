@@ -37,6 +37,7 @@ import one.zagura.IonLauncher.ui.view.SummaryView
 import one.zagura.IonLauncher.ui.view.WidgetView
 import one.zagura.IonLauncher.ui.view.MediaView
 import one.zagura.IonLauncher.util.FillDrawable
+import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
 
 class HomeScreen : Activity() {
@@ -141,7 +142,7 @@ class HomeScreen : Activity() {
 
     override fun onResume() {
         super.onResume()
-        ionApplication.task {
+        TaskRunner.submit {
             val events = EventsLoader.load(this)
             runOnUiThread {
                 summaryView.updateEvents(events)

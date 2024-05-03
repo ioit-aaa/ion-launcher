@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.settings.iconPackPicker.viewHolder
+package one.zagura.IonLauncher.ui.iconPackPicker.viewHolder
 
 import android.content.Context
 import android.graphics.Typeface

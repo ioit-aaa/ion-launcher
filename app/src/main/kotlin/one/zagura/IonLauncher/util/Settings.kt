@@ -1,7 +1,6 @@
 package one.zagura.IonLauncher.util
 
 import android.content.Context
-import one.zagura.IonLauncher.ui.ionApplication
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ObjectInputStream
@@ -116,7 +115,7 @@ class Settings(
     }
 
     fun edit(context: Context, block: SettingsEditor.() -> Unit) {
-        context.ionApplication.task {
+        TaskRunner.submit {
             fileLock.withLock {
                 updated = true
                 block(editor)

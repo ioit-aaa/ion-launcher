@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.extra
+package one.zagura.IonLauncher.ui.view.settings
 
 import android.annotation.SuppressLint
 import android.app.WallpaperManager

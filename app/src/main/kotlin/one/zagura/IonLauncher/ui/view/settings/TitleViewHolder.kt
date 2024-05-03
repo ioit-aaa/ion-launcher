@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.settings.common
+package one.zagura.IonLauncher.ui.view.settings
 
 import android.content.Context
 import android.view.Gravity

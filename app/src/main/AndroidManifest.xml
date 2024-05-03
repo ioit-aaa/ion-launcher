@@ -58,7 +58,7 @@
         </activity>
 
         <activity
-            android:name=".ui.extra.WallpaperApplicationActivity"
+            android:name=".ui.WallpaperApplicationActivity"
             android:label="@string/wallpaper"
             android:theme="@style/IonLauncher.Settings"
             android:exported="true">
@@ -73,7 +73,7 @@
         </activity>
 
         <activity
-            android:name=".ui.settings.SettingsActivity"
+            android:name=".ui.SettingsActivity"
             android:theme="@style/IonLauncher.Settings"
             android:label="@string/tweaks"
             android:launchMode="singleInstancePerTask"
@@ -87,24 +87,24 @@
         </activity>
 
         <activity
-            android:name=".ui.settings.LookAndFeelActivity"
+            android:name=".ui.LookAndFeelActivity"
             android:theme="@style/IonLauncher.Settings"/>
 
         <activity
-            android:name=".ui.settings.SuggestionsActivity"
+            android:name=".ui.SuggestionsActivity"
             android:theme="@style/IonLauncher.Settings"/>
 
         <activity
-            android:name=".ui.settings.iconPackPicker.IconPackPickerActivity"
+            android:name="one.zagura.IonLauncher.ui.iconPackPicker.IconPackPickerActivity"
             android:theme="@style/IonLauncher.Settings"
             android:exported="true"/>
 
         <activity
-            android:name=".ui.settings.widgets.WidgetChooserActivity"
+            android:name="one.zagura.IonLauncher.ui.widgetChooser.WidgetChooserActivity"
             android:theme="@style/IonLauncher.Settings"/>
 
         <activity
-            android:name=".ui.settings.SetupActivity"
+            android:name=".ui.SetupActivity"
             android:theme="@style/IonLauncher.Settings"
             android:exported="true">
             <intent-filter>

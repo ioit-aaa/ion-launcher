@@ -15,11 +15,6 @@ import one.zagura.IonLauncher.provider.search.Search
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.util.CrashActivity
 import one.zagura.IonLauncher.util.Settings
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.ThreadFactory
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
 
 val Context.ionApplication
     get() = applicationContext as IonLauncherApp
@@ -29,18 +24,6 @@ val Activity.ionApplication
 class IonLauncherApp : Application() {
 
     val settings = Settings("settings")
-
-    private val workerPool: ExecutorService = ThreadPoolExecutor(
-        2, 4, 60L, TimeUnit.SECONDS, SynchronousQueue(), ThreadFactory {
-            Thread(it).apply {
-                isDaemon = false
-            }
-        }
-    )
-
-    fun task(task: () -> Unit) {
-        workerPool.execute(task)
-    }
 
     override fun onCreate() {
         super.onCreate()

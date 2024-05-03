@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.settings.widgets
+package one.zagura.IonLauncher.ui.widgetChooser
 
 import android.appwidget.AppWidgetProviderInfo
 import android.graphics.drawable.Drawable
@@ -14,7 +14,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.R
-import one.zagura.IonLauncher.ui.settings.common.TitleViewHolder
+import one.zagura.IonLauncher.ui.view.settings.TitleViewHolder
 import one.zagura.IonLauncher.util.FillDrawable
 
 class WidgetChooserAdapter(

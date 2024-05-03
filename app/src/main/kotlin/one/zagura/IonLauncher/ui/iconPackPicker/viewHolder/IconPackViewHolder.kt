@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.settings.iconPackPicker.viewHolder
+package one.zagura.IonLauncher.ui.iconPackPicker.viewHolder
 
 import android.content.Context
 import android.content.res.ColorStateList
@@ -10,8 +10,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.R
-import one.zagura.IonLauncher.ui.settings.iconPackPicker.IconPackPickerActivity
-import one.zagura.IonLauncher.ui.settings.iconPackPicker.IconPackPickerAdapter
+import one.zagura.IonLauncher.ui.iconPackPicker.IconPackPickerActivity
+import one.zagura.IonLauncher.ui.iconPackPicker.IconPackPickerAdapter
 
 class IconPackViewHolder(context: Context, val type: Int) : RecyclerView.ViewHolder(LinearLayout(context)) {
 

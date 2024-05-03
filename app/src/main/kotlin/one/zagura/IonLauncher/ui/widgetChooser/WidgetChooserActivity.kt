@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.settings.widgets
+package one.zagura.IonLauncher.ui.widgetChooser
 
 import android.app.Activity
 import android.appwidget.AppWidgetHost
@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.data.Widget
 import one.zagura.IonLauncher.provider.Widgets
 import one.zagura.IonLauncher.ui.HomeScreen
-import one.zagura.IonLauncher.ui.settings.common.setupWindow
+import one.zagura.IonLauncher.ui.view.settings.setupWindow
 import one.zagura.IonLauncher.util.Utils
 
 class WidgetChooserActivity : Activity() {

@@ -38,6 +38,7 @@ import one.zagura.IonLauncher.util.FillDrawable
 import one.zagura.IonLauncher.util.IconTheming
 import one.zagura.IonLauncher.util.NonDrawable
 import one.zagura.IonLauncher.util.Settings
+import one.zagura.IonLauncher.util.TaskRunner
 import java.io.FileNotFoundException
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -52,16 +53,17 @@ object IconLoader {
 
     fun updateIconPacks(context: Context, settings: Settings) {
         clearCache()
-        context.ionApplication.task {
+        TaskRunner.submit {
             iconPacksLock.withLock {
-                iconPacks = settings.getStrings("icon_packs").orEmpty().mapNotNull { iconPackPackage ->
-                    try {
-                        IconTheming.getIconPackInfo(context.packageManager, iconPackPackage)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        null
+                iconPacks =
+                    settings.getStrings("icon_packs").orEmpty().mapNotNull { iconPackPackage ->
+                        try {
+                            IconTheming.getIconPackInfo(context.packageManager, iconPackPackage)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            null
+                        }
                     }
-                }
             }
         }
     }

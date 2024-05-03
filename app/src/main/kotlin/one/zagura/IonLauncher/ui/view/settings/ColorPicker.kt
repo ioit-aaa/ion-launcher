@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.settings.common
+package one.zagura.IonLauncher.ui.view.settings
 
 import android.app.Dialog
 import android.app.WallpaperManager

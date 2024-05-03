@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalContracts::class)
 
-package one.zagura.IonLauncher.ui.settings.common
+package one.zagura.IonLauncher.ui.view.settings
 
 import android.annotation.SuppressLint
 import android.app.Activity

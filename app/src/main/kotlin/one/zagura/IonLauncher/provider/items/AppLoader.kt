@@ -9,6 +9,7 @@ import one.zagura.IonLauncher.provider.HiddenApps
 import one.zagura.IonLauncher.provider.UpdatingResource
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.ui.IonLauncherApp
+import one.zagura.IonLauncher.util.TaskRunner
 import java.util.TreeSet
 
 object AppLoader : UpdatingResource<List<App>>() {
@@ -17,7 +18,7 @@ object AppLoader : UpdatingResource<List<App>>() {
     private var apps: MutableList<App> = ArrayList()
 
     fun reloadApps(ionApplication: IonLauncherApp) {
-        ionApplication.task {
+        TaskRunner.submit {
             val userManager = ionApplication.getSystemService(Context.USER_SERVICE) as UserManager
             val launcherApps = ionApplication.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
             val collection = TreeSet<App> { a, b -> a.label.compareTo(b.label) }

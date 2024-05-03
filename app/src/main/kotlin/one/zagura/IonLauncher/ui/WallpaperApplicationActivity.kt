@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.extra
+package one.zagura.IonLauncher.ui
 
 import android.app.Activity
 import android.app.Dialog
@@ -24,7 +24,8 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import one.zagura.IonLauncher.R
-import one.zagura.IonLauncher.ui.ionApplication
+import one.zagura.IonLauncher.ui.view.settings.WallpaperDragView
+import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
 
 class WallpaperApplicationActivity : Activity() {
@@ -106,7 +107,7 @@ class WallpaperApplicationActivity : Activity() {
                                         setPadding(tp, tp, tp, tp)
                                         textSize = 16f
                                         setOnClickListener {
-                                            ionApplication.task {
+                                            TaskRunner.submit {
                                                 wallView.applyWallpaper(WallpaperManager.FLAG_SYSTEM)
                                             }
                                             finish()
@@ -121,7 +122,7 @@ class WallpaperApplicationActivity : Activity() {
                                         setPadding(tp, tp, tp, tp)
                                         textSize = 16f
                                         setOnClickListener {
-                                            ionApplication.task {
+                                            TaskRunner.submit {
                                                 wallView.applyWallpaper(WallpaperManager.FLAG_LOCK)
                                             }
                                             finish()
@@ -136,7 +137,7 @@ class WallpaperApplicationActivity : Activity() {
                                         setPadding(tp, tp, tp, tp)
                                         textSize = 16f
                                         setOnClickListener {
-                                            ionApplication.task {
+                                            TaskRunner.submit {
                                                 wallView.applyWallpaper(WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK)
                                             }
                                             finish()

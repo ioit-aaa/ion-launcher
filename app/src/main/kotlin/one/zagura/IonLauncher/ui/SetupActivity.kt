@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.settings
+package one.zagura.IonLauncher.ui
 
 import android.Manifest
 import android.app.Activity
@@ -28,12 +28,11 @@ import one.zagura.IonLauncher.provider.items.ContactsLoader
 import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.provider.summary.EventsLoader
-import one.zagura.IonLauncher.ui.HomeScreen
-import one.zagura.IonLauncher.ui.settings.common.color
-import one.zagura.IonLauncher.ui.settings.common.permissionSwitch
-import one.zagura.IonLauncher.ui.settings.common.setSettingsContentView
-import one.zagura.IonLauncher.ui.settings.common.setting
-import one.zagura.IonLauncher.ui.settings.common.title
+import one.zagura.IonLauncher.ui.view.settings.color
+import one.zagura.IonLauncher.ui.view.settings.permissionSwitch
+import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
+import one.zagura.IonLauncher.ui.view.settings.setting
+import one.zagura.IonLauncher.ui.view.settings.title
 import one.zagura.IonLauncher.util.Utils
 
 class SetupActivity : Activity() {

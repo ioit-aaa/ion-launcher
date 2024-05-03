@@ -6,7 +6,7 @@ import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
-import one.zagura.IonLauncher.ui.settings.common.setupWindow
+import one.zagura.IonLauncher.ui.view.settings.setupWindow
 import one.zagura.IonLauncher.util.Utils
 
 class DebugSuggestionsActivity : Activity() {

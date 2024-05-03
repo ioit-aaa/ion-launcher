@@ -19,8 +19,8 @@ import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Dock
 import one.zagura.IonLauncher.provider.items.IconLoader
 import one.zagura.IonLauncher.ui.ionApplication
-import one.zagura.IonLauncher.util.NonDrawable
 import one.zagura.IonLauncher.util.Settings
+import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
 import kotlin.math.abs
 
@@ -35,7 +35,7 @@ class SuggestionRowView(
     private var labels = emptyList<CharSequence>()
 
     fun update(allSuggestions: List<LauncherItem>) {
-        context.ionApplication.task {
+        TaskRunner.submit {
             val newSuggestions = takeSuggestions(allSuggestions)
             if (newSuggestions.isEmpty()) post {
                 suggestions = emptyList()

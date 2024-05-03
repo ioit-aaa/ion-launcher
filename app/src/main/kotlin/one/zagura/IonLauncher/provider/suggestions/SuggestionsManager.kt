@@ -17,8 +17,8 @@ import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.UpdatingResource
-import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.Settings
+import one.zagura.IonLauncher.util.TaskRunner
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.collections.ArrayList
@@ -42,7 +42,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
     override fun getResource(): List<LauncherItem> = suggestions
 
     fun onItemOpened(context: Context, item: LauncherItem) {
-        context.ionApplication.task {
+        TaskRunner.submit {
             val data = ContextArray()
             getCurrentContext(context, data)
             contextLock.withLock {

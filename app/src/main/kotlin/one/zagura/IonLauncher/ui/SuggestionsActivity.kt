@@ -1,17 +1,17 @@
-package one.zagura.IonLauncher.ui.settings
+package one.zagura.IonLauncher.ui
 
 import android.app.Activity
 import android.os.Bundle
 import one.zagura.IonLauncher.BuildConfig
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.provider.ColorThemer
-import one.zagura.IonLauncher.ui.settings.common.color
-import one.zagura.IonLauncher.ui.settings.common.onClick
-import one.zagura.IonLauncher.ui.settings.common.seekbar
-import one.zagura.IonLauncher.ui.settings.common.setSettingsContentView
-import one.zagura.IonLauncher.ui.settings.common.setting
-import one.zagura.IonLauncher.ui.settings.common.switch
-import one.zagura.IonLauncher.ui.settings.common.title
+import one.zagura.IonLauncher.ui.view.settings.color
+import one.zagura.IonLauncher.ui.view.settings.onClick
+import one.zagura.IonLauncher.ui.view.settings.seekbar
+import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
+import one.zagura.IonLauncher.ui.view.settings.setting
+import one.zagura.IonLauncher.ui.view.settings.switch
+import one.zagura.IonLauncher.ui.view.settings.title
 
 class SuggestionsActivity : Activity() {
 

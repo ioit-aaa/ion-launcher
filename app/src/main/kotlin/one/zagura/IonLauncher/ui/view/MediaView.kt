@@ -17,9 +17,9 @@ import android.view.View
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.media.MediaPlayerData
 import one.zagura.IonLauncher.provider.ColorThemer
-import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.ClippedDrawable
 import one.zagura.IonLauncher.util.Settings
+import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
 import kotlin.math.abs
 import kotlin.math.min
@@ -37,7 +37,7 @@ class MediaView(context: Context) : View(context) {
     private var players = emptyList<PreparedMediaData>()
 
     fun update(players: List<MediaPlayerData>) {
-        context.ionApplication.task {
+        TaskRunner.submit {
             this.players = players.map {
                 val drawable = it.cover?.let {
                     val drawable = BitmapDrawable(it)
