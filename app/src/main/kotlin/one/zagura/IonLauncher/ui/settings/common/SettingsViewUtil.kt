@@ -117,6 +117,7 @@ inline fun SettingsPageScope.setting(
     child: SettingViewScope.() -> Unit
 ) = setting(title, view.context.getString(subtitle), isVertical, child)
 
+@OptIn(ExperimentalContracts::class)
 inline fun SettingsPageScope.setting(
     @StringRes title: Int,
     subtitle: String? = null,
