@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
@@ -32,11 +31,11 @@ import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.provider.summary.EventsLoader
 import one.zagura.IonLauncher.ui.drawer.DrawerArea
-import one.zagura.IonLauncher.ui.view.MusicView
 import one.zagura.IonLauncher.ui.view.PinnedGridView
 import one.zagura.IonLauncher.ui.view.SuggestionRowView
 import one.zagura.IonLauncher.ui.view.SummaryView
 import one.zagura.IonLauncher.ui.view.WidgetView
+import one.zagura.IonLauncher.ui.view.MediaView
 import one.zagura.IonLauncher.util.FillDrawable
 import one.zagura.IonLauncher.util.Utils
 
@@ -54,8 +53,11 @@ class HomeScreen : Activity() {
     private lateinit var drawerArea: DrawerArea
 
     private lateinit var summaryView: SummaryView
-    private lateinit var musicView: MusicView
+
+    private lateinit var mediaView: MediaView
+
     private var widgetView: WidgetView? = null
+
     private lateinit var pinnedGrid: PinnedGridView
     private lateinit var suggestionsView: SuggestionRowView
 
@@ -114,7 +116,7 @@ class HomeScreen : Activity() {
             }
         }
         NotificationService.MediaObserver.track {
-            musicView.updateTrack(it.firstOrNull())
+            mediaView.update(it)
         }
         widgetView?.startListening()
         pinnedGrid.updateGridApps()
@@ -160,13 +162,13 @@ class HomeScreen : Activity() {
         })
         pinnedGrid.applyCustomizations(settings)
         drawerArea.applyCustomizations()
-        musicView.applyCustomizations(settings)
+        mediaView.applyCustomizations(settings)
         summaryView.applyCustomizations()
         suggestionsView.applyCustomizations(settings)
         val m = pinnedGrid.calculateSideMargin()
         summaryView.setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 2), m, m)
         val v = (dp * 6).toInt()
-        musicView.updateLayoutParams<MarginLayoutParams> {
+        mediaView.updateLayoutParams<MarginLayoutParams> {
             leftMargin = m
             rightMargin = m
             bottomMargin = v
@@ -199,8 +201,7 @@ class HomeScreen : Activity() {
         val fullHeight = Utils.getDisplayHeight(this)
 
         summaryView = SummaryView(this)
-        musicView = MusicView(this)
-//        suggestionsView = SuggestionsView(this, ::showDropTargets)
+        mediaView = MediaView(this)
         suggestionsView = SuggestionRowView(this, ::showDropTargets, ::search)
         pinnedGrid = PinnedGridView(this)
 
@@ -211,7 +212,7 @@ class HomeScreen : Activity() {
                 summaryView,
                 LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f))
             addView(
-                musicView,
+                mediaView,
                 MarginLayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
             addView(pinnedGrid,
                 MarginLayoutParams(LayoutParams.MATCH_PARENT, pinnedGrid.calculateGridHeight()))

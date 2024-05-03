@@ -5,6 +5,7 @@ import android.content.Context
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
+import android.media.session.PlaybackState
 import android.os.Build
 import android.service.notification.NotificationListenerService
 import androidx.core.app.NotificationManagerCompat
@@ -20,49 +21,53 @@ class NotificationService : NotificationListenerService() {
             return
         }
         val msm = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
-        msm.addOnActiveSessionsChangedListener(MediaObserver::onMediaControllersUpdated, componentName)
+        msm.addOnActiveSessionsChangedListener(::activeSessionsCallback, componentName)
         MediaObserver.updateMediaItem(applicationContext)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         val msm = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
-        msm.removeOnActiveSessionsChangedListener(MediaObserver::onMediaControllersUpdated)
-        MediaObserver.onMediaControllersUpdated(null)
+        msm.removeOnActiveSessionsChangedListener(::activeSessionsCallback)
+        activeSessionsCallback(null)
     }
 
-    object MediaObserver : UpdatingResource<Set<MediaPlayerData>>() {
+    private fun activeSessionsCallback(controllers: MutableList<MediaController>?) {
+        MediaObserver.onMediaControllersUpdated(applicationContext, controllers)
+    }
+
+    object MediaObserver : UpdatingResource<List<MediaPlayerData>>() {
         override fun getResource() = mediaItems
 
-        private var mediaItems = emptySet<MediaPlayerData>()
+        private var mediaItems = emptyList<MediaPlayerData>()
 
         fun updateMediaItem(context: Context) {
             if (!hasPermission(context))
                 return
             val msm = context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
-            onMediaControllersUpdated(msm.getActiveSessions(componentName))
+            onMediaControllersUpdated(context, msm.getActiveSessions(componentName))
         }
 
-        fun onMediaControllersUpdated(controllers: MutableList<MediaController>?) {
+        fun onMediaControllersUpdated(context: Context, controllers: MutableList<MediaController>?) {
             val old = mediaItems
             if (controllers.isNullOrEmpty()) {
-                mediaItems = emptySet()
+                mediaItems = emptyList()
                 if (old.isNotEmpty())
                     update(mediaItems)
                 return
             }
-            val set = HashSet<MediaPlayerData>()
+            val list = ArrayList<MediaPlayerData>()
             for (controller in controllers) {
                 val metadata = controller.metadata ?: continue
-                val item = MediaItemCreator.create(controller, metadata)
-                set.add(item)
+                val item = MediaItemCreator.create(context, controller, metadata)
+                list.add(item)
                 controller.registerCallback(object : MediaController.Callback() {
                     var oldItem = item
                     override fun onMetadataChanged(metadata: MediaMetadata?) {
-                        set.remove(oldItem)
+                        list.remove(oldItem)
                         if (metadata != null) {
-                            val newItem = MediaItemCreator.create(controller, metadata)
-                            set.add(newItem)
+                            val newItem = MediaItemCreator.create(context, controller, metadata)
+                            list.add(newItem)
                             if (newItem == oldItem) {
                                 oldItem = newItem
                                 return
@@ -71,9 +76,12 @@ class NotificationService : NotificationListenerService() {
                         }
                         update(mediaItems)
                     }
+                    override fun onPlaybackStateChanged(state: PlaybackState?) {
+                        update(mediaItems)
+                    }
                 })
             }
-            mediaItems = set
+            mediaItems = list
             if (old != mediaItems)
                 update(mediaItems)
         }

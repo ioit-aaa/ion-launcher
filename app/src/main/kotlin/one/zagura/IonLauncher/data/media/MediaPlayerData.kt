@@ -4,8 +4,8 @@ import android.app.PendingIntent
 import android.graphics.Bitmap
 
 data class MediaPlayerData(
-    val title: String,
-    val subtitle: String?,
+    val title: CharSequence,
+    val subtitle: CharSequence,
     val cover: Bitmap?,
     val onTap: PendingIntent?,
     val isPlaying: (() -> Boolean)?,
