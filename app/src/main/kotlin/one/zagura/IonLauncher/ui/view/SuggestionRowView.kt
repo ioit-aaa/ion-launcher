@@ -36,12 +36,14 @@ class SuggestionRowView(
 
     fun update(allSuggestions: List<LauncherItem>) {
         context.ionApplication.task {
-            suggestions = takeSuggestions(allSuggestions)
-            if (suggestions.isEmpty()) post {
+            val newSuggestions = takeSuggestions(allSuggestions)
+            if (newSuggestions.isEmpty()) post {
+                suggestions = emptyList()
                 labels = emptyList()
                 isVisible = false
             }
             else post {
+                suggestions = newSuggestions
                 updateLabels()
                 isVisible = true
                 invalidate()
