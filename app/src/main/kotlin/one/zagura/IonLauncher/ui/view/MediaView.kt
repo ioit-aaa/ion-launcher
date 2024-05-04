@@ -1,6 +1,7 @@
 package one.zagura.IonLauncher.ui.view
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
@@ -40,12 +41,16 @@ class MediaView(context: Context) : View(context) {
         TaskRunner.submit {
             this.players = players.map {
                 val drawable = it.cover?.let {
-                    val drawable = BitmapDrawable(it)
-                    drawable.setBounds(0, 0, it.width, it.height)
+                    val bitmap = when {
+                        it.width > it.height -> Bitmap.createBitmap(it, (it.width - it.height) / 2, 0, it.height, it.height)
+                        it.width < it.height -> Bitmap.createBitmap(it, 0, (it.height - it.width) / 2, it.width, it.width)
+                        else -> it
+                    }
+                    val drawable = BitmapDrawable(bitmap)
+                    drawable.setBounds(0, 0, bitmap.width, bitmap.height)
                     ClippedDrawable(drawable, Path().apply {
-                        val w = it.width / 2f
-                        val h = it.height / 2f
-                        addCircle(w, h, min(w, h), Path.Direction.CW)
+                        val r = bitmap.width / 2f
+                        addCircle(r, r, r, Path.Direction.CW)
                     })
                 }
                 PreparedMediaData(drawable, "", "", it.isPlaying?.invoke() == true, it)
