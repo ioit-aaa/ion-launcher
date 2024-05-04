@@ -1,6 +1,7 @@
 package one.zagura.IonLauncher.ui.view.settings
 
 import android.content.Context
+import android.graphics.Typeface
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -18,9 +19,10 @@ class TitleViewHolder(context: Context) : RecyclerView.ViewHolder(LinearLayout(c
         gravity = Gravity.CENTER_VERTICAL
         val h = (20 * dp).toInt()
         setPadding(h, Utils.getStatusBarHeight(context), h, 0)
-        textSize = 22f
+        textSize = 18f
         setTextColor(resources.getColor(R.color.color_hint))
         background = FillDrawable(resources.getColor(R.color.color_bg))
+        typeface = Typeface.DEFAULT_BOLD
     }
 
     private val separator = View(context).apply {
@@ -34,7 +36,7 @@ class TitleViewHolder(context: Context) : RecyclerView.ViewHolder(LinearLayout(c
             addView(text,
                 ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    (64 * dp).toInt() + Utils.getStatusBarHeight(context)
+                    (56 * dp).toInt() + Utils.getStatusBarHeight(context)
                 )
             )
             addView(separator,

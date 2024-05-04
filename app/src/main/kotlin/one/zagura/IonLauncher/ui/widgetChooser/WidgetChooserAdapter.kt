@@ -48,22 +48,17 @@ class WidgetChooserAdapter(
         val context = parent.context
         val dp = parent.resources.displayMetrics.density
         val preview = ImageView(context).apply {
-            val p = (16 * dp).toInt()
+            val p = (8 * dp).toInt()
             setPadding(p, p, p, p)
         }
         val icon = ImageView(context)
         val v = LinearLayout(context).apply {
+            val p = (16 * dp).toInt()
+            setPadding(0, p, 0, p)
             layoutParams = RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT)
-            background = GradientDrawable().apply {
-                cornerRadius = 12 * dp
-                setStroke((dp).toInt(), resources.getColor(R.color.color_separator))
-            }
             orientation = LinearLayout.VERTICAL
             val h = (48 * dp).toInt()
             addView(preview, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, parent.resources.displayMetrics.widthPixels / 2 - h))
-            addView(
-                View(context).apply { background = FillDrawable(resources.getColor(R.color.color_separator)) },
-                LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp.toInt()))
             addView(LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
                 val p = (8 * dp).toInt()

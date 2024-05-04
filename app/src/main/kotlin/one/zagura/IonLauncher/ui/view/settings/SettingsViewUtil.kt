@@ -64,6 +64,7 @@ fun Activity.setupWindow() {
     window.navigationBarColor = bc
 }
 
+@OptIn(ExperimentalContracts::class)
 inline fun Activity.setSettingsContentView(@StringRes titleId: Int, builder: SettingsPageScope.() -> Unit) {
     contract { callsInPlace(builder, InvocationKind.EXACTLY_ONCE) }
     val dp = resources.displayMetrics.density
@@ -76,11 +77,12 @@ inline fun Activity.setSettingsContentView(@StringRes titleId: Int, builder: Set
                 gravity = Gravity.CENTER_VERTICAL
                 val h = (20 * dp).toInt()
                 setPadding(h, Utils.getStatusBarHeight(context), h, 0)
-                textSize = 22f
+                textSize = 18f
                 setTextColor(resources.getColor(R.color.color_hint))
                 background = FillDrawable(resources.getColor(R.color.color_bg))
+                typeface = Typeface.DEFAULT_BOLD
                 setText(titleId)
-            }, LayoutParams(MATCH_PARENT, (64 * dp).toInt() + Utils.getStatusBarHeight(context)))
+            }, LayoutParams(MATCH_PARENT, (56 * dp).toInt() + Utils.getStatusBarHeight(context)))
             addView(View(context).apply {
                 background = FillDrawable(resources.getColor(R.color.color_separator))
             }, MarginLayoutParams(MATCH_PARENT, dp.toInt()).apply {
@@ -244,10 +246,12 @@ fun SettingViewScope.onClick(activity: Class<*>) = onClick {
 fun SettingViewScope.onClick(listener: (View) -> Unit) {
     view.setOnClickListener(listener)
     val dp = view.context.resources.displayMetrics.density
-    val s = (24 * dp).toInt()
+    val s = (32 * dp).toInt()
+    val p = (4 * dp).toInt()
     view.addView(ImageView(view.context).apply {
         setImageResource(R.drawable.ic_arrow_right)
         imageTintList = ColorStateList.valueOf(resources.getColor(R.color.color_hint))
+        setPadding(p, p, p, p)
     }, LayoutParams(s, s))
     view.background = RippleDrawable(
         ColorStateList.valueOf(view.resources.getColor(R.color.color_disabled)),
@@ -256,11 +260,12 @@ fun SettingViewScope.onClick(listener: (View) -> Unit) {
 
 fun SettingViewScope.color(settingId: String, default: Int) {
     val dp = view.context.resources.displayMetrics.density
+    val s = (32 * dp).toInt()
     var color = view.context.ionApplication.settings[settingId, default] or 0xff000000.toInt()
     val dr = GradientDrawable().apply {
         setColor(color)
         setStroke(dp.coerceAtMost(2f).toInt(), 0x33000000)
-        cornerRadius = 5 * dp
+        cornerRadius = s.toFloat()
     }
 
     view.setOnClickListener {
@@ -277,10 +282,12 @@ fun SettingViewScope.color(settingId: String, default: Int) {
         }
     }
     updateSubtitle(ColorPicker.formatColorString(color))
-    val s = (32 * dp).toInt()
     view.addView(View(view.context).apply {
         background = dr
     }, LayoutParams(s, s))
+    view.background = RippleDrawable(
+        ColorStateList.valueOf(view.resources.getColor(R.color.color_disabled)),
+        ColorDrawable(view.resources.getColor(R.color.color_bg)), null)
 }
 
 fun SettingViewScope.seekbar(

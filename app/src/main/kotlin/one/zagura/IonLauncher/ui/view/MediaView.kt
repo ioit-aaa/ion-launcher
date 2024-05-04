@@ -123,8 +123,9 @@ class MediaView(context: Context) : View(context) {
             )
             playIcon.draw(canvas)
 
+            val lastIconOff = (2 * dp).toInt()
             controlX += itemHeight.toInt()
-            icTrackNext.setBounds(controlX + controlPadding, y.toInt() + controlPadding, controlX + itemHeight.toInt() - controlPadding, y.toInt() + itemHeight.toInt() - controlPadding)
+            icTrackNext.setBounds(controlX + controlPadding - lastIconOff, y.toInt() + controlPadding, controlX + itemHeight.toInt() - controlPadding - lastIconOff, y.toInt() + itemHeight.toInt() - controlPadding)
             icTrackNext.draw(canvas)
 
             y += itemHeight + separation
