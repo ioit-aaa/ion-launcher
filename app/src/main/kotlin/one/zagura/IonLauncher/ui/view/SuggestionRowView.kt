@@ -56,7 +56,6 @@ class SuggestionRowView(
         pillPaint.color = ColorThemer.pillBackground(context)
         textPaint.color = ColorThemer.pillForeground(context)
         icSearch.setTint(ColorThemer.pillForeground(context))
-        updateLabels()
         invalidate()
     }
 
@@ -179,6 +178,11 @@ class SuggestionRowView(
                 LongPressMenu.dismissCurrent()
         }
         return super.onDragEvent(e)
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        updateLabels()
+        invalidate()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
