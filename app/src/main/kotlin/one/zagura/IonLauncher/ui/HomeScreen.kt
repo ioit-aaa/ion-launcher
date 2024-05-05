@@ -164,7 +164,7 @@ class HomeScreen : Activity() {
         pinnedGrid.applyCustomizations(settings)
         drawerArea.applyCustomizations()
         mediaView.applyCustomizations(settings)
-        summaryView.applyCustomizations()
+        summaryView.applyCustomizations(settings)
         suggestionsView.applyCustomizations(settings)
         val m = pinnedGrid.calculateSideMargin()
         summaryView.setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 2), m, m)

@@ -18,6 +18,7 @@ import one.zagura.IonLauncher.data.summary.Event
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.summary.Alarm
 import one.zagura.IonLauncher.util.LiveWallpaper
+import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.Utils
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -44,32 +45,26 @@ class SummaryView(c: Context) : View(c) {
         }
 
         private fun tryConsumeTap(e: MotionEvent): Boolean {
+            val dp = resources.displayMetrics.density
+            val padding = 16 * dp
+            val separation = 6 * dp
+
             val y = e.y
-            val dateHeight = datePaint.descent() - datePaint.ascent()
-            if (y < paddingTop + paddingLeft + dateHeight)
+            val dateHeight = titlePaint.descent() - titlePaint.ascent()
+            val dt = paddingTop + padding + dateHeight + separation
+            if (y < dt)
                 return performClick()
             if (events.isEmpty())
                 return false
-            val dp = resources.displayMetrics.density
             val x = e.x
-            val innerPadding = 40 * dp
-            if (x < innerPadding || x > width - innerPadding)
+            if (x < paddingLeft + padding || x > width - paddingRight - padding)
                 return false
 
-            val m = 6 * dp
-            val titleHeight = titlePaint.descent() - titlePaint.ascent() + m
-            val eventHeight = textPaint.descent() - textPaint.ascent() + m
-            val contentHeight = titleHeight + events.size * eventHeight
-            val dt = dateHeight + paddingTop + paddingLeft
-            val yOffset = dt + (height - dt - paddingBottom - contentHeight) / 2
-            val yy = y - yOffset
-            if (yy < 0 || yy > contentHeight)
+            val eventHeight = textPaint.descent() - textPaint.ascent() + separation
+            val yy = y - dt
+            if (yy < 0)
                 return false
-
-            if (yy < titleHeight)
-                return performClick()
-
-            val i = (yy.toInt() - titleHeight.toInt()) / eventHeight.toInt()
+            val i = yy.toInt() / eventHeight.toInt()
             if (i >= events.size)
                 return false
             events[i].open(this@SummaryView)
@@ -117,36 +112,39 @@ class SummaryView(c: Context) : View(c) {
     }
 
     override fun onDraw(canvas: Canvas) {
-        canvas.drawText(dateString, paddingLeft.toFloat(), paddingTop - datePaint.ascent(), datePaint)
-        if (events.isEmpty())
+        if (events.isEmpty()) {
+            canvas.drawText(dateString, paddingLeft.toFloat(), paddingTop - titlePaint.ascent(), titlePaint)
             return
+        }
         val dp = resources.displayMetrics.density
-        val dateHeight = datePaint.descent() - datePaint.ascent()
+
         val titleHeight = titlePaint.descent() - titlePaint.ascent()
         val eventHeight = textPaint.descent() - textPaint.ascent()
         val eventRightHeight = rightTextPaint.descent() - rightTextPaint.ascent()
-        val m = 6 * dp
-        val contentHeight = titleHeight + events.size * (eventHeight + m)
-        val dt = dateHeight + paddingTop + paddingLeft
-        val yOffset = dt + (height - dt - paddingBottom - contentHeight) / 2
-        val innerPadding = 40 * dp
-        canvas.drawText(resources.getString(R.string.today), innerPadding, yOffset - titlePaint.ascent(), titlePaint)
-        var bottomTop = yOffset + titleHeight + m
-        val radius = 2 * dp
-        val circXOffset = innerPadding + radius + 4 * dp
-        val textXOffset = innerPadding + radius * 2 + 12 * dp
+
+        val separation = 6 * dp
+        val padding = 16 * dp
+        val dotRadius = 2 * dp
+        val circXOffset = paddingLeft + padding + dotRadius + 4 * dp
+        val textXOffset = paddingLeft + padding + dotRadius * 2 + 12 * dp
         val roff = (eventHeight - eventRightHeight) / 2 - rightTextPaint.ascent()
+
+        val totalHeight = titleHeight + (eventHeight + separation) * events.size + padding * 2
+        canvas.drawRoundRect(paddingLeft.toFloat(), paddingTop.toFloat(), (width - paddingRight).toFloat(), paddingTop + totalHeight, radius, radius, cardPaint)
+        canvas.drawText(dateString, paddingLeft.toFloat() + padding, paddingTop + padding - titlePaint.ascent(), titlePaint)
+
+        var bottomTop = paddingTop + padding + titleHeight + separation
         for (event in events) {
             canvas.drawCircle(
                 circXOffset,
                 bottomTop + eventHeight / 2f,
-                radius,
+                dotRadius,
                 colorPaint.apply { color = event.color ?: textPaint.color }
             )
             canvas.drawText(event.left, textXOffset, bottomTop - textPaint.ascent(), textPaint)
             if (event.right != null)
-                canvas.drawText(event.right, width - innerPadding, bottomTop + roff, rightTextPaint)
-            bottomTop += eventHeight + m
+                canvas.drawText(event.right, width - paddingRight - padding, bottomTop + roff, rightTextPaint)
+            bottomTop += eventHeight + separation
         }
     }
 
@@ -156,12 +154,6 @@ class SummaryView(c: Context) : View(c) {
         isAntiAlias = true
         isSubpixelText = true
         typeface = Typeface.DEFAULT_BOLD
-    }
-    private val datePaint = Paint().apply {
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
-        textAlign = Paint.Align.LEFT
-        isAntiAlias = true
-        isSubpixelText = true
     }
     private val textPaint = Paint().apply {
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
@@ -176,9 +168,11 @@ class SummaryView(c: Context) : View(c) {
         isSubpixelText = true
         typeface = Typeface.MONOSPACE
     }
+    private val cardPaint = Paint().apply { isAntiAlias = true }
     private val colorPaint = Paint().apply {
         isAntiAlias = true
     }
+    private var radius = 0f
 
     override fun onTouchEvent(e: MotionEvent) = gestureDetector.onTouchEvent(e)
 
@@ -190,13 +184,15 @@ class SummaryView(c: Context) : View(c) {
         return true
     }
 
-    fun applyCustomizations() {
+    fun applyCustomizations(settings: Settings) {
+        val dp = resources.displayMetrics.density
         val textColor = ColorThemer.foreground(context)
         val hintColor = ColorThemer.hint(context)
         titlePaint.color = textColor
         textPaint.color = textColor
-        datePaint.color = hintColor
         rightTextPaint.color = hintColor
+        cardPaint.color = ColorThemer.background(context)
+        radius = settings["dock:icon-size", 48] * dp / 2f
     }
 
     private sealed class CompiledEvent(
