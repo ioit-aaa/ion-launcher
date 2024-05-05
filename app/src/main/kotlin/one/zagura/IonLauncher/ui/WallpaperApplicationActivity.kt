@@ -78,7 +78,7 @@ class WallpaperApplicationActivity : Activity() {
                     setTextColor(resources.getColor(R.color.color_button_text))
                     val r = 99 * dp
                     background = RippleDrawable(
-                        ColorStateList.valueOf(resources.getColor(R.color.color_separator)),
+                        ColorStateList.valueOf(resources.getColor(R.color.color_hint)),
                         ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null)).apply {
                             paint.color = resources.getColor(R.color.color_button)
                         }, null)

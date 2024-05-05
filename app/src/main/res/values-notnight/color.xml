@@ -2,13 +2,13 @@
 <resources>
     <color name="color_bg">#eeeeee</color>
     <color name="color_bg_sunk">#d3d3d3</color>
-    <color name="color_separator">#999</color>
+    <color name="color_separator">#bbb</color>
     <color name="color_hint">#555</color>
     <color name="color_text">#111</color>
 
     <color name="color_heading">#555</color>
     <color name="color_disabled">#bababa</color>
 
-    <color name="color_button">#222</color>
-    <color name="color_button_text">#eeeeee</color>
+    <color name="color_button">#d3d3d3</color>
+    <color name="color_button_text">#111</color>
 </resources>

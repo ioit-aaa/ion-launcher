@@ -203,7 +203,7 @@ object ColorPicker {
                 setText(android.R.string.ok)
                 setTextColor(resources.getColor(R.color.color_button_text))
                 background = RippleDrawable(
-                    ColorStateList.valueOf(resources.getColor(R.color.color_separator)),
+                    ColorStateList.valueOf(resources.getColor(R.color.color_hint)),
                     ShapeDrawable(RoundRectShape(floatArrayOf(br, br, 0f, 0f, 0f, 0f, br, br), null, null)).apply {
                         paint.color = resources.getColor(R.color.color_button)
                     }, null)
@@ -223,7 +223,7 @@ object ColorPicker {
                 setText(android.R.string.cancel)
                 setTextColor(resources.getColor(R.color.color_button_text))
                 background = RippleDrawable(
-                    ColorStateList.valueOf(resources.getColor(R.color.color_separator)),
+                    ColorStateList.valueOf(resources.getColor(R.color.color_hint)),
                     ShapeDrawable(RoundRectShape(floatArrayOf(0f, 0f, br, br, br, br, 0f, 0f), null, null)).apply {
                         paint.color = resources.getColor(R.color.color_button)
                     }, null)
