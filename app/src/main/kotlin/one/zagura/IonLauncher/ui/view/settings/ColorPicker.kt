@@ -154,6 +154,8 @@ object ColorPicker {
                         addColorView(colorText, t.toArgb())
                 }
             }
+            addColorView(colorText, ColorThemer.background(context))
+            addColorView(colorText, ColorThemer.foreground(context))
         }, MarginLayoutParams((320 * dp).toInt(), (128 * dp).toInt()).apply {
             bottomMargin = (8 * dp).toInt()
         })
@@ -272,8 +274,8 @@ object ColorPicker {
             val m = (8 * dp).toInt()
             width = 0
             height = 0
-            val r = tag as Int / 3
-            val c = tag as Int % 3
+            val r = tag as Int / 4
+            val c = tag as Int % 4
             rowSpec = GridLayout.spec(r, 1, 1f)
             columnSpec = GridLayout.spec(c, 1, 1f)
             if (c != 0) leftMargin = m

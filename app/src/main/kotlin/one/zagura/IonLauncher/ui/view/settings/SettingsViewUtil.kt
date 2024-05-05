@@ -269,13 +269,14 @@ fun SettingViewScope.color(settingId: String, default: Int) {
     }
 
     view.setOnClickListener {
+        val settings = it.context.ionApplication.settings
         ColorPicker.show(
             it.context,
-            it.context.ionApplication.settings[settingId, default]
+            settings[settingId, default],
         ) { newColor ->
             color = newColor or 0xff000000.toInt()
             dr.setColor(color)
-            it.context.ionApplication.settings.edit(it.context) {
+            settings.edit(it.context) {
                 settingId set newColor
             }
             updateSubtitle(ColorPicker.formatColorString(newColor))

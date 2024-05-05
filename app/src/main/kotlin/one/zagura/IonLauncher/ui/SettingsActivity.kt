@@ -30,6 +30,9 @@ class SettingsActivity : Activity() {
             setting(R.string.suggestions) {
                 onClick(SuggestionsActivity::class.java)
             }
+            setting(R.string.today) {
+                onClick(TodayActivity::class.java)
+            }
             title(R.string.pinned_grid)
             setting(R.string.columns, isVertical = true) {
                 seekbar("dock:columns", 5, min = 1, max = 7)

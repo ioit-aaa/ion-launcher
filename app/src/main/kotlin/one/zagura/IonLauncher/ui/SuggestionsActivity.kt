@@ -5,13 +5,12 @@ import android.os.Bundle
 import one.zagura.IonLauncher.BuildConfig
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.provider.ColorThemer
-import one.zagura.IonLauncher.ui.view.settings.color
+import one.zagura.IonLauncher.ui.view.settings.colorSettings
 import one.zagura.IonLauncher.ui.view.settings.onClick
 import one.zagura.IonLauncher.ui.view.settings.seekbar
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
 import one.zagura.IonLauncher.ui.view.settings.setting
 import one.zagura.IonLauncher.ui.view.settings.switch
-import one.zagura.IonLauncher.ui.view.settings.title
 
 class SuggestionsActivity : Activity() {
 
@@ -29,16 +28,7 @@ class SuggestionsActivity : Activity() {
             setting(R.string.show_search_in_suggestions) {
                 switch("layout:search-in-suggestions", false)
             }
-            title(R.string.color)
-            setting(R.string.background, subtitle = "") {
-                color("pill:bg", ColorThemer.DEFAULT_FG)
-            }
-            setting(R.string.foreground, subtitle = "") {
-                color("pill:fg", ColorThemer.DEFAULT_BG)
-            }
-            setting(R.string.background_opacity, isVertical = true) {
-                seekbar("pill:bg:alpha", 0xff, min = 0, max = 0xff)
-            }
+            colorSettings("pill", ColorThemer.DEFAULT_FG, ColorThemer.DEFAULT_BG, 0xff)
         }
     }
 }

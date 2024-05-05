@@ -95,6 +95,10 @@
             android:theme="@style/IonLauncher.Settings"/>
 
         <activity
+            android:name=".ui.TodayActivity"
+            android:theme="@style/IonLauncher.Settings"/>
+
+        <activity
             android:name="one.zagura.IonLauncher.ui.iconPackPicker.IconPackPickerActivity"
             android:theme="@style/IonLauncher.Settings"
             android:exported="true"/>

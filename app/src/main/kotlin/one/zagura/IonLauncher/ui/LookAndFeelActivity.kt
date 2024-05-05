@@ -7,14 +7,12 @@ import android.view.View
 import androidx.core.view.isVisible
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.provider.ColorThemer
-import one.zagura.IonLauncher.ui.view.settings.color
 import one.zagura.IonLauncher.ui.view.settings.onClick
-import one.zagura.IonLauncher.ui.view.settings.seekbar
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
 import one.zagura.IonLauncher.ui.view.settings.setting
 import one.zagura.IonLauncher.ui.view.settings.switch
-import one.zagura.IonLauncher.ui.view.settings.title
 import one.zagura.IonLauncher.ui.iconPackPicker.IconPackPickerActivity
+import one.zagura.IonLauncher.ui.view.settings.colorSettings
 
 class LookAndFeelActivity : Activity() {
 
@@ -39,16 +37,7 @@ class LookAndFeelActivity : Activity() {
                 }
                 bg.isVisible = ionApplication.settings["icon:monochrome", false]
             }
-            title(R.string.color)
-            setting(R.string.background, subtitle = "") {
-                color("color:bg", ColorThemer.DEFAULT_BG)
-            }
-            setting(R.string.foreground, subtitle = "") {
-                color("color:fg", ColorThemer.DEFAULT_FG)
-            }
-            setting(R.string.background_opacity, isVertical = true) {
-                seekbar("color:bg:alpha", 0xdd, min = 0, max = 0xff)
-            }
+            colorSettings("color", ColorThemer.DEFAULT_BG, ColorThemer.DEFAULT_FG, 0xdd)
         }
     }
 }

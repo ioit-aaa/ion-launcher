@@ -186,12 +186,12 @@ class SummaryView(c: Context) : View(c) {
 
     fun applyCustomizations(settings: Settings) {
         val dp = resources.displayMetrics.density
-        val textColor = ColorThemer.foreground(context)
-        val hintColor = ColorThemer.hint(context)
+        val textColor = ColorThemer.todayForeground(context)
+        val hintColor = ColorThemer.todayHint(context)
         titlePaint.color = textColor
         textPaint.color = textColor
         rightTextPaint.color = hintColor
-        cardPaint.color = ColorThemer.background(context)
+        cardPaint.color = ColorThemer.todayBackground(context)
         radius = settings["dock:icon-size", 48] * dp / 2f
     }
 
