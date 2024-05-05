@@ -36,10 +36,10 @@ class NotificationService : NotificationListenerService() {
         MediaObserver.onMediaControllersUpdated(applicationContext, controllers)
     }
 
-    object MediaObserver : UpdatingResource<List<MediaPlayerData>>() {
+    object MediaObserver : UpdatingResource<Array<MediaPlayerData>>() {
         override fun getResource() = mediaItems
 
-        private var mediaItems = emptyList<MediaPlayerData>()
+        private var mediaItems = emptyArray<MediaPlayerData>()
 
         fun updateMediaItem(context: Context) {
             if (!hasPermission(context))
@@ -51,7 +51,7 @@ class NotificationService : NotificationListenerService() {
         fun onMediaControllersUpdated(context: Context, controllers: MutableList<MediaController>?) {
             val old = mediaItems
             if (controllers.isNullOrEmpty()) {
-                mediaItems = emptyList()
+                mediaItems = emptyArray()
                 if (old.isNotEmpty())
                     update(mediaItems)
                 return
@@ -64,16 +64,16 @@ class NotificationService : NotificationListenerService() {
                 controller.registerCallback(object : MediaController.Callback() {
                     var oldItem = item
                     override fun onMetadataChanged(metadata: MediaMetadata?) {
-                        list.remove(oldItem)
                         if (metadata != null) {
                             val newItem = MediaItemCreator.create(context, controller, metadata)
-                            list.add(newItem)
-                            if (newItem == oldItem) {
-                                oldItem = newItem
+                            if (newItem == oldItem)
                                 return
-                            }
+                            list.remove(oldItem)
+                            list.add(newItem)
                             oldItem = newItem
-                        }
+                        } else
+                            list.remove(oldItem)
+                        mediaItems = list.toTypedArray()
                         update(mediaItems)
                     }
                     override fun onPlaybackStateChanged(state: PlaybackState?) {
@@ -81,8 +81,8 @@ class NotificationService : NotificationListenerService() {
                     }
                 })
             }
-            mediaItems = list
-            if (old != mediaItems)
+            mediaItems = list.toTypedArray()
+            if (!old.contentEquals(mediaItems))
                 update(mediaItems)
         }
     }

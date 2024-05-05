@@ -37,7 +37,7 @@ class MediaView(context: Context) : View(context) {
 
     private var players = emptyList<PreparedMediaData>()
 
-    fun update(players: List<MediaPlayerData>) {
+    fun update(players: Array<MediaPlayerData>) {
         TaskRunner.submit {
             this.players = players.map {
                 val drawable = it.cover?.let {
@@ -113,23 +113,31 @@ class MediaView(context: Context) : View(context) {
             canvas.drawText(player.title, 0, player.title.length, textX, y + itemHeight / 2f - s, titlePaint)
             canvas.drawText(player.subtitle, 0, player.subtitle.length, textX, y + itemHeight / 2f + s + textHeight, subtitlePaint)
 
-            var controlX = width - itemHeight.toInt() * 2
             val playIcon = if (player.isPlaying) icPause else icPlay
-            playIcon.setBounds(
-                controlX + controlPadding,
-                y.toInt() + controlPadding,
-                controlX + itemHeight.toInt() - controlPadding,
-                y.toInt() + itemHeight.toInt() - controlPadding
-            )
-            playIcon.draw(canvas)
-
             val lastIconOff = (2 * dp).toInt()
-            controlX += itemHeight.toInt()
-            icTrackNext.setBounds(controlX + controlPadding - lastIconOff, y.toInt() + controlPadding, controlX + itemHeight.toInt() - controlPadding - lastIconOff, y.toInt() + itemHeight.toInt() - controlPadding)
-            icTrackNext.draw(canvas)
+
+            if (player.data.next == null) {
+                val controlX = width - itemHeight.toInt() - lastIconOff
+                drawIcon(canvas, playIcon, controlX, y.toInt(), controlPadding)
+            } else {
+                var controlX = width - itemHeight.toInt() * 2
+                drawIcon(canvas, playIcon, controlX, y.toInt(), controlPadding)
+                controlX += itemHeight.toInt() - lastIconOff
+                drawIcon(canvas, icTrackNext, controlX, y.toInt(), controlPadding)
+            }
 
             y += itemHeight + separation
         }
+    }
+
+    private fun drawIcon(canvas: Canvas, icon: Drawable, x: Int, y: Int, controlPadding: Int) {
+        icon.setBounds(
+            x + controlPadding,
+            y + controlPadding,
+            x + itemHeight.toInt() - controlPadding,
+            y + itemHeight.toInt() - controlPadding
+        )
+        icon.draw(canvas)
     }
 
     private val pillPaint = Paint().apply {
@@ -175,9 +183,16 @@ class MediaView(context: Context) : View(context) {
             if (i < 0 || i >= players.size)
                 return false
             val player = players[i]
-            if (e.x < width - paddingRight - itemHeight * 2)
-                player.data.onTap?.send()
-            else if (e.x < width - paddingRight - itemHeight) {
+            var x = itemHeight
+            player.data.next?.let {
+                if (e.x >= width - paddingRight - x) {
+                    Utils.click(context)
+                    it()
+                    return true
+                }
+                x += itemHeight
+            }
+            if (e.x >= width - paddingRight - x) {
                 Utils.click(context)
                 if (player.data.isPlaying?.invoke() == true) {
                     player.data.pause()
@@ -187,8 +202,8 @@ class MediaView(context: Context) : View(context) {
                     player.isPlaying = true
                 }
                 invalidate()
-            } else
-                player.data.next()
+            }
+            else player.data.onTap?.send()
             return true
         }
     })

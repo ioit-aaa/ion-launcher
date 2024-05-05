@@ -39,7 +39,7 @@ object MediaItemCreator {
             isPlaying = { controller.playbackState?.state == PlaybackState.STATE_PLAYING },
             play = controller.transportControls::play,
             pause = controller.transportControls::pause,
-            next = controller.transportControls::skipToNext,
+            next = controller.transportControls::skipToNext.takeIf { controller.queue != null },
         )
     }
 }

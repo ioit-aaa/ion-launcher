@@ -11,5 +11,5 @@ data class MediaPlayerData(
     val isPlaying: (() -> Boolean)?,
     val play: () -> Unit,
     val pause: () -> Unit,
-    val next: () -> Unit,
+    val next: (() -> Unit)?,
 )
