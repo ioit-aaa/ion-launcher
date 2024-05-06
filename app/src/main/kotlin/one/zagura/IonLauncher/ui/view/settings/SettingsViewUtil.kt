@@ -322,7 +322,7 @@ fun SettingViewScope.seekbar(
         })
     }
     with(number) {
-        val r = 8 * dp
+        val r = 6 * dp
         background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null)).apply {
             paint.color = resources.getColor(R.color.color_bg_sunk)
         }

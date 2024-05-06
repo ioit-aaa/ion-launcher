@@ -40,13 +40,15 @@ class WidgetChooserAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, type: Int): RecyclerView.ViewHolder {
         if (type == 1)
             return TitleViewHolder(parent.context)
+        val dp = parent.resources.displayMetrics.density
         val label = TextView(parent.context).apply {
             setTextColor(resources.getColor(R.color.color_text))
             textSize = 12f
             gravity = Gravity.CENTER_VERTICAL
+            val p = (8 * dp).toInt()
+            setPadding(p, p, p, p)
         }
         val context = parent.context
-        val dp = parent.resources.displayMetrics.density
         val preview = ImageView(context).apply {
             val p = (8 * dp).toInt()
             setPadding(p, p, p, p)
@@ -67,7 +69,7 @@ class WidgetChooserAdapter(
                 addView(icon, LinearLayout.LayoutParams(hh, hh).apply {
                     marginEnd = p
                 })
-                addView(label, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, hh))
+                addView(label, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
             }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, h))
         }
         return VH(v, label, preview, icon).apply {

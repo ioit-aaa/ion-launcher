@@ -26,6 +26,7 @@ import androidx.core.graphics.toColorInt
 import androidx.core.widget.doOnTextChanged
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.provider.ColorThemer
+import java.util.TreeSet
 
 object ColorPicker {
 
@@ -34,7 +35,7 @@ object ColorPicker {
         val content = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
-            val p = (18 * dp).toInt()
+            val p = (16 * dp).toInt()
             setPadding(p, p, p, p)
         }
         val lightness = SeekBar(context).apply {
@@ -45,6 +46,7 @@ object ColorPicker {
             val hsl = FloatArray(3)
             ColorUtils.colorToHSL(initColor, hsl)
             progress = (hsl[2] * 300).toInt()
+            contentDescription = "L"
         }
         val saturation = SeekBar(context).apply {
             progressDrawable = generateSeekbarTrackDrawable(context)
@@ -54,6 +56,7 @@ object ColorPicker {
             val hsl = FloatArray(3)
             ColorUtils.colorToHSL(initColor, hsl)
             progress = (hsl[1] * 300).toInt()
+            contentDescription = "S"
         }
         val hue = SeekBar(context).apply {
             progressDrawable = generateSeekbarTrackDrawable(context)
@@ -63,6 +66,7 @@ object ColorPicker {
             val hsl = FloatArray(3)
             ColorUtils.colorToHSL(initColor, hsl)
             progress = hsl[0].toInt()
+            contentDescription = "H"
         }
         val colorText = EditText(context).apply {
             hint = formatColorString(ColorThemer.DEFAULT_BG)
@@ -71,8 +75,9 @@ object ColorPicker {
             val p = (12 * dp).toInt()
             setPadding(p, p, p, p)
             setSingleLine()
-            val r = 8 * dp
-            background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
+            val lra = 4 * dp
+            val bra = 10 * dp
+            background = ShapeDrawable(RoundRectShape(floatArrayOf(lra, lra, lra, lra, bra, bra, bra, bra), null, null))
             doOnTextChanged { text, _, _, _ ->
                 val c = parseColorString(text.toString())
                 backgroundTintList = ColorStateList.valueOf(c)
@@ -127,7 +132,7 @@ object ColorPicker {
 
         val w = Dialog(context).apply {
             setContentView(content, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
-            val r = 24 * dp
+            val r = 26 * dp
             window!!.setBackgroundDrawable(ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null)).apply {
                 paint.color = context.resources.getColor(R.color.color_bg)
             })
@@ -135,41 +140,55 @@ object ColorPicker {
 
         content.addView(GridLayout(context).apply {
             orientation = GridLayout.VERTICAL
-            addColorView(colorText, 0x000000)
-            addColorView(colorText, ColorThemer.DEFAULT_BG)
-            addColorView(colorText, 0xefefef)
+            val set = arrayOf(
+                0x000000,
+                ColorThemer.DEFAULT_BG,
+                0xefefef,
+                ColorThemer.background(context) and 0xffffff,
+                ColorThemer.foreground(context) and 0xffffff,
+            ).toCollection(TreeSet { a, b ->
+                if (a == b)
+                    return@TreeSet 0
+                val aa = FloatArray(3)
+                ColorUtils.colorToHSL(a, aa)
+                val bb = FloatArray(3)
+                ColorUtils.colorToHSL(b, bb)
+                if (aa[0] < bb[0]) -1 else 1
+            })
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                addColorView(colorText, context.getColor(android.R.color.system_accent1_500))
-                addColorView(colorText, context.getColor(android.R.color.system_accent2_500))
-                addColorView(colorText, context.getColor(android.R.color.system_accent3_500))
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                set.add(context.getColor(android.R.color.system_accent1_500))
+                set.add(context.getColor(android.R.color.system_accent2_500))
+                set.add(context.getColor(android.R.color.system_accent3_500))
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                 val wallColors = WallpaperManager.getInstance(context).getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
                 if (wallColors != null) {
-                    addColorView(colorText, wallColors.primaryColor.toArgb())
+                    set.add(wallColors.primaryColor.toArgb() and 0xffffff)
                     val s = wallColors.secondaryColor
                     val t = wallColors.tertiaryColor
                     if (s != null)
-                        addColorView(colorText, s.toArgb())
+                        set.add(s.toArgb() and 0xffffff)
                     if (t != null)
-                        addColorView(colorText, t.toArgb())
+                        set.add(t.toArgb() and 0xffffff)
                 }
             }
-            addColorView(colorText, ColorThemer.background(context))
-            addColorView(colorText, ColorThemer.foreground(context))
-        }, MarginLayoutParams((320 * dp).toInt(), (128 * dp).toInt()).apply {
-            bottomMargin = (8 * dp).toInt()
+            for (color in set)
+                addColorView(colorText, color)
+        }, MarginLayoutParams((320 * dp).toInt(), (192 * dp).toInt()).apply {
+            bottomMargin = (6 * dp).toInt()
         })
         content.addView(colorText, MarginLayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply {
             bottomMargin = (8 * dp).toInt()
         })
-        val l = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        val l = LayoutParams(LayoutParams.MATCH_PARENT, (42 * dp).toInt())
         content.addView(LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             val v = (4 * dp).toInt()
             setPadding(0, v, 0, v)
             addView(TextView(context).apply {
-                setTextColor(resources.getColor(R.color.color_text))
+                setTextColor(resources.getColor(R.color.color_hint))
+                typeface = Typeface.DEFAULT_BOLD
                 text = "L"
             })
             addView(lightness, l)
@@ -180,7 +199,8 @@ object ColorPicker {
             val v = (4 * dp).toInt()
             setPadding(0, v, 0, v)
             addView(TextView(context).apply {
-                setTextColor(resources.getColor(R.color.color_text))
+                setTextColor(resources.getColor(R.color.color_hint))
+                typeface = Typeface.DEFAULT_BOLD
                 text = "S"
             })
             addView(saturation, l)
@@ -191,15 +211,16 @@ object ColorPicker {
             val v = (4 * dp).toInt()
             setPadding(0, v, 0, v)
             addView(TextView(context).apply {
-                setTextColor(resources.getColor(R.color.color_text))
+                setTextColor(resources.getColor(R.color.color_hint))
+                typeface = Typeface.DEFAULT_BOLD
                 text = "H"
             })
             addView(hue, l)
         }, l)
         content.addView(LinearLayout(context).apply {
-            val br = 8 * dp
-            val h = (18 * dp).toInt()
-            val v = (10 * dp).toInt()
+            val br = 10 * dp
+            val h = (32 * dp).toInt()
+            val v = (15 * dp).toInt()
             orientation = LinearLayout.HORIZONTAL
             addView(TextView(context).apply {
                 setText(android.R.string.ok)
@@ -252,8 +273,13 @@ object ColorPicker {
         if (tag == null)
             tag = 0
         val dp = resources.displayMetrics.density
+        val r = tag as Int / 4
+        val c = tag as Int % 4
         addView(View(context).apply {
-            val r = 8 * dp
+            val lra = 4 * dp
+            val bra = 10 * dp
+            val tl = if (r == 0 && c == 0) bra else lra
+            val tr = if (r == 0 && c == 3) bra else lra
             val highlight = DoubleArray(3)
                 .also { ColorUtils.colorToLAB(color, it) }
                 .also {
@@ -264,18 +290,16 @@ object ColorPicker {
                 .let { ColorUtils.LABToColor(it[0], it[1], it[2]) }
             background = RippleDrawable(
                 ColorStateList.valueOf(highlight),
-                ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null)), null)
+                ShapeDrawable(RoundRectShape(floatArrayOf(tl, tl, tr, tr, lra, lra, lra, lra), null, null)), null)
             backgroundTintList = ColorStateList.valueOf(color or 0xff000000.toInt())
             setOnClickListener {
                 target.setText(formatColorString(color))
             }
             contentDescription = formatColorString(color)
         }, GridLayout.LayoutParams().apply {
-            val m = (8 * dp).toInt()
+            val m = (6 * dp).toInt()
             width = 0
             height = 0
-            val r = tag as Int / 4
-            val c = tag as Int % 4
             rowSpec = GridLayout.spec(r, 1, 1f)
             columnSpec = GridLayout.spec(c, 1, 1f)
             if (c != 0) leftMargin = m

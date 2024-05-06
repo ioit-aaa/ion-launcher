@@ -82,8 +82,8 @@ class WallpaperApplicationActivity : Activity() {
                         ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null)).apply {
                             paint.color = resources.getColor(R.color.color_button)
                         }, null)
-                    val h = (24 * dp).toInt()
-                    val v = (12 * dp).toInt()
+                    val h = (32 * dp).toInt()
+                    val v = (15 * dp).toInt()
                     setPadding(h, v, h, v)
                     gravity = Gravity.CENTER_HORIZONTAL
                     typeface = Typeface.DEFAULT_BOLD
