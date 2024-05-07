@@ -49,4 +49,5 @@
     <string name="show_search_in_suggestions">Кнопка поиск в ряду рекомендаций</string>
     <string name="monochrome_icons">Монохромные иконки</string>
     <string name="monochrome_bg">Фон монохромных иконок</string>
+    <string name="turn_off_torch">Выключить фонарь</string>
 </resources>

@@ -49,4 +49,5 @@
     <string name="show_search_in_suggestions">Botó de cerca en fila de suggeriments</string>
     <string name="monochrome_icons">Icones monocromes</string>
     <string name="monochrome_bg">Fons d\'icones monocromes</string>
+    <string name="turn_off_torch">Apagar llanterna</string>
 </resources>

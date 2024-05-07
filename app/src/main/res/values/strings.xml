@@ -48,4 +48,5 @@
     <string name="show_search_in_suggestions">Search button in suggestions row</string>
     <string name="monochrome_icons">Monochrome Icons</string>
     <string name="monochrome_bg">Monochrome Icons Background</string>
+    <string name="turn_off_torch">Turn off torch</string>
 </resources>

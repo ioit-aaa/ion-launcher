@@ -13,8 +13,11 @@ import android.os.BatteryManager
 import android.os.Build
 import android.os.Process
 import android.os.UserHandle
+import androidx.annotation.RequiresApi
+import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
+import one.zagura.IonLauncher.data.items.TorchToggleItem
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.UpdatingResource
 import one.zagura.IonLauncher.util.Settings
@@ -41,6 +44,8 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
     private var suggestions: ArrayList<LauncherItem> = ArrayList()
     override fun getResource(): List<LauncherItem> = suggestions
 
+    private var systemActions = ArrayList<LauncherItem>()
+
     fun onItemOpened(context: Context, item: LauncherItem) {
         TaskRunner.submit {
             val data = ContextArray()
@@ -64,6 +69,21 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
     fun onAppUninstalled(context: Context, packageName: String, user: UserHandle) {
         if (this.suggestions.removeAll { it is App && it.packageName == packageName && it.userHandle == user })
             update(suggestions)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun onTorchStateChanged(context: Context, enabled: Boolean, cameraId: String) {
+        val i = systemActions.indexOfFirst { it is TorchToggleItem }
+        if (i != -1) {
+            systemActions.removeAt(i)
+            suggestions.removeAt(i)
+        }
+        if (enabled) {
+            val item = TorchToggleItem(cameraId, context.getString(R.string.turn_off_torch))
+            systemActions.add(0, item)
+            suggestions.add(0, item)
+        }
+        update(suggestions)
     }
 
     private fun updateSuggestions(context: Context) {
@@ -112,7 +132,8 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
                 newSuggestions.add(app to d)
             }
         }
-        suggestions = newSuggestions.mapTo(ArrayList()) { it.first }
+        val s = ArrayList(systemActions)
+        suggestions = newSuggestions.mapTo(s) { it.first }
         update(suggestions)
     }
 

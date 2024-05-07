@@ -25,11 +25,13 @@ import androidx.annotation.RequiresApi
 import androidx.core.graphics.alpha
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.get
+import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.ContactItem
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.data.items.ActionItem
 import one.zagura.IonLauncher.data.items.StaticShortcut
+import one.zagura.IonLauncher.data.items.TorchToggleItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.ClippedDrawable
@@ -74,6 +76,9 @@ object IconLoader {
         is ContactItem -> loadIcon(context, item)
         is ActionItem -> loadIcon(context, item)
         is StaticShortcut -> loadIcon(context, item)
+        is TorchToggleItem -> context.getDrawable(R.drawable.ic_torch)!!.apply {
+            setTint(ColorThemer.pillForeground(context))
+        }
     }
 
     fun loadIcon(context: Context, item: ActionItem): Drawable {

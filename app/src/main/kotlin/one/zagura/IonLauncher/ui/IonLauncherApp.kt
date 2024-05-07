@@ -7,7 +7,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.LauncherApps
+import android.content.pm.PackageManager
+import android.hardware.camera2.CameraManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import androidx.annotation.RequiresApi
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.items.IconLoader
@@ -31,11 +35,23 @@ class IonLauncherApp : Application() {
         settings.init(applicationContext)
         SuggestionsManager.onCreate(applicationContext)
         setupApps()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH))
+                (getSystemService(Context.CAMERA_SERVICE) as CameraManager?)
+                    ?.registerTorchCallback(torchCallback, Handler(Looper.getMainLooper()))
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    val torchCallback = object : CameraManager.TorchCallback() {
+        override fun onTorchModeChanged(cameraId: String, enabled: Boolean) =
+            SuggestionsManager.onTorchStateChanged(this@IonLauncherApp, enabled, cameraId)
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
     object AppReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) = AppLoader.reloadApps(context.ionApplication)
+        override fun onReceive(context: Context, intent: Intent) =
+            AppLoader.reloadApps(context.ionApplication)
     }
 
     private fun setupApps() {
