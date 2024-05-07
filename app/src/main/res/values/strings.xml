@@ -22,9 +22,11 @@
     <string name="contacts_access">Contacts Access</string>
     <string name="calendar_access">Calendar Access</string>
     <string name="usage_access">App Usage Access</string>
+    <string name="call_log_access">Call Log Access</string>
     <string name="to_show_in_search">To show them in the search results</string>
     <string name="to_show_media_player">To show the media player</string>
     <string name="for_suggestions">For suggestions and tweaked search results</string>
+    <string name="for_summary_view">To show info in the today view</string>
     <string name="to_show_upcoming_events">To show upcoming events</string>
     <string name="finish_setup">Finish Setup</string>
     <string name="just_look">Just look at the launcher</string>
@@ -49,4 +51,8 @@
     <string name="monochrome_icons">Monochrome Icons</string>
     <string name="monochrome_bg">Monochrome Icons Background</string>
     <string name="turn_off_torch">Turn off torch</string>
+    <plurals name="missed_calls">
+        <item quantity="one">One missed call</item>
+        <item quantity="other">%d missed calls</item>
+    </plurals>
 </resources>

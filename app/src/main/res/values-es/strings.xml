@@ -23,9 +23,11 @@
     <string name="contacts_access">Acceso a contactos</string>
     <string name="calendar_access">Acceso al calendario</string>
     <string name="usage_access">Acceso a uso de apps</string>
+    <string name="call_log_access">Acceso a registro de llamadas</string>
     <string name="to_show_in_search">Para mostrarlos en resultados de busqueda</string>
     <string name="to_show_media_player">Para mostrar el reproductor de música</string>
     <string name="for_suggestions">Para sugerencias y ajustar los resultados de busqueda</string>
+    <string name="for_summary_view">Para mostrar en la vista de hoy</string>
     <string name="to_show_upcoming_events">Para mostrar proximos eventos</string>
     <string name="finish_setup">Finalizar preconfiguración</string>
     <string name="just_look">Solo ver el lanzador</string>
@@ -50,4 +52,8 @@
     <string name="monochrome_icons">Iconos monocromos</string>
     <string name="monochrome_bg">Fondo de iconos monocromos</string>
     <string name="turn_off_torch">Apagar linterna</string>
+    <plurals name="missed_calls">
+        <item quantity="one">Una llamada perdida</item>
+        <item quantity="many">%d llamadas perdidas</item>
+    </plurals>
 </resources>

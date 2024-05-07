@@ -23,9 +23,11 @@
     <string name="contacts_access">Acces a contactes</string>
     <string name="calendar_access">Acces al calendari</string>
     <string name="usage_access">Acces a l\'us d\'apps</string>
+    <string name="call_log_access">Acces a historial de trucades</string>
     <string name="to_show_in_search">Per mostrar en resultats de çerca</string>
     <string name="to_show_media_player">Per mostrar el reproductor d\'audio</string>
     <string name="for_suggestions">Per sugeriments i çerca millorada</string>
+    <string name="for_summary_view">Per mostrar infornació en l\'area d\'avui</string>
     <string name="to_show_upcoming_events">Per mostrar propers events</string>
     <string name="finish_setup">Finalitzar preconfiguració</string>
     <string name="just_look">Nomes veure el llençador</string>
@@ -50,4 +52,8 @@
     <string name="monochrome_icons">Icones monocromes</string>
     <string name="monochrome_bg">Fons d\'icones monocromes</string>
     <string name="turn_off_torch">Apagar llanterna</string>
+    <plurals name="missed_calls">
+        <item quantity="one">Una trucada perduda</item>
+        <item quantity="many">%d trucades perdudes</item>
+    </plurals>
 </resources>

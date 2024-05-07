@@ -23,9 +23,11 @@
     <string name="contacts_access">Доступ к контактам</string>
     <string name="calendar_access">Доступ к календарю</string>
     <string name="usage_access">Доступ к использованию прилошений</string>
+    <string name="call_log_access">Доступ к журналу звонков</string>
     <string name="to_show_in_search">Чтобы их показывать в результатах поиска</string>
     <string name="to_show_media_player">Чтобы показывать играющую музику</string>
     <string name="for_suggestions">Для рекомендацый и улучшеного поиска</string>
+    <string name="for_summary_view">Чтобы показывать инфо в сегоднешнем виджете</string>
     <string name="to_show_upcoming_events">Чтобы показывать следуйщие эвенты</string>
     <string name="finish_setup">Закончить настройку</string>
     <string name="just_look">Просто увидить лаунчер</string>
@@ -50,4 +52,9 @@
     <string name="monochrome_icons">Монохромные иконки</string>
     <string name="monochrome_bg">Фон монохромных иконок</string>
     <string name="turn_off_torch">Выключить фонарь</string>
+    <plurals name="missed_calls">
+        <item quantity="one">%d потеранный звонок</item>
+        <item quantity="few">%d потеранных знонка</item>
+        <item quantity="many">%d потеранных звонков</item>
+    </plurals>
 </resources>

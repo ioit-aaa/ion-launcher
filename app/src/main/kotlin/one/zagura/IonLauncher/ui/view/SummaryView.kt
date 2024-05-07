@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.os.Build
+import android.provider.CallLog
 import android.text.format.DateFormat
 import android.util.TypedValue
 import android.view.GestureDetector
@@ -17,6 +18,7 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.data.summary.Event
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.summary.Alarm
+import one.zagura.IonLauncher.provider.summary.MissedCalls
 import one.zagura.IonLauncher.util.LiveWallpaper
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.Utils
@@ -25,6 +27,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Calendar
 import kotlin.math.abs
+import kotlin.math.sign
 
 
 class SummaryView(c: Context) : View(c) {
@@ -89,8 +92,13 @@ class SummaryView(c: Context) : View(c) {
         } else
             DateFormat.getMediumDateFormat(context)
                 .format(Calendar.getInstance().time)
+        val missedCalls = MissedCalls.get(context, Calendar.getInstance().apply {
+            add(Calendar.HOUR_OF_DAY, -2)
+        }.timeInMillis)
         val alarm = Alarm.get(context)
-        val e = ArrayList<CompiledEvent>(events.size + (alarm?.let { 1 } ?: 0))
+        val e = ArrayList<CompiledEvent>(events.size + (alarm?.let { 1 } ?: 0) + missedCalls.sign)
+        if (missedCalls != 0)
+            e.add(CompiledEvent.MissedCalls(context, missedCalls))
         alarm?.let {
             e.add(CompiledEvent.Alarm(
                 it.open,
@@ -218,6 +226,17 @@ class SummaryView(c: Context) : View(c) {
             override fun open(view: View) {
                 view.context.startActivity(Intent(Intent.ACTION_MAIN)
                     .addCategory(Intent.CATEGORY_APP_CALENDAR)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), LauncherItem.createOpeningAnimation(view))
+            }
+        }
+
+        class MissedCalls(
+            context: Context,
+            missed: Int,
+        ) : CompiledEvent(context.resources.getQuantityString(R.plurals.missed_calls, missed, missed), null, null) {
+            override fun open(view: View) {
+                view.context.startActivity(Intent(Intent.ACTION_VIEW)
+                    .setType(CallLog.Calls.CONTENT_TYPE)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), LauncherItem.createOpeningAnimation(view))
             }
         }

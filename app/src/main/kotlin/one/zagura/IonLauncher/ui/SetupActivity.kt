@@ -28,6 +28,7 @@ import one.zagura.IonLauncher.provider.items.ContactsLoader
 import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.provider.summary.EventsLoader
+import one.zagura.IonLauncher.provider.summary.MissedCalls
 import one.zagura.IonLauncher.ui.view.settings.color
 import one.zagura.IonLauncher.ui.view.settings.permissionSwitch
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
@@ -40,6 +41,7 @@ class SetupActivity : Activity() {
     private lateinit var updateContactsAccess: (Boolean) -> Unit
     private lateinit var updateCalendarAccess: (Boolean) -> Unit
     private lateinit var updateUsageAccess: (Boolean) -> Unit
+    private lateinit var updateCallLogAccess: (Boolean) -> Unit
     private lateinit var updateNotificationAccess: (Boolean) -> Unit
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,6 +57,9 @@ class SetupActivity : Activity() {
                 }
                 setting(R.string.usage_access, subtitle = R.string.for_suggestions) {
                     updateUsageAccess = permissionSwitch(SuggestionsManager.hasPermission(view.context), ::grantUsageAccess)
+                }
+                setting(R.string.call_log_access, subtitle = R.string.for_summary_view) {
+                    updateCallLogAccess = permissionSwitch(hasCallLogAccess(), ::grantCallLogAccess)
                 }
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
@@ -119,6 +124,7 @@ class SetupActivity : Activity() {
             updateContactsAccess(hasContactsAccess())
             updateCalendarAccess(hasCalendarAccess())
             updateUsageAccess(SuggestionsManager.hasPermission(this))
+            updateCallLogAccess(hasCallLogAccess())
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             updateNotificationAccess(hasNotificationAccess())
@@ -162,6 +168,7 @@ class SetupActivity : Activity() {
     private fun hasNotificationAccess() = NotificationService.hasPermission(this)
     private fun hasContactsAccess() = ContactsLoader.hasPermission(this)
     private fun hasCalendarAccess() = EventsLoader.hasPermission(this)
+    private fun hasCallLogAccess() = MissedCalls.hasPermission(this)
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     fun grantNotificationAccess(v: View) {
@@ -177,6 +184,10 @@ class SetupActivity : Activity() {
     @RequiresApi(Build.VERSION_CODES.M)
     fun grantContactsAccess(v: View) =
         requestPermissions(arrayOf(Manifest.permission.READ_CONTACTS), 0)
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun grantCallLogAccess(v: View) =
+        requestPermissions(arrayOf(Manifest.permission.READ_CALL_LOG), 0)
 
     @RequiresApi(Build.VERSION_CODES.M)
     fun grantCalendarAccess(v: View) =
