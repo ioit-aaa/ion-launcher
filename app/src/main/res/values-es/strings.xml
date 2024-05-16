@@ -52,6 +52,7 @@
     <string name="monochrome_icons">Iconos monocromos</string>
     <string name="monochrome_bg">Fondo de iconos monocromos</string>
     <string name="turn_off_torch">Apagar linterna</string>
+    <string name="radius_percent">Porcentage de radio</string>
     <plurals name="missed_calls">
         <item quantity="one">Una llamada perdida</item>
         <item quantity="many">%d llamadas perdidas</item>

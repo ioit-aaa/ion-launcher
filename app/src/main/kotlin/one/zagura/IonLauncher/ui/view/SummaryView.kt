@@ -200,7 +200,7 @@ class SummaryView(c: Context) : View(c) {
         textPaint.color = textColor
         rightTextPaint.color = hintColor
         cardPaint.color = ColorThemer.todayBackground(context)
-        radius = settings["dock:icon-size", 48] * dp / 2f
+        radius = settings["dock:icon-size", 48] * settings["icon:radius-ratio", 50] * dp / 100f
     }
 
     private sealed class CompiledEvent(

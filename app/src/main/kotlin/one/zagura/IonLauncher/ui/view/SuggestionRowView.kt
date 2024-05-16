@@ -33,6 +33,7 @@ class SuggestionRowView(
     private var showSearchButton = false
     private var suggestions = emptyList<LauncherItem>()
     private var labels = emptyList<CharSequence>()
+    private var radius = 0f
 
     fun update(allSuggestions: List<LauncherItem>) {
         TaskRunner.submit {
@@ -52,6 +53,8 @@ class SuggestionRowView(
     }
 
     fun applyCustomizations(settings: Settings) {
+        val dp = resources.displayMetrics.density
+        radius = settings["dock:icon-size", 48] * settings["icon:radius-ratio", 50] * dp / 100f
         showSearchButton = settings["layout:search-in-suggestions", false]
         pillPaint.color = ColorThemer.pillBackground(context)
         textPaint.color = ColorThemer.pillForeground(context)
@@ -91,9 +94,8 @@ class SuggestionRowView(
         if (showSearchButton) {
             val x = pl + width - height
             val y = pt
-            val r = height / 2f
             val p = (8 * dp).toInt()
-            canvas.drawCircle(x + r, y + r, r, pillPaint)
+            canvas.drawRoundRect(x.toFloat(), y.toFloat(), x.toFloat() + height, y.toFloat() + height, radius, radius, pillPaint)
             icSearch.setBounds(x + p, y + p, x + height - p, y + height - p)
             icSearch.draw(canvas)
         }
@@ -102,12 +104,11 @@ class SuggestionRowView(
         val suggestionsWidth = if (showSearchButton) width - height.toFloat() else width + separation
         val singleWidth = suggestionsWidth / suggestions.size
         var x = pl.toFloat()
-        val r = height * dp
         val p = (8 * dp).toInt()
         for (i in suggestions.indices) {
             val item = suggestions[i]
             val icon = IconLoader.loadIcon(context, item)
-            canvas.drawRoundRect(x, pt.toFloat(), x + singleWidth - separation, pt + height.toFloat(), r, r, pillPaint)
+            canvas.drawRoundRect(x, pt.toFloat(), x + singleWidth - separation, pt + height.toFloat(), radius, radius, pillPaint)
             icon.copyBounds(tmpRect)
             icon.setBounds(x.toInt() + p, pt + p, x.toInt() + height - p, pt + height - p)
             icon.draw(canvas)

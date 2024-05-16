@@ -51,6 +51,7 @@
     <string name="monochrome_icons">Monochrome Icons</string>
     <string name="monochrome_bg">Monochrome Icons Background</string>
     <string name="turn_off_torch">Turn off torch</string>
+    <string name="radius_percent">Radius Percent</string>
     <plurals name="missed_calls">
         <item quantity="one">One missed call</item>
         <item quantity="other">%d missed calls</item>

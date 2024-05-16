@@ -23,7 +23,6 @@ import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
 import kotlin.math.abs
-import kotlin.math.min
 
 class MediaView(context: Context) : View(context) {
 
@@ -66,6 +65,7 @@ class MediaView(context: Context) : View(context) {
         val dp = resources.displayMetrics.density
         separation = 12 * dp
         itemHeight = settings["dock:icon-size", 48] * dp
+        radius = settings["dock:icon-size", 48] * settings["icon:radius-ratio", 50] * dp / 100f
         val c = ColorThemer.background(context)
         pillPaint.color = ColorThemer.foreground(context)
         titlePaint.color = c
@@ -79,6 +79,7 @@ class MediaView(context: Context) : View(context) {
 
     private var itemHeight = 0f
     private var separation = 0f
+    private var radius = 0f
 
     private val tmpRect = Rect()
 
@@ -95,13 +96,12 @@ class MediaView(context: Context) : View(context) {
         val dp = resources.displayMetrics.density
 
         var y = pt.toFloat()
-        val r = itemHeight
         val iconPadding = (6 * dp).toInt()
         val controlPadding = (10 * dp).toInt()
         for (i in players.indices) {
             val player = players[i]
             val icon = player.icon
-            canvas.drawRoundRect(pl.toFloat(), y, pl + width.toFloat(), y + itemHeight, r, r, pillPaint)
+            canvas.drawRoundRect(pl.toFloat(), y, pl + width.toFloat(), y + itemHeight, radius, radius, pillPaint)
             if (icon != null) {
                 icon.copyBounds(tmpRect)
                 icon.setBounds(pl + iconPadding, y.toInt() + iconPadding, pl + itemHeight.toInt() - iconPadding, y.toInt() + itemHeight.toInt() - iconPadding)

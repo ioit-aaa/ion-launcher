@@ -233,39 +233,40 @@ class HomeScreen : Activity() {
             addView(drawerArea, LayoutParams(LayoutParams.MATCH_PARENT, fullHeight + offset))
         }
 
+        sheetBehavior = BottomSheetBehavior<View>().apply {
+            isHideable = false
+            peekHeight = fullHeight
+            state = STATE_COLLAPSED
+            addBottomSheetCallback(object : BottomSheetCallback() {
+                override fun onStateChanged(view: View, newState: Int) {
+                    if (newState != STATE_EXPANDED)
+                        drawerArea.clearSearch()
+                    desktop.isVisible = newState != STATE_EXPANDED
+                    if (newState == STATE_COLLAPSED) {
+                        drawerArea.isInvisible = true
+                        desktop.bringToFront()
+                    } else {
+                        drawerArea.isInvisible = false
+                        drawerArea.bringToFront()
+                    }
+                }
+
+                override fun onSlide(view: View, slideOffset: Float) {
+                    drawerArea.alpha = slideOffset * slideOffset / 0.6f - 0.4f
+                    val a = (slideOffset * 2f).coerceAtMost(1f)
+                    screenBackground.alpha = (screenBackgroundAlpha * (1f - a) + 255 * a).toInt()
+                    desktop.alpha = 1f - a
+                    desktop.translationY = slideOffset * offset * 0.75f
+                    val scale = 1f - slideOffset * 0.02f
+                    desktop.scaleX = scale
+                    desktop.scaleY = scale
+                }
+            })
+        }
+
         return CoordinatorLayout(this).apply {
             fitsSystemWindows = false
             addView(sheet, CoordinatorLayout.LayoutParams(LayoutParams.MATCH_PARENT, fullHeight + offset).apply {
-                sheetBehavior = BottomSheetBehavior<View>().apply {
-                    isHideable = false
-                    peekHeight = fullHeight
-                    state = STATE_COLLAPSED
-                    addBottomSheetCallback(object : BottomSheetCallback() {
-                        override fun onStateChanged(view: View, newState: Int) {
-                            if (newState != STATE_EXPANDED)
-                                drawerArea.clearSearch()
-                            desktop.isVisible = newState != STATE_EXPANDED
-                            if (newState == STATE_COLLAPSED) {
-                                drawerArea.isInvisible = true
-                                desktop.bringToFront()
-                            } else {
-                                drawerArea.isInvisible = false
-                                drawerArea.bringToFront()
-                            }
-                        }
-
-                        override fun onSlide(view: View, slideOffset: Float) {
-                            drawerArea.alpha = slideOffset * slideOffset / 0.6f - 0.4f
-                            val a = (slideOffset * 2f).coerceAtMost(1f)
-                            screenBackground.alpha = (screenBackgroundAlpha * (1f - a) + 255 * a).toInt()
-                            desktop.alpha = 1f - a
-                            desktop.translationY = slideOffset * offset * 0.75f
-                            val scale = 1f - slideOffset * 0.02f
-                            desktop.scaleX = scale
-                            desktop.scaleY = scale
-                        }
-                    })
-                }
                 behavior = sheetBehavior
             })
         }

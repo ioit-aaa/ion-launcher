@@ -52,6 +52,7 @@
     <string name="monochrome_icons">Icones monocromes</string>
     <string name="monochrome_bg">Fons d\'icones monocromes</string>
     <string name="turn_off_torch">Apagar llanterna</string>
+    <string name="radius_percent">Percentatge de radi</string>
     <plurals name="missed_calls">
         <item quantity="one">Una trucada perduda</item>
         <item quantity="many">%d trucades perdudes</item>

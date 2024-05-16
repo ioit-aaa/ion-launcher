@@ -3,12 +3,15 @@ package one.zagura.IonLauncher.util
 import android.graphics.Canvas
 import android.graphics.ColorFilter
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.PixelFormat
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
+import one.zagura.IonLauncher.ui.ionApplication
 
 internal class ContactDrawable(
     private val text: String,
+    private val radiusRatio: Float,
 ) : Drawable() {
 
     companion object {
@@ -28,8 +31,8 @@ internal class ContactDrawable(
     }
 
     override fun draw(canvas: Canvas) {
-        val w = bounds.width() / 2f
-        canvas.drawCircle(w, w, w - 1f, bgPaint)
+        val r = bounds.width() * radiusRatio
+        canvas.drawRoundRect(bounds.left.toFloat(), bounds.top.toFloat(), bounds.right.toFloat(), bounds.bottom.toFloat(), r, r, bgPaint)
         val x = bounds.width() / 2f
         val y = (bounds.height() - (textPaint.descent() + textPaint.ascent())) / 2f
         canvas.drawText(text, x, y, textPaint)

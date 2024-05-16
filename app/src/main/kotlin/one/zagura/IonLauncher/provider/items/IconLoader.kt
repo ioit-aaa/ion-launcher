@@ -123,9 +123,8 @@ object IconLoader {
                 pic.setBounds(0, 0, pic.intrinsicWidth, pic.intrinsicHeight)
                 val path = Path().apply {
                     val w = pic.bounds.width()
-                    val p = w / 32f
-                    val r = w / 10f
-                    addRoundRect(p, p, w - p, w - p,
+                    val r = w * context.ionApplication.settings["icon:radius-ratio", 50] / 100f
+                    addRoundRect(0f, 0f, w.toFloat(), w.toFloat(),
                         floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
                 }
                 return@getOrPut ClippedDrawable(pic, path)
@@ -133,7 +132,9 @@ object IconLoader {
             val realName = contact.label.trim()
             if (realName.isEmpty())
                 return@getOrPut NonDrawable
-            ContactDrawable(realName.substring(0, realName.length.coerceAtMost(2)))
+            ContactDrawable(
+                realName.substring(0, realName.length.coerceAtMost(2)),
+                context.ionApplication.settings["icon:radius-ratio", 50] / 100f)
         }
     }
 
@@ -180,6 +181,7 @@ object IconLoader {
     }
 
     private fun transformIcon(context: Context, icon: Drawable): Drawable {
+        val settings = context.ionApplication.settings
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || icon !is AdaptiveIconDrawable) {
             val bmp = icon.toBitmap(1, 1)
             val isOpaqueSquare = bmp[0, 0].alpha == 255
@@ -196,19 +198,19 @@ object IconLoader {
                 ClippedDrawable(layers, path)
             } else icon
             return icon.apply {
-                setGrayscale(context.ionApplication.settings["icon:grayscale", true])
+                setGrayscale(settings["icon:grayscale", true])
             }
         }
 
         var fg = icon.foreground
         var bg = icon.background
-        fg?.setGrayscale(context.ionApplication.settings["icon:grayscale", true])
-        bg?.setGrayscale(context.ionApplication.settings["icon:grayscale", true])
+        fg?.setGrayscale(settings["icon:grayscale", true])
+        bg?.setGrayscale(settings["icon:grayscale", true])
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val monochrome = icon.monochrome
-            if (monochrome != null && context.ionApplication.settings["icon:monochrome", false]) {
-                if (!context.ionApplication.settings["icon:monochrome-bg", true]) {
+            if (monochrome != null && settings["icon:monochrome", false]) {
+                if (!settings["icon:monochrome-bg", true]) {
                     monochrome.colorFilter = PorterDuffColorFilter(ColorThemer.foreground(context), PorterDuff.Mode.SRC_IN)
                     val w = monochrome.intrinsicWidth
                     return InsetDrawable(monochrome, -w / 5)
@@ -227,8 +229,9 @@ object IconLoader {
         layers.setBounds(0, 0, w, h)
 
         val path = Path().apply {
-            val w2 = w / 2f
-            addCircle(w2, w2, w2, Path.Direction.CW)
+            val r = w * settings["icon:radius-ratio", 50] / 100f
+            addRoundRect(0f, 0f, w.toFloat(), w.toFloat(),
+                floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
         }
         return ClippedDrawable(layers, path)
     }

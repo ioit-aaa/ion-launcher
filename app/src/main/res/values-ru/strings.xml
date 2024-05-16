@@ -52,6 +52,7 @@
     <string name="monochrome_icons">Монохромные иконки</string>
     <string name="monochrome_bg">Фон монохромных иконок</string>
     <string name="turn_off_torch">Выключить фонарь</string>
+    <string name="radius_percent">Процент радиуса</string>
     <plurals name="missed_calls">
         <item quantity="one">%d потеранный звонок</item>
         <item quantity="few">%d потеранных знонка</item>
