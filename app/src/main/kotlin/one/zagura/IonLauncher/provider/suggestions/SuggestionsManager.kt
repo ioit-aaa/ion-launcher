@@ -17,9 +17,11 @@ import androidx.annotation.RequiresApi
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
+import one.zagura.IonLauncher.data.items.OpenAlarmsItem
 import one.zagura.IonLauncher.data.items.TorchToggleItem
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.UpdatingResource
+import one.zagura.IonLauncher.provider.summary.EventsLoader
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.TaskRunner
 import java.util.*
@@ -67,7 +69,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
     }
 
     fun onAppUninstalled(context: Context, packageName: String, user: UserHandle) {
-        if (this.suggestions.removeAll { it is App && it.packageName == packageName && it.userHandle == user })
+        if (this.suggestions.removeIf { it is App && it.packageName == packageName && it.userHandle == user })
             update(suggestions)
     }
 
@@ -132,6 +134,8 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
                 newSuggestions.add(app to d)
             }
         }
+        if (EventsLoader.mightWantToSetAlarm(context))
+            newSuggestions.add(OpenAlarmsItem(context.getString(R.string.alarms)) to 0.1f)
         val s = ArrayList(systemActions)
         suggestions = newSuggestions.mapTo(s) { it.first }
         update(suggestions)

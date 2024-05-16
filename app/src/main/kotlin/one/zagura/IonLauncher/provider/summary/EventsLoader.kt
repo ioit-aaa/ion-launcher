@@ -1,6 +1,7 @@
 package one.zagura.IonLauncher.provider.summary
 
 import android.Manifest
+import android.app.AlarmManager
 import android.content.ContentUris
 import android.content.Context
 import android.content.pm.PackageManager
@@ -12,33 +13,31 @@ import java.util.Calendar
 
 
 object EventsLoader {
-    private val PROJECTION = arrayOf(
-        CalendarContract.Instances._ID,
-        CalendarContract.Instances.TITLE,
-        CalendarContract.Instances.DISPLAY_COLOR,
-        CalendarContract.Instances.ALL_DAY,
-        CalendarContract.Instances.BEGIN,
-        CalendarContract.Instances.END,
-    )
 
     fun load(context: Context): List<Event> {
         if (!hasPermission(context))
             return emptyList()
-        val eventsUriBuilder = CalendarContract.Instances.CONTENT_URI
-            .buildUpon()
         val startOfDay = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, (Calendar.getInstance()[Calendar.HOUR_OF_DAY] - 3).coerceAtLeast(0))
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
         }
-        ContentUris.appendId(eventsUriBuilder, startOfDay.timeInMillis)
-        ContentUris.appendId(eventsUriBuilder, startOfDay.apply {
-            set(Calendar.HOUR_OF_DAY, 24)
-        }.timeInMillis)
-        val eventsUri = eventsUriBuilder.build()
+        val eventsUri = CalendarContract.Instances.CONTENT_URI
+            .buildUpon().apply {
+                ContentUris.appendId(this, startOfDay.timeInMillis)
+                ContentUris.appendId(this, startOfDay.apply {
+                    set(Calendar.HOUR_OF_DAY, 24)
+                }.timeInMillis)
+            }.build()
         val cur = context.contentResolver.query(
             eventsUri,
-            PROJECTION,
+            arrayOf(
+                CalendarContract.Instances._ID,
+                CalendarContract.Instances.TITLE,
+                CalendarContract.Instances.DISPLAY_COLOR,
+                CalendarContract.Instances.ALL_DAY,
+                CalendarContract.Instances.BEGIN,
+                CalendarContract.Instances.END),
             null, null,
             CalendarContract.Instances.DTSTART + " ASC",
         ) ?: return emptyList()
@@ -60,6 +59,47 @@ object EventsLoader {
         }
         cur.close()
         return events
+    }
+
+    fun mightWantToSetAlarm(context: Context): Boolean {
+        if (!hasPermission(context))
+            return false
+        if (Calendar.getInstance()[Calendar.HOUR_OF_DAY] < 19)
+            return false
+        val nextDay = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 24)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+        }
+        val eventsUri = CalendarContract.Instances.CONTENT_URI
+            .buildUpon().apply {
+                ContentUris.appendId(this, nextDay.timeInMillis)
+                ContentUris.appendId(this, nextDay.apply {
+                    add(Calendar.HOUR_OF_DAY, 12)
+                }.timeInMillis)
+            }.build()
+        val cur = context.contentResolver.query(
+            eventsUri,
+            arrayOf(
+                CalendarContract.Instances._ID,
+                CalendarContract.Instances.ALL_DAY,
+                CalendarContract.Instances.BEGIN),
+            CalendarContract.Instances.ALL_DAY+"=0", null, null
+        ) ?: return false
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val alarm = alarmManager.nextAlarmClock
+        try {
+            if (cur.count == 0)
+                return false
+            while (cur.moveToNext()) {
+                if (alarm == null)
+                    return true
+                val begin = cur.getLong(2)
+                if (alarm.triggerTime <= begin)
+                    return false
+            }
+        } finally { cur.close() }
+        return true
     }
 
     fun hasPermission(context: Context): Boolean =

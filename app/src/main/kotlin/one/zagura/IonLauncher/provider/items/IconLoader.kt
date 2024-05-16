@@ -30,6 +30,7 @@ import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.ContactItem
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.data.items.ActionItem
+import one.zagura.IonLauncher.data.items.OpenAlarmsItem
 import one.zagura.IonLauncher.data.items.StaticShortcut
 import one.zagura.IonLauncher.data.items.TorchToggleItem
 import one.zagura.IonLauncher.provider.ColorThemer
@@ -77,6 +78,9 @@ object IconLoader {
         is ActionItem -> loadIcon(context, item)
         is StaticShortcut -> loadIcon(context, item)
         is TorchToggleItem -> context.getDrawable(R.drawable.ic_torch)!!.apply {
+            setTint(ColorThemer.pillForeground(context))
+        }
+        is OpenAlarmsItem -> context.getDrawable(R.drawable.ic_alarm)!!.apply {
             setTint(ColorThemer.pillForeground(context))
         }
     }
