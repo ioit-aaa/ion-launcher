@@ -28,7 +28,13 @@ object Search {
     }
 
     fun query(query: String): List<LauncherItem> {
-        val results = TreeSet<Pair<LauncherItem, Float>> { a, b -> a.second.compareTo(b.second) }
+        val results = TreeSet<Pair<LauncherItem, Float>> { a, b ->
+            when {
+                a.first == b.first -> 0
+                a.second > b.second -> -1
+                else -> 1
+            }
+        }
         for (provider in providers)
             provider.query(query, results)
         return results.map { it.first }
