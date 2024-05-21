@@ -4,10 +4,7 @@ import android.content.Intent
 import android.graphics.Rect
 import android.view.View
 
-class ActionItem(
-    val action: String,
-    override val label: String,
-) : LauncherItem() {
+class ActionItem(val action: String) : LauncherItem() {
 
     override fun open(view: View, bounds: Rect) {
         super.open(view, bounds)
@@ -29,7 +26,7 @@ class ActionItem(
         } catch (e: Exception) { e.printStackTrace() }
     }
 
-    override fun toString() = "${ACTION.toString(16)}$action/$label"
+    override fun toString() = "${ACTION.toString(16)}$action"
 
     override fun hashCode() = action.hashCode()
 

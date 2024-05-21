@@ -7,7 +7,7 @@ import one.zagura.IonLauncher.data.items.ActionItem
 
 object SettingsProvider : BasicProvider<ActionItem> {
 
-    private var list = emptyList<ActionItem>()
+    private var list = emptyList<Pair<ActionItem, String>>()
 
     override fun updateData(context: Context) {
         if (list.isEmpty())
@@ -29,13 +29,13 @@ object SettingsProvider : BasicProvider<ActionItem> {
         list = emptyList()
     }
 
-    private fun action(context: Context, action: String): ActionItem? {
+    private fun action(context: Context, action: String): Pair<ActionItem, String>? {
         val item = context.packageManager.queryIntentActivities(Intent(action), 0)
             .firstOrNull() ?: return null
         val label = item.loadLabel(context.packageManager).toString()
-        return ActionItem(action, label)
+        return ActionItem(action) to label
     }
 
     override fun getBaseData() = list
-    override fun extraFactor(query: String, item: ActionItem) = 0f
+    override fun extraFactor(query: String, item: ActionItem, label: String) = 0f
 }

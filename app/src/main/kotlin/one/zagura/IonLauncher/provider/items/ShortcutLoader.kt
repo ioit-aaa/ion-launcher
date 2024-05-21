@@ -19,11 +19,7 @@ object ShortcutLoader {
             .setPackage(packageName)
             .setShortcutIds(listOf(id))
         return launcherApps.getShortcuts(query, userHandle)?.firstOrNull()?.let {
-            val appLabel = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                launcherApps.getApplicationInfo(packageName, 0, userHandle).loadLabel(context.packageManager).toString()
-            else
-                context.packageManager.getApplicationInfo(packageName, 0).loadLabel(context.packageManager).toString()
-            StaticShortcut(packageName, id, userHandle, it.shortLabel.toString(), appLabel)
+            StaticShortcut(packageName, id, userHandle)
         }
     }
 
@@ -34,7 +30,7 @@ object ShortcutLoader {
         val launcherApps = context.getSystemService(LauncherApps::class.java)
         try {
             launcherApps.getShortcuts(query, Process.myUserHandle())?.forEach {
-                out.add(StaticShortcut(app.packageName, it.id, app.userHandle, it.shortLabel.toString(), app.label))
+                out.add(StaticShortcut(app.packageName, it.id, app.userHandle))
             }
         } catch (_: Exception) {}
     }

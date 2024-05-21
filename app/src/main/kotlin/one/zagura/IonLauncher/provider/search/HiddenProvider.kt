@@ -3,13 +3,16 @@ package one.zagura.IonLauncher.provider.search
 import android.content.Context
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.HiddenApps
+import one.zagura.IonLauncher.provider.items.LabelLoader
 
 object HiddenProvider : BasicProvider<LauncherItem> {
 
-    private var hidden = emptyList<LauncherItem>()
+    private var hidden = emptyList<Pair<LauncherItem, String>>()
 
     override fun updateData(context: Context) {
-        hidden = HiddenApps.getItems(context)
+        hidden = HiddenApps.getItems(context).map {
+            it to LabelLoader.loadLabel(context, it)
+        }
     }
 
     override fun clearData() {
@@ -17,5 +20,5 @@ object HiddenProvider : BasicProvider<LauncherItem> {
     }
 
     override fun getBaseData() = hidden
-    override fun extraFactor(query: String, item: LauncherItem) = -.1f
+    override fun extraFactor(query: String, item: LauncherItem, label: String) = -.1f
 }

@@ -6,9 +6,7 @@ import android.graphics.Rect
 import android.provider.AlarmClock
 import android.view.View
 
-class OpenAlarmsItem(
-    override val label: String,
-) : LauncherItem() {
+object OpenAlarmsItem : LauncherItem() {
 
     override fun toString() = ""
 

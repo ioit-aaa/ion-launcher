@@ -19,8 +19,6 @@ import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 
 sealed class LauncherItem {
 
-    abstract val label: String
-
     /**
      * What to do when the item is clicked
      */
@@ -92,59 +90,30 @@ sealed class LauncherItem {
                         ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                         arrayOf(
                             ContactsContract.Contacts.LOOKUP_KEY,
-                            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
                             ContactsContract.CommonDataKinds.Phone.NUMBER,
                             ContactsContract.CommonDataKinds.Phone.STARRED,
-                            ContactsContract.CommonDataKinds.Phone.IS_PRIMARY,
                             ContactsContract.Contacts.PHOTO_ID
                         ), "${ContactsContract.Contacts.LOOKUP_KEY} = ?", arrayOf(content), null)
                         ?: return null
-
                     if (cur.count == 0)
                         return null
-
                     if (!cur.moveToNext())
                         return null
-
-                    val starred = cur.getInt(3) != 0
+                    val starred = cur.getInt(2) != 0
                     val lookupKey = cur.getString(0)
-                    var name = cur.getString(1)
-                    val phone = cur.getString(2)
-                    val photoId = cur.getString(5)
+                    val phone = cur.getString(1)
+                    val photoId = cur.getString(3)
                     val iconUri: Uri? = if (photoId != null) {
                         ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, photoId.toLong())
                     } else null
-
                     cur.close()
-
-                    val nicknameCur = context.contentResolver.query(
-                        ContactsContract.Data.CONTENT_URI,
-                        arrayOf(
-                            ContactsContract.CommonDataKinds.Nickname.NAME,
-                            ContactsContract.Data.LOOKUP_KEY
-                        ),
-                        "(${ContactsContract.Data.MIMETYPE} = ?) AND (${ContactsContract.Data.LOOKUP_KEY} = ?)",
-                        arrayOf(ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE, content), null)
-
-                    if (nicknameCur != null) {
-                        if (nicknameCur.count > 0) {
-                            if (nicknameCur.moveToNext()) {
-                                val nickname = nicknameCur.getString(0)
-                                if (nickname != null)
-                                    name = nickname
-                            }
-                        }
-                        nicknameCur.close()
-                    }
-
-                    ContactItem(name, lookupKey, phone, starred, iconUri)
+                    ContactItem(lookupKey, phone, starred, iconUri)
                 }
                 ACTION -> {
                     val action = data.substring(1)
-                    val item = context.packageManager.queryIntentActivities(Intent(action), 0)
-                        .firstOrNull() ?: return null
-                    val label = item.loadLabel(context.packageManager).toString()
-                    ActionItem(action, label)
+                    if (context.packageManager.queryIntentActivities(Intent(action), 0).isEmpty())
+                        return null
+                    ActionItem(action)
                 }
                 else -> null
             }

@@ -133,7 +133,7 @@ object IconLoader {
                 }
                 return@getOrPut ClippedDrawable(pic, path)
             } catch (_: FileNotFoundException) {}
-            val realName = contact.label.trim()
+            val realName = LabelLoader.loadLabel(context, contact).trim()
             if (realName.isEmpty())
                 return@getOrPut NonDrawable
             ContactDrawable(

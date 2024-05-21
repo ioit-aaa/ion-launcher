@@ -13,9 +13,7 @@ import androidx.annotation.RequiresApi
 class StaticShortcut(
     val packageName: String,
     val id: String,
-    private val userHandle: UserHandle,
-    override val label: String,
-    val appLabel: String,
+    val userHandle: UserHandle,
 ) : LauncherItem() {
 
     override fun open(view: View, bounds: Rect) {

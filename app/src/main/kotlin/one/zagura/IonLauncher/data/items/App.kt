@@ -11,7 +11,6 @@ class App(
     val packageName: String,
     val name: String,
     val userHandle: UserHandle,
-    override val label: String
 ) : LauncherItem() {
 
     override fun open(view: View, bounds: Rect) {

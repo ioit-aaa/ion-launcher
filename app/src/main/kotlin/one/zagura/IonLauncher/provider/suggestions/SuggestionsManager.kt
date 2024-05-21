@@ -14,11 +14,11 @@ import android.os.Build
 import android.os.Process
 import android.os.UserHandle
 import androidx.annotation.RequiresApi
-import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.data.items.OpenAlarmsItem
 import one.zagura.IonLauncher.data.items.TorchToggleItem
+import one.zagura.IonLauncher.provider.Dock
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.UpdatingResource
 import one.zagura.IonLauncher.provider.summary.EventsLoader
@@ -69,7 +69,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
     }
 
     fun onAppUninstalled(context: Context, packageName: String, user: UserHandle) {
-        if (this.suggestions.removeIf { it is App && it.packageName == packageName && it.userHandle == user })
+        if (this.suggestions.removeAll { it is App && it.packageName == packageName && it.userHandle == user })
             update(suggestions)
     }
 
@@ -81,7 +81,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
             suggestions.removeAt(i)
         }
         if (enabled) {
-            val item = TorchToggleItem(cameraId, context.getString(R.string.turn_off_torch))
+            val item = TorchToggleItem(cameraId)
             systemActions.add(0, item)
             suggestions.add(0, item)
         }
@@ -99,15 +99,18 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
                 else -> 1
             }
         }
+        val dockItems = Dock.getItems(context)
         contextLock.withLock {
             for ((item, data) in contextMap.entries) {
+                if (dockItems.contains(item))
+                    continue
                 val d = contextMap.calculateDistance(currentData, data)
                 if (d < 0.0003f)
                     newSuggestions.add(item to d / 0.0003f)
             }
         }
 
-        if (newSuggestions.size < 16 && hasPermission(context)) {
+        if (newSuggestions.size < 6 && hasPermission(context)) {
             @SuppressLint("InlinedApi")
             val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
@@ -135,7 +138,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
             }
         }
         if (EventsLoader.mightWantToSetAlarm(context))
-            newSuggestions.add(OpenAlarmsItem(context.getString(R.string.alarms)) to 0.1f)
+            newSuggestions.add(OpenAlarmsItem to 0.1f)
         val s = ArrayList(systemActions)
         suggestions = newSuggestions.mapTo(s) { it.first }
         update(suggestions)

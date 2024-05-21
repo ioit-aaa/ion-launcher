@@ -18,6 +18,7 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Dock
 import one.zagura.IonLauncher.provider.items.IconLoader
+import one.zagura.IonLauncher.provider.items.LabelLoader
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.TaskRunner
@@ -205,7 +206,7 @@ class SuggestionRowView(
             else width + separation
         val w = suggestionsWidth / suggestions.size - separation - height
         labels = suggestions.map {
-            TextUtils.ellipsize(it.label, textPaint, w, TextUtils.TruncateAt.END)
+            TextUtils.ellipsize(LabelLoader.loadLabel(context, it), textPaint, w, TextUtils.TruncateAt.END)
         }
     }
 

@@ -7,7 +7,6 @@ import android.provider.ContactsContract
 import android.view.View
 
 class ContactItem(
-    override var label: String,
     val lookupKey: String,
     val phone: String?,
     val isFavorite: Boolean,
@@ -39,8 +38,7 @@ class ContactItem(
         if (javaClass != other?.javaClass) return false
         other as ContactItem
         if (lookupKey != other.lookupKey) return false
-        if (phone != other.phone) return false
-        return label == other.label
+        return phone == other.phone
     }
 
     override fun hashCode() = lookupKey.hashCode()

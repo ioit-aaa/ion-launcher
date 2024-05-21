@@ -9,10 +9,7 @@ import android.view.View
 import androidx.annotation.RequiresApi
 
 @RequiresApi(Build.VERSION_CODES.M)
-class TorchToggleItem(
-    private val cameraId: String,
-    override val label: String,
-) : LauncherItem() {
+class TorchToggleItem(private val cameraId: String) : LauncherItem() {
 
     override fun toString() = ""
 

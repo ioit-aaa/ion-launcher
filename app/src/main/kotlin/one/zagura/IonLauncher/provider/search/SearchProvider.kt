@@ -15,9 +15,22 @@ sealed interface SearchProvider {
          * @return true if [string]'s initials contain [query]
          */
         fun matchInitials(query: String, string: String): Boolean {
-            val initials = string.split(Regex("([ .\\-_]|([a-z](?=[A-Z0-9])))")).mapNotNull(String::firstOrNull).joinToString("")
-            val initialsBasic = string.split(Regex("[ .\\-_]")).mapNotNull(String::firstOrNull).joinToString("")
-            return initials.contains(query, ignoreCase = true) || initialsBasic.contains(query, ignoreCase = true)
+            var i = 0
+            while (i < string.length && string[i] in " .\\-_")
+                i++
+            for (c in query) {
+                if (i == string.length)
+                    return false
+                if (string[i].lowercaseChar() != c.lowercaseChar())
+                    return false
+                while (true) {
+                    if (++i == string.length || string[i] in " .\\-_")
+                        break
+                    if (i < string.lastIndex && string[i].isLowerCase() && string[i + 1].isUpperCase())
+                        break
+                }
+            }
+            return true
         }
     }
 }

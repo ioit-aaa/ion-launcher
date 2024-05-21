@@ -30,9 +30,8 @@ object ContactsLoader {
         if (cur.count != 0) {
             while (cur.moveToNext()) {
                 val starred = cur.getInt(3) != 0
-                if (requiresStar && !starred) {
+                if (requiresStar && !starred)
                     continue
-                }
                 val lookupKey = cur.getString(0)
                 val name = cur.getString(1)
                 if (name.isNullOrBlank()) continue
@@ -42,7 +41,7 @@ object ContactsLoader {
                     ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, photoId.toLong())
                 } else null
 
-                val contact = ContactItem(name, lookupKey, phone, starred, iconUri)
+                val contact = ContactItem(lookupKey, phone, starred, iconUri)
 
                 if (!contactMap.containsKey(lookupKey)) {
                     contactMap[lookupKey] = contact
@@ -50,25 +49,6 @@ object ContactsLoader {
             }
         }
         cur.close()
-
-        val nicknameCur = context.contentResolver.query(
-            ContactsContract.Data.CONTENT_URI,
-            arrayOf(ContactsContract.CommonDataKinds.Nickname.NAME, ContactsContract.Data.LOOKUP_KEY),
-            "${ContactsContract.Data.MIMETYPE}=?",
-            arrayOf(ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE), null)
-
-        if (nicknameCur != null) {
-            if (nicknameCur.count != 0) {
-                while (nicknameCur.moveToNext()) {
-                    val lookupKey = nicknameCur.getString(1)
-                    val nickname = nicknameCur.getString(0)
-                    if (nickname != null && lookupKey != null && contactMap.containsKey(lookupKey)) {
-                        contactMap[lookupKey]!!.label = nickname
-                    }
-                }
-            }
-            nicknameCur.close()
-        }
 
         return contactMap.values.toList()
     }

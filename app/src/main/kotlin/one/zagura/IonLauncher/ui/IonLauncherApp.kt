@@ -15,6 +15,7 @@ import android.os.Looper
 import androidx.annotation.RequiresApi
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.items.IconLoader
+import one.zagura.IonLauncher.provider.items.LabelLoader
 import one.zagura.IonLauncher.provider.search.Search
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.util.CrashActivity
@@ -72,8 +73,10 @@ class IonLauncherApp : Application() {
 
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
-        if (level == TRIM_MEMORY_UI_HIDDEN)
+        if (level == TRIM_MEMORY_UI_HIDDEN) {
             IconLoader.clearCache()
+            LabelLoader.clearCache()
+        }
         Search.clearData()
         SuggestionsManager.saveToStorage(this)
     }

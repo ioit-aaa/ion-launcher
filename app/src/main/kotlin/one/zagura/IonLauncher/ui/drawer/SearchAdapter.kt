@@ -15,10 +15,12 @@ import android.widget.TextView
 import androidx.core.text.buildSpannedString
 import androidx.core.view.setPadding
 import androidx.recyclerview.widget.RecyclerView
+import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.data.items.StaticShortcut
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.items.IconLoader
+import one.zagura.IonLauncher.provider.items.LabelLoader
 import one.zagura.IonLauncher.ui.HomeScreen
 import one.zagura.IonLauncher.ui.view.LongPressMenu
 import one.zagura.IonLauncher.util.Utils
@@ -111,17 +113,19 @@ class SearchAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, i: Int) {
+        val context = holder.itemView.context
         val item = getItem(i)
         with(holder.label) {
-            text = item.label
-            setTextColor(ColorThemer.foreground(holder.itemView.context))
+            setTextColor(ColorThemer.foreground(context))
         }
-        holder.icon.setImageDrawable(IconLoader.loadIcon(holder.itemView.context, item))
+        holder.icon.setImageDrawable(IconLoader.loadIcon(context, item))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && item is StaticShortcut) {
             holder.label.text = buildSpannedString {
-                append(item.appLabel + ": ", ForegroundColorSpan(ColorThemer.hint(holder.itemView.context)), 0)
-                append(item.label)
+                append(LabelLoader.loadLabel(context, item.packageName, item.userHandle) + ": ", ForegroundColorSpan(ColorThemer.hint(context)), 0)
+                append(LabelLoader.loadLabel(context, item))
             }
+        } else {
+            holder.label.text = LabelLoader.loadLabel(context, item)
         }
     }
 

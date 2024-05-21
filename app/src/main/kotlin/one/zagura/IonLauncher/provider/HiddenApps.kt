@@ -39,7 +39,7 @@ object HiddenApps {
             "hidden" set new
         }
         if (item is App)
-            AppLoader.onShow(item)
+            AppLoader.onShow(context, item)
     }
 
     fun isHidden(settings: Settings, app: App): Boolean {
