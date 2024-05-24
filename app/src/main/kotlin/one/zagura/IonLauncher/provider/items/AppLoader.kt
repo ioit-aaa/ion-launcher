@@ -23,8 +23,12 @@ object AppLoader : UpdatingResource<List<App>>() {
         TaskRunner.submit {
             val userManager = ionApplication.getSystemService(Context.USER_SERVICE) as UserManager
             val launcherApps = ionApplication.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
-            val collection = TreeSet<App> { a, b -> LabelLoader.loadLabel(ionApplication, a)
-                .compareTo(LabelLoader.loadLabel(ionApplication, b)) }
+            val collection = TreeSet<App> { a, b ->
+                val la = LabelLoader.loadLabel(ionApplication, a)
+                val lb = LabelLoader.loadLabel(ionApplication, b)
+                val c = la.compareTo(lb)
+                if (c == 0) -1 else c
+            }
 
             for (user in userManager.userProfiles) {
                 val appList = launcherApps.getActivityList(null, user)
