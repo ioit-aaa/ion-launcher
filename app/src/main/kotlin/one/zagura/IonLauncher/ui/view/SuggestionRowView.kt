@@ -65,9 +65,9 @@ class SuggestionRowView(
 
     fun applyCustomizations(settings: Settings) {
         showSearchButton = settings["layout:search-in-suggestions", false]
-        pillPaint.color = ColorThemer.pillBackground(context)
-        textPaint.color = ColorThemer.pillForeground(context)
-        icSearch.setTint(ColorThemer.pillForeground(context))
+        pillPaint.color = ColorThemer.iconBackground(context)
+        textPaint.color = ColorThemer.iconForeground(context)
+        icSearch.setTint(ColorThemer.iconForeground(context))
         invalidate()
     }
 

@@ -9,7 +9,6 @@
     <string name="pinned_grid">Apps anclades</string>
     <string name="rows">Files</string>
     <string name="columns">Columnes</string>
-    <string name="look_and_feel">Aparença</string>
     <string name="icon_packs">Paquets d\'icones</string>
     <string name="chosen">Escollits</string>
     <string name="available">Disponibles</string>
@@ -31,11 +30,12 @@
     <string name="to_show_upcoming_events">Per mostrar propers events</string>
     <string name="finish_setup">Finalitzar preconfiguració</string>
     <string name="just_look">Nomes veure el llençador</string>
-    <string name="today">Avuí</string>
     <string name="icon_size">Tamany d\'icones</string>
     <string name="background">Fons</string>
     <string name="foreground">Text i icones</string>
     <string name="background_opacity">Opacitat del fons</string>
+    <string name="app_drawer_background_opacity">Opacitat del calaix d\'aplicacions</string>
+    <string name="card_background_opacity">Opacitat de targeta</string>
     <string name="app_info">Info d\'app</string>
     <string name="hide">Amagar</string>
     <string name="unhide">Mostrar</string>
@@ -54,6 +54,8 @@
     <string name="turn_off_torch">Apagar llanterna</string>
     <string name="radius_percent">Percentatge de radi</string>
     <string name="alarms">Alarmes</string>
+    <string name="icons">Icons</string>
+    <string name="layout">Layout</string>
     <plurals name="missed_calls">
         <item quantity="one">Una trucada perduda</item>
         <item quantity="many">%d trucades perdudes</item>

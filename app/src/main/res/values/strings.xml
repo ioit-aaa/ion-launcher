@@ -8,7 +8,6 @@
     <string name="pinned_grid">Pinned Grid</string>
     <string name="rows">Rows</string>
     <string name="columns">Columns</string>
-    <string name="look_and_feel"><![CDATA[Look & Feel]]></string>
     <string name="icon_packs">Icon Packs</string>
     <string name="chosen">Chosen</string>
     <string name="available">Available</string>
@@ -30,11 +29,12 @@
     <string name="to_show_upcoming_events">To show upcoming events</string>
     <string name="finish_setup">Finish Setup</string>
     <string name="just_look">Just look at the launcher</string>
-    <string name="today">Today</string>
     <string name="icon_size">Icon size</string>
     <string name="background">Background</string>
     <string name="foreground">Foreground</string>
     <string name="background_opacity">Background Opacity</string>
+    <string name="app_drawer_background_opacity">App Drawer Opacity</string>
+    <string name="card_background_opacity">Card Opacity</string>
     <string name="app_info">App Info</string>
     <string name="hide">Hide</string>
     <string name="unhide">Unhide</string>
@@ -53,6 +53,8 @@
     <string name="turn_off_torch">Turn off torch</string>
     <string name="radius_percent">Radius Percent</string>
     <string name="alarms">Alarms</string>
+    <string name="icons">Icons</string>
+    <string name="layout">Layout</string>
     <plurals name="missed_calls">
         <item quantity="one">One missed call</item>
         <item quantity="other">%d missed calls</item>

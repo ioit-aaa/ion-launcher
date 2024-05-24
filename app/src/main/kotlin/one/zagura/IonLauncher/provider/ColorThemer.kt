@@ -7,34 +7,28 @@ import kotlin.math.abs
 import kotlin.math.max
 
 object ColorThemer {
-    const val DEFAULT_BG = 0x111111
-    const val DEFAULT_FG = 0xfefefe
+    const val DEFAULT_DARK = 0x111111
+    const val DEFAULT_LIGHT = 0xfefefe
+
+    fun iconBackground(context: Context): Int {
+        val s = context.ionApplication.settings
+        return s["icon:bg", DEFAULT_LIGHT] and 0xffffff or (s["icon:bg:alpha", 0xff] shl 24)
+    }
+    fun iconForeground(context: Context): Int =
+        context.ionApplication.settings["icon:fg", DEFAULT_DARK] or 0xff000000.toInt()
+    fun iconHint(context: Context): Int =
+        context.ionApplication.settings["icon:fg", DEFAULT_DARK] and 0xffffff or 0xaa000000.toInt()
 
     fun background(context: Context): Int =
-        context.ionApplication.settings["color:bg", DEFAULT_BG] or 0xff000000.toInt()
+        context.ionApplication.settings["color:bg", DEFAULT_DARK] or 0xff000000.toInt()
     fun foreground(context: Context): Int =
-        context.ionApplication.settings["color:fg", DEFAULT_FG] or 0xff000000.toInt()
+        context.ionApplication.settings["color:fg", DEFAULT_LIGHT] or 0xff000000.toInt()
     fun hint(context: Context): Int =
-        context.ionApplication.settings["color:fg", DEFAULT_FG] and 0xffffff or 0xaa000000.toInt()
-    fun reverseHint(context: Context): Int =
-        context.ionApplication.settings["color:bg", DEFAULT_BG] and 0xffffff or 0xaa000000.toInt()
-
-    fun pillBackground(context: Context): Int {
+        context.ionApplication.settings["color:fg", DEFAULT_LIGHT] and 0xffffff or 0xaa000000.toInt()
+    fun backgroundToday(context: Context): Int {
         val s = context.ionApplication.settings
-        return s["pill:bg", DEFAULT_FG] and 0xffffff or (s["pill:bg:alpha", 0xff] shl 24)
+        return s["color:bg", DEFAULT_DARK] and 0xffffff or (s["today:bg:alpha", 0xbb] shl 24)
     }
-
-    fun pillForeground(context: Context): Int =
-        context.ionApplication.settings["pill:fg", DEFAULT_BG] or 0xff000000.toInt()
-
-    fun todayBackground(context: Context): Int {
-        val s = context.ionApplication.settings
-        return s["today:bg", DEFAULT_BG] and 0xffffff or (s["today:bg:alpha", 0xbb] shl 24)
-    }
-    fun todayForeground(context: Context): Int =
-        context.ionApplication.settings["today:fg", DEFAULT_FG] or 0xff000000.toInt()
-    fun todayHint(context: Context): Int =
-        context.ionApplication.settings["today:fg", DEFAULT_FG] and 0xffffff or 0xaa000000.toInt()
 
     fun level(color: Int, level: Double): Int {
         val lab = DoubleArray(3)

@@ -93,15 +93,11 @@
         </activity>
 
         <activity
-            android:name=".ui.LookAndFeelActivity"
+            android:name=".ui.IconsSettingsActivity"
             android:theme="@style/IonLauncher.Settings"/>
 
         <activity
-            android:name=".ui.SuggestionsActivity"
-            android:theme="@style/IonLauncher.Settings"/>
-
-        <activity
-            android:name=".ui.TodayActivity"
+            android:name=".ui.LayoutSettingsActivity"
             android:theme="@style/IonLauncher.Settings"/>
 
         <activity

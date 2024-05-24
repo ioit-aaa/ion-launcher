@@ -29,7 +29,7 @@ import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.provider.summary.EventsLoader
 import one.zagura.IonLauncher.provider.summary.MissedCalls
-import one.zagura.IonLauncher.ui.view.settings.color
+import one.zagura.IonLauncher.ui.view.settings.colorSettings
 import one.zagura.IonLauncher.ui.view.settings.permissionSwitch
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
 import one.zagura.IonLauncher.ui.view.settings.setting
@@ -67,13 +67,7 @@ class SetupActivity : Activity() {
                     updateNotificationAccess = permissionSwitch(hasNotificationAccess(), ::grantNotificationAccess)
                 }
             }
-            title(R.string.look_and_feel)
-            setting(R.string.background) {
-                color("color:bg", ColorThemer.DEFAULT_BG)
-            }
-            setting(R.string.foreground) {
-                color("color:fg", ColorThemer.DEFAULT_FG)
-            }
+            colorSettings("color", ColorThemer.DEFAULT_DARK, ColorThemer.DEFAULT_LIGHT, 0xdd)
             val dp = resources.displayMetrics.density
             val m = (18 * dp).toInt()
             view.addView(TextView(view.context).apply {

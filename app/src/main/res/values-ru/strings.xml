@@ -9,7 +9,6 @@
     <string name="pinned_grid">Сетка приложений</string>
     <string name="rows">Ряды</string>
     <string name="columns">Столбы</string>
-    <string name="look_and_feel">Внешнясть</string>
     <string name="icon_packs">Пакеты иконок</string>
     <string name="chosen">Выбранные</string>
     <string name="available">Не выбранные</string>
@@ -31,11 +30,12 @@
     <string name="to_show_upcoming_events">Чтобы показывать следуйщие эвенты</string>
     <string name="finish_setup">Закончить настройку</string>
     <string name="just_look">Просто увидить лаунчер</string>
-    <string name="today">Сегодня</string>
     <string name="icon_size">Размер иконок</string>
     <string name="background">Фон</string>
     <string name="foreground">Техт и иконки</string>
     <string name="background_opacity">Непрозрачность фона</string>
+    <string name="app_drawer_background_opacity">Непрозрачность панели приложений</string>
+    <string name="card_background_opacity">Непрозрачность панели календаря</string>
     <string name="app_info">Инфо приложения</string>
     <string name="hide">Спрятать</string>
     <string name="unhide">Показать</string>
@@ -54,6 +54,8 @@
     <string name="turn_off_torch">Выключить фонарь</string>
     <string name="radius_percent">Процент радиуса</string>
     <string name="alarms">Будильники</string>
+    <string name="icons">Icons</string>
+    <string name="layout">Layout</string>
     <plurals name="missed_calls">
         <item quantity="one">%d потеранный звонок</item>
         <item quantity="few">%d потеранных знонка</item>

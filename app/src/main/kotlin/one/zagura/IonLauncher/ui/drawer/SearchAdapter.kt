@@ -63,7 +63,7 @@ class SearchAdapter(
         val view = LinearLayout(parent.context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            val iconSize = (HomeScreen.SEARCH_ICON_SIZE * dp).toInt()
+            val iconSize = (40 * dp).toInt()
             setPadding((12 * dp).toInt())
             addView(icon, LinearLayout.LayoutParams(iconSize, iconSize))
             addView(label)

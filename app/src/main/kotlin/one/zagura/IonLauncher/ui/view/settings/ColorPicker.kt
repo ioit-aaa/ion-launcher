@@ -69,7 +69,7 @@ object ColorPicker {
             contentDescription = "H"
         }
         val colorText = EditText(context).apply {
-            hint = formatColorString(ColorThemer.DEFAULT_BG)
+            hint = formatColorString(ColorThemer.DEFAULT_DARK)
             setTextColor(ColorThemer.contrast(0, 0.9, 0))
             setHintTextColor(resources.getColor(R.color.color_hint))
             val p = (12 * dp).toInt()
@@ -142,10 +142,12 @@ object ColorPicker {
             orientation = GridLayout.VERTICAL
             val set = arrayOf(
                 0x000000,
-                ColorThemer.DEFAULT_BG,
-                0xefefef,
+                ColorThemer.DEFAULT_DARK,
+                ColorThemer.DEFAULT_LIGHT,
                 ColorThemer.background(context) and 0xffffff,
                 ColorThemer.foreground(context) and 0xffffff,
+                ColorThemer.iconBackground(context) and 0xffffff,
+                ColorThemer.iconForeground(context) and 0xffffff,
             ).toCollection(TreeSet { a, b ->
                 if (a == b)
                     return@TreeSet 0

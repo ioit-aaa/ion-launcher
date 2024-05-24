@@ -9,7 +9,6 @@
     <string name="pinned_grid">Apps ancladas</string>
     <string name="rows">Filas</string>
     <string name="columns">Columnas</string>
-    <string name="look_and_feel">Apariencia</string>
     <string name="icon_packs">Paquetes de iconos</string>
     <string name="chosen">Elegidos</string>
     <string name="available">Disponibles</string>
@@ -31,11 +30,12 @@
     <string name="to_show_upcoming_events">Para mostrar proximos eventos</string>
     <string name="finish_setup">Finalizar preconfiguración</string>
     <string name="just_look">Solo ver el lanzador</string>
-    <string name="today">Hoy</string>
     <string name="icon_size">Tamaño de iconos</string>
     <string name="background">Fondo</string>
     <string name="foreground">Texto e iconos</string>
     <string name="background_opacity">Opacidad del fondo</string>
+    <string name="app_drawer_background_opacity">Opacidad del cajón de aplicaciones</string>
+    <string name="card_background_opacity">Opacidad de tarjeta</string>
     <string name="app_info">Info de app</string>
     <string name="hide">Esconder</string>
     <string name="unhide">Mostrar</string>
@@ -54,6 +54,8 @@
     <string name="turn_off_torch">Apagar linterna</string>
     <string name="radius_percent">Porcentage de radio</string>
     <string name="alarms">Alarmas</string>
+    <string name="icons">Icons</string>
+    <string name="layout">Layout</string>
     <plurals name="missed_calls">
         <item quantity="one">Una llamada perdida</item>
         <item quantity="many">%d llamadas perdidas</item>

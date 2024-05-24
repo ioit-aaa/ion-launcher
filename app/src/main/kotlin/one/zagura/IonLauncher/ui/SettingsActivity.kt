@@ -7,11 +7,13 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import one.zagura.IonLauncher.R
+import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.items.ContactsLoader
 import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.provider.summary.EventsLoader
 import one.zagura.IonLauncher.provider.summary.MissedCalls
+import one.zagura.IonLauncher.ui.view.settings.colorSettings
 import one.zagura.IonLauncher.ui.view.settings.onClick
 import one.zagura.IonLauncher.ui.view.settings.seekbar
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
@@ -25,24 +27,18 @@ class SettingsActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setSettingsContentView(R.string.tweaks) {
-            setting(R.string.look_and_feel) {
-                onClick(LookAndFeelActivity::class.java)
+            setting(R.string.layout) {
+                onClick(LayoutSettingsActivity::class.java)
             }
-            setting(R.string.suggestions) {
-                onClick(SuggestionsActivity::class.java)
+            setting(R.string.icons) {
+                onClick(IconsSettingsActivity::class.java)
             }
-            setting(R.string.today) {
-                onClick(TodayActivity::class.java)
+            colorSettings("color", ColorThemer.DEFAULT_DARK, ColorThemer.DEFAULT_LIGHT, 0xdd)
+            setting(R.string.app_drawer_background_opacity, isVertical = true) {
+                seekbar("drawer:bg:alpha", 0xf0, min = 0, max = 0xff)
             }
-            title(R.string.pinned_grid)
-            setting(R.string.columns, isVertical = true) {
-                seekbar("dock:columns", 5, min = 1, max = 7)
-            }
-            setting(R.string.rows, isVertical = true) {
-                seekbar("dock:rows", 2, min = 1, max = 4)
-            }
-            setting(R.string.icon_size, isVertical = true) {
-                seekbar("dock:icon-size", 48, min = 24, max = 72, multiplier = 8)
+            setting(R.string.card_background_opacity, isVertical = true) {
+                seekbar("today:bg:alpha", 0xf0, min = 0, max = 0xff)
             }
             title(R.string.widgets)
             setting(R.string.choose_widget) {

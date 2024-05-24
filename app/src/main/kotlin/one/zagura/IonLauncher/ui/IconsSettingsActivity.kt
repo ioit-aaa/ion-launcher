@@ -13,13 +13,12 @@ import one.zagura.IonLauncher.ui.view.settings.setting
 import one.zagura.IonLauncher.ui.view.settings.switch
 import one.zagura.IonLauncher.ui.iconPackPicker.IconPackPickerActivity
 import one.zagura.IonLauncher.ui.view.settings.colorSettings
-import one.zagura.IonLauncher.ui.view.settings.seekbar
 
-class LookAndFeelActivity : Activity() {
+class IconsSettingsActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setSettingsContentView(R.string.look_and_feel) {
+        setSettingsContentView(R.string.icons) {
             setting(R.string.icon_packs) {
                 onClick(IconPackPickerActivity::class.java)
             }
@@ -38,10 +37,7 @@ class LookAndFeelActivity : Activity() {
                 }
                 bg.isVisible = ionApplication.settings["icon:monochrome", false]
             }
-            setting(R.string.radius_percent, isVertical = true) {
-                seekbar("icon:radius-ratio", 50, min = 0, max = 50, multiplier = 5)
-            }
-            colorSettings("color", ColorThemer.DEFAULT_BG, ColorThemer.DEFAULT_FG, 0xdd)
+            colorSettings("icon", ColorThemer.DEFAULT_LIGHT, ColorThemer.DEFAULT_DARK, 0xdd)
         }
     }
 }

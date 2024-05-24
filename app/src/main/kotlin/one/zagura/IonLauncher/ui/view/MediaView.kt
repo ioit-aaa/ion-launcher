@@ -94,10 +94,10 @@ class MediaView(
     fun applyCustomizations(settings: Settings) {
         val dp = resources.displayMetrics.density
         separation = 12 * dp
-        val c = ColorThemer.background(context)
-        pillPaint.color = ColorThemer.foreground(context)
+        val c = ColorThemer.iconForeground(context)
+        pillPaint.color = ColorThemer.iconBackground(context)
         titlePaint.color = c
-        subtitlePaint.color = ColorThemer.reverseHint(context)
+        subtitlePaint.color = ColorThemer.iconHint(context)
         icPlay.setTint(c)
         icPause.setTint(c)
         icTrackNext.setTint(c)

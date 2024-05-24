@@ -77,12 +77,8 @@ object IconLoader {
         is ContactItem -> loadIcon(context, item)
         is ActionItem -> loadIcon(context, item)
         is StaticShortcut -> loadIcon(context, item)
-        is TorchToggleItem -> context.getDrawable(R.drawable.ic_torch)!!.apply {
-            setTint(ColorThemer.pillForeground(context))
-        }
-        is OpenAlarmsItem -> context.getDrawable(R.drawable.ic_alarm)!!.apply {
-            setTint(ColorThemer.pillForeground(context))
-        }
+        is TorchToggleItem -> loadSymbolicIcon(context, R.drawable.ic_torch)
+        is OpenAlarmsItem -> loadSymbolicIcon(context, R.drawable.ic_alarm)
     }
 
     fun loadIcon(context: Context, item: ActionItem): Drawable {
@@ -171,6 +167,19 @@ object IconLoader {
                 iterator.remove()
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private fun loadSymbolicIcon(context: Context, res: Int): Drawable {
+        val monochrome = context.getDrawable(res)!!
+        val settings = context.ionApplication.settings
+        if (!settings["icon:monochrome-bg", true]) {
+            monochrome.setTint(ColorThemer.iconForeground(context))
+            val w = monochrome.intrinsicWidth
+            return InsetDrawable(monochrome, -w / 5)
+        }
+        monochrome.colorFilter = PorterDuffColorFilter(ColorThemer.iconForeground(context), PorterDuff.Mode.SRC_IN)
+        return makeIcon(settings, FillDrawable(ColorThemer.iconBackground(context)), monochrome)
+    }
+
     private fun themeIcon(context: Context, icon: Drawable): Drawable {
         val ti = transformIcon(context, icon)
         val iconThemingInfo = iconPacks.firstNotNullOfOrNull {
@@ -189,21 +198,24 @@ object IconLoader {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || icon !is AdaptiveIconDrawable) {
             val bmp = icon.toBitmap(1, 1)
             val isOpaqueSquare = bmp[0, 0].alpha == 255
-            val icon = if (isOpaqueSquare) {
-                val w = icon.intrinsicWidth
-                val h = icon.intrinsicHeight
-                val p = w / 32f
-                val layers = InsetDrawable(icon, p.toInt())
-                layers.setBounds(0, 0, w, h)
-                val path = Path().apply {
-                    val r = w / 8f
-                    addRoundRect(p, p, w - p, w - p, floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
-                }
-                ClippedDrawable(layers, path)
-            } else icon
-            return icon.apply {
-                setGrayscale(settings["icon:grayscale", true])
+            icon.setGrayscale(settings["icon:grayscale", true])
+            val w = icon.intrinsicWidth
+            val h = icon.intrinsicHeight
+            val icon = if (isOpaqueSquare) icon else {
+                val layers = LayerDrawable(arrayOf(FillDrawable(ColorThemer.iconBackground(context)), icon))
+                layers.setLayerInset(0, w / 6, h / 6, w / 6, h / 6)
+                layers.setLayerInset(1, w / 6, h / 6, w / 6, h / 6)
+                layers
             }
+            icon.setBounds(0, 0, w, h)
+            val path = Path().apply {
+                val r = w * settings["icon:radius-ratio", 50] / 100f
+                addRoundRect(
+                    0f, 0f, w.toFloat(), h.toFloat(),
+                    floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW
+                )
+            }
+            return ClippedDrawable(icon, path)
         }
 
         var fg = icon.foreground
@@ -215,16 +227,24 @@ object IconLoader {
             val monochrome = icon.monochrome
             if (monochrome != null && settings["icon:monochrome", false]) {
                 if (!settings["icon:monochrome-bg", true]) {
-                    monochrome.colorFilter = PorterDuffColorFilter(ColorThemer.foreground(context), PorterDuff.Mode.SRC_IN)
+                    monochrome.colorFilter = PorterDuffColorFilter(ColorThemer.iconForeground(context), PorterDuff.Mode.SRC_IN)
                     val w = monochrome.intrinsicWidth
                     return InsetDrawable(monochrome, -w / 5)
                 }
-                monochrome.colorFilter = PorterDuffColorFilter(ColorThemer.background(context), PorterDuff.Mode.SRC_IN)
+                monochrome.colorFilter = PorterDuffColorFilter(ColorThemer.iconForeground(context), PorterDuff.Mode.SRC_IN)
                 fg = monochrome
-                bg = FillDrawable(ColorThemer.foreground(context))
+                bg = FillDrawable(ColorThemer.iconBackground(context))
             }
         }
 
+        return makeIcon(settings, bg, fg)
+    }
+
+    private fun makeIcon(
+        settings: Settings,
+        bg: Drawable?,
+        fg: Drawable?,
+    ): ClippedDrawable {
         val layers = LayerDrawable(arrayOf(bg, fg))
         val w = layers.intrinsicWidth
         val h = layers.intrinsicHeight
@@ -234,8 +254,10 @@ object IconLoader {
 
         val path = Path().apply {
             val r = w * settings["icon:radius-ratio", 50] / 100f
-            addRoundRect(0f, 0f, w.toFloat(), w.toFloat(),
-                floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
+            addRoundRect(
+                0f, 0f, w.toFloat(), w.toFloat(),
+                floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW
+            )
         }
         return ClippedDrawable(layers, path)
     }

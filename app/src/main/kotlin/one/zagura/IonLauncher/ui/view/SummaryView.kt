@@ -206,12 +206,12 @@ class SummaryView(
     }
 
     fun applyCustomizations(settings: Settings) {
-        val textColor = ColorThemer.todayForeground(context)
-        val hintColor = ColorThemer.todayHint(context)
+        val textColor = ColorThemer.foreground(context)
+        val hintColor = ColorThemer.hint(context)
         titlePaint.color = textColor
         textPaint.color = textColor
         rightTextPaint.color = hintColor
-        cardPaint.color = ColorThemer.todayBackground(context)
+        cardPaint.color = ColorThemer.backgroundToday(context)
     }
 
     private sealed class CompiledEvent(

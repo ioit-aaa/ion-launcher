@@ -35,7 +35,20 @@ class IonLauncherApp : Application() {
         CrashActivity.init(applicationContext)
         settings.init(applicationContext)
         SuggestionsManager.onCreate(applicationContext)
-        setupApps()
+
+        val launcherApps = getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+        launcherApps.registerCallback(AppLoader.AppCallback(this))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            registerReceiver(
+                AppReceiver,
+                IntentFilter().apply {
+                    addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
+                    addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
+                    addAction(Intent.ACTION_MANAGED_PROFILE_UNLOCKED)
+                }
+            )
+        }
+        AppLoader.reloadApps(this)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH))
@@ -53,22 +66,6 @@ class IonLauncherApp : Application() {
     object AppReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) =
             AppLoader.reloadApps(context.ionApplication)
-    }
-
-    private fun setupApps() {
-        val launcherApps = getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
-        launcherApps.registerCallback(AppLoader.AppCallback(this))
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            registerReceiver(
-                AppReceiver,
-                IntentFilter().apply {
-                    addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
-                    addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
-                    addAction(Intent.ACTION_MANAGED_PROFILE_UNLOCKED)
-                }
-            )
-        }
-        AppLoader.reloadApps(this)
     }
 
     override fun onTrimMemory(level: Int) {

@@ -34,8 +34,7 @@ class SuggestionsAdapter : RecyclerView.Adapter<SuggestionsAdapter.ViewHolder>()
     override fun onCreateViewHolder(parent: ViewGroup, type: Int): ViewHolder {
         val dp = parent.context.resources.displayMetrics.density
         val icon = ImageView(parent.context).apply {
-            val x = HomeScreen.SEARCH_ICON_SIZE
-            val s = (x * dp).toInt()
+            val s = (32 * dp).toInt()
             layoutParams = LinearLayout.LayoutParams(s, s)
         }
         val label = TextView(parent.context).apply {

@@ -3,6 +3,7 @@ package one.zagura.IonLauncher.ui.drawer
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.os.Build
 import android.text.Editable
@@ -21,7 +22,6 @@ import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.ColorThemer
-import one.zagura.IonLauncher.provider.items.LabelLoader
 import one.zagura.IonLauncher.provider.search.Search
 import one.zagura.IonLauncher.util.FillDrawable
 import one.zagura.IonLauncher.util.Utils
@@ -165,7 +165,6 @@ class DrawerArea(
         val fgColor = ColorThemer.foreground(context)
         val hintColor = ColorThemer.hint(context)
         val separatorColor = hintColor and 0xffffff or 0x44000000
-        val bgColor = ColorThemer.background(context)
         with(entry) {
             setTextColor(fgColor)
             setHintTextColor(hintColor)
@@ -175,6 +174,5 @@ class DrawerArea(
         }
         icSearch.setTint(hintColor)
         separator.background = FillDrawable(separatorColor)
-        background = FillDrawable(bgColor)
     }
 }

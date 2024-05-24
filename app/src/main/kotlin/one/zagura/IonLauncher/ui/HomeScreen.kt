@@ -43,10 +43,6 @@ import one.zagura.IonLauncher.util.Utils
 
 class HomeScreen : Activity() {
 
-    companion object {
-        const val SEARCH_ICON_SIZE = 32
-    }
-
     private lateinit var sheetBehavior: BottomSheetBehavior<View>
     private lateinit var sheet: View
 
@@ -66,6 +62,7 @@ class HomeScreen : Activity() {
     private val drawingContext = SharedDrawingContext()
     private val screenBackground = FillDrawable(0)
     private var screenBackgroundAlpha = 0
+    private var drawerBackgroundAlpha = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -156,6 +153,7 @@ class HomeScreen : Activity() {
         val settings = ionApplication.settings
         screenBackground.color = ColorThemer.background(this)
         screenBackgroundAlpha = settings["color:bg:alpha", 0xdd]
+        drawerBackgroundAlpha = settings["drawer:bg:alpha", 0xf0]
         screenBackground.alpha = screenBackgroundAlpha
         val dp = resources.displayMetrics.density
         Utils.setDarkStatusFG(window, ColorThemer.foreground(this).let {
@@ -257,7 +255,7 @@ class HomeScreen : Activity() {
                 override fun onSlide(view: View, slideOffset: Float) {
                     drawerArea.alpha = slideOffset * slideOffset / 0.6f - 0.4f
                     val a = (slideOffset * 2f).coerceAtMost(1f)
-                    screenBackground.alpha = (screenBackgroundAlpha * (1f - a) + 255 * a).toInt()
+                    screenBackground.alpha = (screenBackgroundAlpha * (1f - a) + drawerBackgroundAlpha * a).toInt()
                     desktop.alpha = 1f - a
                     desktop.translationY = slideOffset * offset * 0.75f
                     val scale = 1f - slideOffset * 0.02f
