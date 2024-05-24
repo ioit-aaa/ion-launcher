@@ -80,7 +80,7 @@ object LongPressMenu {
                 GradientDrawable().apply {
                     color = ColorStateList.valueOf(ColorThemer.foreground(context))
                     setStroke((2 * dp).toInt(), ColorThemer.background(context))
-                    val bigR = 24 * dp
+                    val bigR = 21 * dp
                     val smallR = 8 * dp
                     cornerRadii = when (place) {
                         Place.First -> floatArrayOf(bigR, bigR, bigR, bigR, smallR, smallR, smallR, smallR)

@@ -26,7 +26,8 @@ object EventsLoader {
             .buildUpon().apply {
                 ContentUris.appendId(this, startOfDay.timeInMillis)
                 ContentUris.appendId(this, startOfDay.apply {
-                    set(Calendar.HOUR_OF_DAY, 24)
+                    add(Calendar.DAY_OF_YEAR, 1)
+                    set(Calendar.HOUR_OF_DAY, 0)
                 }.timeInMillis)
             }.build()
         val cur = context.contentResolver.query(
@@ -67,7 +68,8 @@ object EventsLoader {
         if (Calendar.getInstance()[Calendar.HOUR_OF_DAY] < 19)
             return false
         val nextDay = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 24)
+            add(Calendar.DAY_OF_YEAR, 1)
+            set(Calendar.HOUR_OF_DAY, 3)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
         }
@@ -82,7 +84,6 @@ object EventsLoader {
             eventsUri,
             arrayOf(
                 CalendarContract.Instances._ID,
-                CalendarContract.Instances.ALL_DAY,
                 CalendarContract.Instances.BEGIN),
             CalendarContract.Instances.ALL_DAY+"=0", null, null
         ) ?: return false
@@ -94,7 +95,7 @@ object EventsLoader {
             while (cur.moveToNext()) {
                 if (alarm == null)
                     return true
-                val begin = cur.getLong(2)
+                val begin = cur.getLong(1)
                 if (alarm.triggerTime <= begin)
                     return false
             }

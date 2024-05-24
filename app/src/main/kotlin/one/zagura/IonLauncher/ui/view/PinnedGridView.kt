@@ -27,6 +27,7 @@ import kotlin.math.abs
 @SuppressLint("UseCompatLoadingForDrawables")
 class PinnedGridView(
     context: Context,
+    private val drawingContext: SharedDrawingContext,
 ) : View(context) {
 
     class ItemPreview(val icon: Drawable, val x: Int, val y: Int)
@@ -43,7 +44,17 @@ class PinnedGridView(
     private var items = ArrayList<LauncherItem?>()
     private var columns = 0
     private var rows = 0
-    private var iconSize = 0
+
+    private val gridPaint = Paint().apply {
+        isAntiAlias = true
+    }
+
+    private val targetPaint = Paint().apply {
+        val dp = resources.displayMetrics.density
+        strokeWidth = 2 * dp
+        style = Paint.Style.STROKE
+        isAntiAlias = true
+    }
 
     private fun getItem(x: Int, y: Int): LauncherItem? {
         val i = y * columns + x
@@ -72,7 +83,6 @@ class PinnedGridView(
         }
         columns = settings["dock:columns", 5]
         rows = settings["dock:rows", 2]
-        iconSize = settings["dock:icon-size", 48]
 
         val fg = ColorThemer.foreground(context)
         gridPaint.color = fg and 0xffffff or 0xdd000000.toInt()
@@ -85,14 +95,13 @@ class PinnedGridView(
      * Called after [applyCustomizations] if necessary
      */
     fun calculateSideMargin(): Int {
-        val dp = resources.displayMetrics.density
-        val iconSize = (iconSize * dp).toInt()
+        val iconSize = drawingContext.iconSize.toInt()
         return (resources.displayMetrics.widthPixels / columns - iconSize) / 2 + paddingLeft
     }
 
     fun calculateGridHeight(): Int {
         val dp = resources.displayMetrics.density
-        val iconSize = (context.ionApplication.settings["dock:icon-size", 48] * dp).toInt()
+        val iconSize = drawingContext.iconSize.toInt()
         val vMargin = (12 * dp).toInt()
         val rows = context.ionApplication.settings["dock:rows", 2]
         return paddingBottom + paddingTop + (iconSize + vMargin * 2) * rows
@@ -108,7 +117,7 @@ class PinnedGridView(
         if (!showDropTargets)
             return
         val dp = resources.displayMetrics.density
-        val r = (iconSize / 2 + 1) * dp
+        val r = drawingContext.iconSize / 2f + dp
         for (x in 0 ..< columns)
             for (y in 0 ..< rows) {
                 canvas.drawCircle(
@@ -126,10 +135,9 @@ class PinnedGridView(
     }
 
     private fun drawItems(canvas: Canvas) {
-        val dp = resources.displayMetrics.density
-        val r = (iconSize * dp).toInt() / 2
-        val sr = (iconSize * dp * 0.9f).toInt() / 2
-        val br = (iconSize * dp).toInt() * 3 / 4
+        val r = drawingContext.iconSize.toInt() / 2
+        val sr = (drawingContext.iconSize * 0.9f).toInt() / 2
+        val br = drawingContext.iconSize.toInt() * 3 / 4
         val d = dropPreview
         val i = replacePreview
         for (x in 0 until columns)
@@ -141,7 +149,7 @@ class PinnedGridView(
                     else IconLoader.loadIcon(context, getItem(x, y) ?: continue)
                 val centerX = (paddingLeft + (width - paddingLeft - paddingRight) / columns * (0.5f + x)).toInt()
                 val centerY = (paddingTop + (height - paddingTop - paddingBottom) / rows * (0.5f + y)).toInt()
-                icon.copyBounds(tmpRect)
+                icon.copyBounds(drawingContext.tmpRect)
                 icon.setBounds(centerX - r, centerY - r, centerX + r, centerY + r)
                 if (showDropTargets) {
                     val a = icon.alpha
@@ -150,21 +158,8 @@ class PinnedGridView(
                     icon.alpha = a
                 } else
                     icon.draw(canvas)
-                icon.bounds = tmpRect
+                icon.bounds = drawingContext.tmpRect
             }
-    }
-
-    private val tmpRect = Rect()
-
-    private val gridPaint = Paint().apply {
-        isAntiAlias = true
-    }
-
-    private val targetPaint = Paint().apply {
-        val dp = resources.displayMetrics.density
-        strokeWidth = 2 * dp
-        style = Paint.Style.STROKE
-        isAntiAlias = true
     }
 
     private fun viewToGridCoords(vx: Int, vy: Int): Pair<Int, Int> {

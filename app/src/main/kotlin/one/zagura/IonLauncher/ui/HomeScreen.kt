@@ -36,6 +36,7 @@ import one.zagura.IonLauncher.ui.view.SuggestionRowView
 import one.zagura.IonLauncher.ui.view.SummaryView
 import one.zagura.IonLauncher.ui.view.WidgetView
 import one.zagura.IonLauncher.ui.view.MediaView
+import one.zagura.IonLauncher.ui.view.SharedDrawingContext
 import one.zagura.IonLauncher.util.FillDrawable
 import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
@@ -62,6 +63,7 @@ class HomeScreen : Activity() {
     private lateinit var pinnedGrid: PinnedGridView
     private lateinit var suggestionsView: SuggestionRowView
 
+    private val drawingContext = SharedDrawingContext()
     private val screenBackground = FillDrawable(0)
     private var screenBackgroundAlpha = 0
 
@@ -136,17 +138,17 @@ class HomeScreen : Activity() {
         super.onStop()
         AppLoader.release()
         NotificationService.MediaObserver.release()
+        mediaView.clearData()
         widgetView?.stopListening()
         SuggestionsManager.saveToStorage(this)
+        summaryView.clearData()
     }
 
     override fun onResume() {
         super.onResume()
         TaskRunner.submit {
             val events = EventsLoader.load(this)
-            runOnUiThread {
-                summaryView.updateEvents(events)
-            }
+            summaryView.updateEvents(events)
         }
     }
 
@@ -161,6 +163,7 @@ class HomeScreen : Activity() {
                 it.luminance < 0.5f
             else ColorThemer.foreground(this).let(ColorThemer::lightness) < 0.5f
         })
+        drawingContext.applyCustomizations(this, settings)
         pinnedGrid.applyCustomizations(settings)
         drawerArea.applyCustomizations()
         mediaView.applyCustomizations(settings)
@@ -201,10 +204,10 @@ class HomeScreen : Activity() {
         val dp = resources.displayMetrics.density
         val fullHeight = Utils.getDisplayHeight(this)
 
-        summaryView = SummaryView(this)
-        mediaView = MediaView(this)
-        suggestionsView = SuggestionRowView(this, ::showDropTargets, ::search)
-        pinnedGrid = PinnedGridView(this)
+        summaryView = SummaryView(this, drawingContext)
+        mediaView = MediaView(this, drawingContext)
+        suggestionsView = SuggestionRowView(this, drawingContext, ::showDropTargets, ::search)
+        pinnedGrid = PinnedGridView(this, drawingContext)
 
         desktop = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL

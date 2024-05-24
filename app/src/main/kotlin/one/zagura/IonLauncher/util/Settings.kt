@@ -14,35 +14,25 @@ class Settings(
     private val fileLock = ReentrantLock()
     var updated = false
 
-    private abstract class Single <V> (
+    private sealed class Single <V> (
         val value: V
     ) {
-        abstract fun toFloat(): Float
         abstract fun toInt(): Int
         abstract fun toBool(): Boolean
         override fun toString() = value.toString()
     }
 
     private class SingleInt(value: Int) : Single<Int>(value) {
-        override fun toFloat(): Float = value.toFloat()
         override fun toInt(): Int = value
         override fun toBool(): Boolean = value != 0
     }
 
-    private class SingleFloat(value: Float) : Single<Float>(value) {
-        override fun toFloat(): Float = value
-        override fun toInt(): Int = value.toInt()
-        override fun toBool(): Boolean = value != 0f
-    }
-
     private class SingleBool(value: Boolean) : Single<Boolean>(value) {
-        override fun toFloat(): Float = if (value) 1f else 0f
         override fun toInt(): Int = if (value) 1 else 0
         override fun toBool(): Boolean = value
     }
 
     private class SingleString(value: String) : Single<String>(value) {
-        override fun toFloat(): Float = value.toFloat()
         override fun toInt(): Int = value.toInt()
         override fun toBool(): Boolean = value.toBoolean()
         override fun toString() = value
@@ -60,10 +50,6 @@ class Settings(
 
         operator fun set(key: String, value: Int) {
             settings.singles[key] = SingleInt(value)
-        }
-
-        operator fun set(key: String, value: Float) {
-            settings.singles[key] = SingleFloat(value)
         }
 
         operator fun set(key: String, value: Boolean) {
@@ -95,11 +81,13 @@ class Settings(
             else settings.lists[key] = Array(value.size) { SingleInt(value[it]) }
         }
 
-        @JvmName("set1")
-        inline infix fun String.set(value: Int) = set(this, value)
+        fun setInts(key: String, value: List<Int>?) {
+            if (value == null) settings.lists.keys.remove(key)
+            else settings.lists[key] = Array(value.size) { SingleInt(value[it]) }
+        }
 
         @JvmName("set1")
-        inline infix fun String.set(value: Float) = set(this, value)
+        inline infix fun String.set(value: Int) = set(this, value)
 
         @JvmName("set1")
         inline infix fun String.set(value: Boolean) = set(this, value)
@@ -136,17 +124,14 @@ class Settings(
     }
 
     inline operator fun get(key: String, default: Int): Int = getInt(key) ?: default
-    inline operator fun get(key: String, default: Float): Float = getFloat(key) ?: default
     inline operator fun get(key: String, default: Boolean): Boolean = getBoolean(key) ?: default
     inline operator fun get(key: String, default: String): String = getString(key) ?: default
 
     inline fun getIntOr(key: String, default: () -> Int): Int = getInt(key) ?: default()
-    inline fun getFloatOr(key: String, default: () -> Float): Float = getFloat(key) ?: default()
     inline fun getBoolOr(key: String, default: () -> Boolean): Boolean = getBoolean(key) ?: default()
     inline fun getStringOr(key: String, default: () -> String): String = getString(key) ?: default()
 
     fun getInt(key: String): Int? = singles[key]?.toInt()
-    fun getFloat(key: String): Float? = singles[key]?.toFloat()
     fun getBoolean(key: String): Boolean? = singles[key]?.toBool()
     fun getString(key: String): String? = singles[key]?.toString()
     fun getStrings(key: String): Array<String>? = lists[key]?.let { l -> Array(l.size) { l[it].toString() } }
@@ -164,7 +149,6 @@ class Settings(
     private fun parseString(string: String): Single<*> = string
         .toBooleanStrictOrNull()?.let(::SingleBool)
         ?: string.toIntOrNull()?.let(::SingleInt)
-        ?: string.toFloatOrNull()?.let(::SingleFloat)
         ?: string.let(::SingleString)
 
     private fun initializeData(it: ObjectInputStream): Boolean {

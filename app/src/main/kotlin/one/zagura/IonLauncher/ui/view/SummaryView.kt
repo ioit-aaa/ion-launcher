@@ -30,10 +30,38 @@ import kotlin.math.abs
 import kotlin.math.sign
 
 
-class SummaryView(c: Context) : View(c) {
+class SummaryView(
+    context: Context,
+    private val drawingContext: SharedDrawingContext,
+) : View(context) {
 
     private var dateString = ""
-    private var events = emptyList<CompiledEvent>()
+    private var events = emptyArray<CompiledEvent>()
+
+    private val titlePaint = Paint().apply {
+        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
+        textAlign = Paint.Align.LEFT
+        isAntiAlias = true
+        isSubpixelText = true
+        typeface = Typeface.DEFAULT_BOLD
+    }
+    private val textPaint = Paint().apply {
+        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
+        textAlign = Paint.Align.LEFT
+        isAntiAlias = true
+        isSubpixelText = true
+    }
+    private val rightTextPaint = Paint().apply {
+        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12f, resources.displayMetrics)
+        textAlign = Paint.Align.RIGHT
+        isAntiAlias = true
+        isSubpixelText = true
+        typeface = Typeface.MONOSPACE
+    }
+    private val cardPaint = Paint().apply { isAntiAlias = true }
+    private val colorPaint = Paint().apply {
+        isAntiAlias = true
+    }
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.OnGestureListener {
         override fun onDown(e: MotionEvent) = true
@@ -87,36 +115,47 @@ class SummaryView(c: Context) : View(c) {
     })
 
     fun updateEvents(events: List<Event>) {
-        dateString = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        dateString = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG))
-        } else
-            DateFormat.getMediumDateFormat(context)
-                .format(Calendar.getInstance().time)
+        else
+            DateFormat.getMediumDateFormat(context).format(Calendar.getInstance().time)
+
         val missedCalls = MissedCalls.get(context, Calendar.getInstance().apply {
             add(Calendar.HOUR_OF_DAY, -2)
         }.timeInMillis)
         val alarm = Alarm.get(context)
-        val e = ArrayList<CompiledEvent>(events.size + (alarm?.let { 1 } ?: 0) + missedCalls.sign)
+
+        var i = 0
+        val e = arrayOfNulls<CompiledEvent>(events.size + (alarm?.let { 1 } ?: 0) + missedCalls.sign)
+
         if (missedCalls != 0)
-            e.add(CompiledEvent.MissedCalls(context, missedCalls))
+            e[i++] = CompiledEvent.MissedCalls(context, missedCalls)
         alarm?.let {
-            e.add(CompiledEvent.Alarm(
+            e[i++] = CompiledEvent.Alarm(
                 it.open,
                 context.getString(R.string.upcoming_alarm),
                 Utils.format(context, it.time),
-            ))
+            )
         }
-        events.mapTo(e) {
-            val textRight = if (it.allDay) null else {
-                val begin = Utils.format(context, it.begin)
-                val end = Utils.format(context, it.end)
+        for (event in events) {
+            val textRight = if (event.allDay) null else {
+                val begin = Utils.format(context, event.begin)
+                val end = Utils.format(context, event.end)
                 "$begin - $end"
             }
-            CompiledEvent.Calendar(it.title, textRight, it.color)
+            e[i++] = CompiledEvent.Calendar(event.title, textRight, event.color)
         }
-        this.events = e
-        contentDescription = dateString
-        invalidate()
+        this.events = e as Array<CompiledEvent>
+        post {
+            contentDescription = dateString
+            invalidate()
+        }
+    }
+
+    fun clearData() {
+        events = emptyArray()
+        dateString = ""
+        contentDescription = ""
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -138,7 +177,7 @@ class SummaryView(c: Context) : View(c) {
         val roff = (eventHeight - eventRightHeight) / 2 - rightTextPaint.ascent()
 
         val totalHeight = titleHeight + (eventHeight + separation) * events.size + padding * 2
-        canvas.drawRoundRect(paddingLeft.toFloat(), paddingTop.toFloat(), (width - paddingRight).toFloat(), paddingTop + totalHeight, radius, radius, cardPaint)
+        canvas.drawRoundRect(paddingLeft.toFloat(), paddingTop.toFloat(), (width - paddingRight).toFloat(), paddingTop + totalHeight, drawingContext.radius, drawingContext.radius, cardPaint)
         canvas.drawText(dateString, paddingLeft.toFloat() + padding, paddingTop + padding - titlePaint.ascent(), titlePaint)
 
         var bottomTop = paddingTop + padding + titleHeight + separation
@@ -156,32 +195,6 @@ class SummaryView(c: Context) : View(c) {
         }
     }
 
-    private val titlePaint = Paint().apply {
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
-        textAlign = Paint.Align.LEFT
-        isAntiAlias = true
-        isSubpixelText = true
-        typeface = Typeface.DEFAULT_BOLD
-    }
-    private val textPaint = Paint().apply {
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
-        textAlign = Paint.Align.LEFT
-        isAntiAlias = true
-        isSubpixelText = true
-    }
-    private val rightTextPaint = Paint().apply {
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12f, resources.displayMetrics)
-        textAlign = Paint.Align.RIGHT
-        isAntiAlias = true
-        isSubpixelText = true
-        typeface = Typeface.MONOSPACE
-    }
-    private val cardPaint = Paint().apply { isAntiAlias = true }
-    private val colorPaint = Paint().apply {
-        isAntiAlias = true
-    }
-    private var radius = 0f
-
     override fun onTouchEvent(e: MotionEvent) = gestureDetector.onTouchEvent(e)
 
     override fun performClick(): Boolean {
@@ -193,14 +206,12 @@ class SummaryView(c: Context) : View(c) {
     }
 
     fun applyCustomizations(settings: Settings) {
-        val dp = resources.displayMetrics.density
         val textColor = ColorThemer.todayForeground(context)
         val hintColor = ColorThemer.todayHint(context)
         titlePaint.color = textColor
         textPaint.color = textColor
         rightTextPaint.color = hintColor
         cardPaint.color = ColorThemer.todayBackground(context)
-        radius = settings["dock:icon-size", 48] * settings["icon:radius-ratio", 50] * dp / 100f
     }
 
     private sealed class CompiledEvent(

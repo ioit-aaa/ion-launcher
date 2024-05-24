@@ -3,46 +3,38 @@ package one.zagura.IonLauncher.provider.suggestions
 import java.util.ArrayList
 import java.util.TreeSet
 
-class ContextMap<T> : Map<T, List<ContextArray>> {
+class ContextMap<T> : Map<T, List<ContextItem>> {
 
-    private var contexts = HashMap<T, ArrayList<ContextArray>>()
+    private var contexts = HashMap<T, ArrayList<ContextItem>>()
 
-    operator fun set(item: T, value: ArrayList<ContextArray>) {
+    operator fun set(item: T, value: ArrayList<ContextItem>) {
         contexts[item] = value
     }
 
-    override val entries: Set<Map.Entry<T, List<ContextArray>>>
+    override val entries: Set<Map.Entry<T, List<ContextItem>>>
         get() = contexts.entries
     override val keys: Set<T>
         get() = contexts.keys
     override val size: Int
         get() = contexts.size
-    override val values: Collection<List<ContextArray>>
+    override val values: Collection<List<ContextItem>>
         get() = contexts.values
 
     override fun containsKey(key: T) = contexts.containsKey(key)
-    override fun containsValue(value: List<ContextArray>) = contexts.containsValue(value)
+    override fun containsValue(value: List<ContextItem>) = contexts.containsValue(value)
     override fun get(key: T) = contexts[key]
     override fun isEmpty() = contexts.isEmpty()
 
-    fun calculateDistance(currentContext: ContextArray, multipleContexts: List<ContextArray>): Float {
+    fun calculateDistance(currentContext: ContextItem, multipleContexts: List<ContextItem>): Float {
         if (multipleContexts.isEmpty())
             return Float.MAX_VALUE
         var a = 1f
         for (d in multipleContexts)
-            a *= calculateDistance(currentContext, d)
+            a *= ContextItem.calculateDistance(currentContext, d)
         return a
     }
 
-    private fun calculateDistance(a: ContextArray, b: ContextArray): Float {
-        var sum = 0f
-        a.data.forEachIndexed { i, fl ->
-            sum += ContextArray.differentiator(i, fl, b.data[i])
-        }
-        return sum / a.data.size
-    }
-
-    fun push(item: T, data: ContextArray, maxContexts: Int) {
+    fun push(item: T, data: ContextItem, maxContexts: Int) {
         val itemContexts = contexts[item]
         if (itemContexts == null) {
             contexts[item] = arrayListOf(data)
@@ -51,9 +43,9 @@ class ContextMap<T> : Map<T, List<ContextArray>> {
         itemContexts.add(data)
         val s = itemContexts.size
         if (s > maxContexts) {
-            val matches = TreeSet<Pair<ContextArray, Pair<Int, Float>>> { (aa, a), (bb, b) ->
+            val matches = TreeSet<Pair<ContextItem, Pair<Int, Float>>> { (aa, a), (bb, b) ->
                 when {
-                    aa.data === bb.data -> 0
+                    aa.data == bb.data -> 0
                     a.second < b.second -> -1
                     else -> 1
                 }
@@ -63,7 +55,7 @@ class ContextMap<T> : Map<T, List<ContextArray>> {
                 for ((i, item) in itemContexts.withIndex()) {
                     if (i == ai)
                         continue
-                    val d = calculateDistance(a, item)
+                    val d = ContextItem.calculateDistance(a, item)
                     if (d < closest.second)
                         closest = i to d
                 }
@@ -83,10 +75,7 @@ class ContextMap<T> : Map<T, List<ContextArray>> {
                     continue
                 }
                 val (arr, loc) = matchesList[trueI]
-                arr.data.forEachIndexed { i, f ->
-                    arr.data[i] = ((f.toInt() + matchData.data[i].toInt()) / 2).toShort()
-                }
-                matchesList[trueI] = arr to loc.copy(first = -1)
+                matchesList[trueI] = ContextItem.mix(arr, matchData) to loc.copy(first = -1)
             }
             itemContexts.clear()
             matchesList.mapTo(itemContexts) { it.first }

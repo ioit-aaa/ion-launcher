@@ -38,7 +38,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
 
     private val suggestionData = Settings("suggestionData")
 
-    private const val MAX_CONTEXT_COUNT = 6
+    private const val MAX_CONTEXT_COUNT = 8
 
     private lateinit var contextMap: ContextMap<LauncherItem>
     private val contextLock = ReentrantLock()
@@ -50,8 +50,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
 
     fun onItemOpened(context: Context, item: LauncherItem) {
         TaskRunner.submit {
-            val data = ContextArray()
-            getCurrentContext(context, data)
+            val data = getCurrentContext(context)
             contextLock.withLock {
                 contextMap.push(item, data, MAX_CONTEXT_COUNT)
             }
@@ -89,8 +88,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
     }
 
     private fun updateSuggestions(context: Context) {
-        val currentData = ContextArray()
-        getCurrentContext(context, currentData)
+        val currentData = getCurrentContext(context)
 
         val newSuggestions = TreeSet<Pair<LauncherItem, Float>> { a, b ->
             when {
@@ -127,6 +125,8 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
                 }
             }
             for (app in AppLoader.getResource()) {
+                if (dockItems.contains(app))
+                    continue
                 val stat = stats[app.packageName] ?: continue
                 val lastUse = stat.lastTimeUsed
                 val sinceLastUse = (System.currentTimeMillis() - lastUse).toDuration(DurationUnit.MILLISECONDS)
@@ -144,7 +144,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
         update(suggestions)
     }
 
-    private fun getCurrentContext(context: Context, out: ContextArray) {
+    private fun getCurrentContext(context: Context): ContextItem {
         val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val rightNow = Calendar.getInstance()
@@ -155,8 +155,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
             batteryManager
                 .getIntProperty(BatteryManager.BATTERY_PROPERTY_STATUS) == BatteryManager.BATTERY_STATUS_CHARGING
         else false
-        val currentHourIn24Format = rightNow[Calendar.HOUR_OF_DAY] * 60 + rightNow[Calendar.MINUTE]
-        val weekDay = rightNow[Calendar.DAY_OF_WEEK]
+        val currentMinuteIn24Format = rightNow[Calendar.HOUR_OF_DAY] * 60 + rightNow[Calendar.MINUTE]
         val isHeadSetConnected = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS).isNotEmpty()
         else false
@@ -164,42 +163,33 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
         val isWifiOn = connManager.isWifiEnabled
         val dayOfYear = rightNow[Calendar.DAY_OF_YEAR]
 
-        out.hour = currentHourIn24Format
-        out.battery = batteryLevel
-        out.hasHeadset = isHeadSetConnected
-        out.hasWifi = isWifiOn
-        out.isPluggedIn = isPluggedIn
-        out.weekDay = weekDay
-        out.dayOfYear = dayOfYear
+        return ContextItem(
+            minute = currentMinuteIn24Format,
+            battery = batteryLevel,
+            dayOfYear = dayOfYear,
+            hasHeadset = isHeadSetConnected,
+            hasWifi = isWifiOn,
+            isPluggedIn = isPluggedIn,
+        )
     }
 
     private fun loadFromStorage(context: Context): ContextMap<LauncherItem> {
         return contextLock.withLock {
             val contextMap = ContextMap<LauncherItem>()
-            suggestionData.getStrings("stats:app_open_ctx")?.let {
-                val dayOfYear = Calendar.getInstance()[Calendar.DAY_OF_YEAR]
-                it.forEach { itemRepresentation ->
-                    val k = "stats:app_open_ctx:$itemRepresentation"
-                    val strings = suggestionData.getStrings(k) ?: return@forEach
-                    if (strings.size % ContextArray.CONTEXT_DATA_SIZE != 0) {
-                        suggestionData.edit(context) {
-                            setStrings(k, null)
-                        }
-                        return@forEach
-                    }
-                    val openingContext = strings
+            val contextStrings = suggestionData.getStrings("stat:open-ctx") ?: return@withLock contextMap
+            val dayOfYear = Calendar.getInstance()[Calendar.DAY_OF_YEAR]
+            for (itemRepresentation in contextStrings) {
+                val k = "stat:open-ctx:$itemRepresentation"
+                val item = LauncherItem.decode(context, itemRepresentation)
+                if (item != null) {
+                    val strings = suggestionData.getInts(k) ?: break
+                    contextMap[item] = strings
                         .asSequence()
-                        .map { it.toShortOrNull(16) ?: 0 }
-                        .chunked(ContextArray.CONTEXT_DATA_SIZE)
-                        .map(::ContextArray)
+                        .map(::ContextItem)
                         .filter { abs(dayOfYear - it.dayOfYear) < 30 }
                         .toCollection(ArrayList())
-
-                    LauncherItem.decode(context, itemRepresentation)?.let { item ->
-                        contextMap[item] = openingContext
-                    } ?: suggestionData.edit(context) {
-                        setStrings(k, null)
-                    }
+                } else suggestionData.edit(context) {
+                    setStrings(k, null)
                 }
             }
             contextMap
@@ -209,11 +199,10 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
     fun saveToStorage(context: Context) {
         contextLock.withLock {
             suggestionData.edit(context) {
-                "stats:app_open_ctx" set contextMap
+                "stat:open-ctx" set contextMap
                     .map { it.key.toString() }
                 contextMap.forEach { (item, data) ->
-                    "stats:app_open_ctx:$item" set data
-                        .flatMap { it.data.map { it.toString(16) } }
+                    setInts("stat:open-ctx:$item", data.map { it.data })
                 }
             }
         }

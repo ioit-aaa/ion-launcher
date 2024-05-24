@@ -9,8 +9,10 @@ object TaskRunner : Thread() {
     fun submit(task: () -> Unit) {
         lock.withLock {
             queue.addLast(task)
-            if (!isRunning)
+            if (!isRunning) {
+                isRunning = true
                 Thread(::run).apply { isDaemon = false }.start()
+            }
         }
     }
 
@@ -19,7 +21,6 @@ object TaskRunner : Thread() {
     private val lock = ReentrantLock()
 
     override fun run() {
-        isRunning = true
         while (true) {
             lock.lock()
             if (queue.peek() == null) {

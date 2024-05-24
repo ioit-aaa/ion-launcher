@@ -44,7 +44,7 @@ class IonLauncherApp : Application() {
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    val torchCallback = object : CameraManager.TorchCallback() {
+    private val torchCallback = object : CameraManager.TorchCallback() {
         override fun onTorchModeChanged(cameraId: String, enabled: Boolean) =
             SuggestionsManager.onTorchStateChanged(this@IonLauncherApp, enabled, cameraId)
     }

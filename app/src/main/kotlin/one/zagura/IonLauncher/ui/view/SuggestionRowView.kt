@@ -27,21 +27,31 @@ import kotlin.math.abs
 
 class SuggestionRowView(
     context: Context,
-    val showDropTargets: () -> Unit,
-    val onSearch: () -> Unit,
+    private val drawingContext: SharedDrawingContext,
+    private val showDropTargets: () -> Unit,
+    private val onSearch: () -> Unit,
 ) : View(context) {
 
     private var showSearchButton = false
     private var suggestions = emptyList<LauncherItem>()
-    private var labels = emptyList<CharSequence>()
-    private var radius = 0f
+    private var labels = emptyArray<CharSequence>()
+
+    private val icSearch = resources.getDrawable(R.drawable.ic_search)
+
+    private val pillPaint = Paint()
+    private val textPaint = TextPaint().apply {
+        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
+        textAlign = Paint.Align.LEFT
+        isAntiAlias = true
+        isSubpixelText = true
+    }
 
     fun update(allSuggestions: List<LauncherItem>) {
         TaskRunner.submit {
             val newSuggestions = takeSuggestions(allSuggestions)
             if (newSuggestions.isEmpty()) post {
                 suggestions = emptyList()
-                labels = emptyList()
+                labels = emptyArray()
                 isVisible = false
             }
             else post {
@@ -54,33 +64,11 @@ class SuggestionRowView(
     }
 
     fun applyCustomizations(settings: Settings) {
-        val dp = resources.displayMetrics.density
-        radius = settings["dock:icon-size", 48] * settings["icon:radius-ratio", 50] * dp / 100f
         showSearchButton = settings["layout:search-in-suggestions", false]
         pillPaint.color = ColorThemer.pillBackground(context)
         textPaint.color = ColorThemer.pillForeground(context)
         icSearch.setTint(ColorThemer.pillForeground(context))
         invalidate()
-    }
-
-    private val pillPaint = Paint().apply {
-
-    }
-
-    private val textPaint = TextPaint().apply {
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
-        textAlign = Paint.Align.LEFT
-        isAntiAlias = true
-        isSubpixelText = true
-    }
-
-    private val icSearch = resources.getDrawable(R.drawable.ic_search)
-
-    private val tmpRect = Rect()
-
-    private val textHeight = run {
-        textPaint.getTextBounds("X", 0, 1, tmpRect)
-        tmpRect.height()
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -96,7 +84,7 @@ class SuggestionRowView(
             val x = pl + width - height
             val y = pt
             val p = (8 * dp).toInt()
-            canvas.drawRoundRect(x.toFloat(), y.toFloat(), x.toFloat() + height, y.toFloat() + height, radius, radius, pillPaint)
+            canvas.drawRoundRect(x.toFloat(), y.toFloat(), x.toFloat() + height, y.toFloat() + height, drawingContext.radius, drawingContext.radius, pillPaint)
             icSearch.setBounds(x + p, y + p, x + height - p, y + height - p)
             icSearch.draw(canvas)
         }
@@ -109,14 +97,14 @@ class SuggestionRowView(
         for (i in suggestions.indices) {
             val item = suggestions[i]
             val icon = IconLoader.loadIcon(context, item)
-            canvas.drawRoundRect(x, pt.toFloat(), x + singleWidth - separation, pt + height.toFloat(), radius, radius, pillPaint)
-            icon.copyBounds(tmpRect)
+            canvas.drawRoundRect(x, pt.toFloat(), x + singleWidth - separation, pt + height.toFloat(), drawingContext.radius, drawingContext.radius, pillPaint)
+            icon.copyBounds(drawingContext.tmpRect)
             icon.setBounds(x.toInt() + p, pt + p, x.toInt() + height - p, pt + height - p)
             icon.draw(canvas)
-            icon.bounds = tmpRect
+            icon.bounds = drawingContext.tmpRect
             val textX = x + height - p / 2
             val text = labels[i]
-            canvas.drawText(text, 0, text.length, textX, pt + (height + textHeight) / 2f, textPaint)
+            canvas.drawText(text, 0, text.length, textX, pt + (height + drawingContext.textHeight) / 2f, textPaint)
             x += singleWidth
         }
     }
@@ -205,8 +193,8 @@ class SuggestionRowView(
             if (showSearchButton) width - height.toFloat()
             else width + separation
         val w = suggestionsWidth / suggestions.size - separation - height
-        labels = suggestions.map {
-            TextUtils.ellipsize(LabelLoader.loadLabel(context, it), textPaint, w, TextUtils.TruncateAt.END)
+        labels = Array(suggestions.size) {
+            TextUtils.ellipsize(LabelLoader.loadLabel(context, suggestions[it]), textPaint, w, TextUtils.TruncateAt.END)
         }
     }
 
@@ -214,15 +202,6 @@ class SuggestionRowView(
         val suggestionCount = context.ionApplication.settings["suggestion:count", 3]
         if (suggestionCount == 0)
             return emptyList()
-        val dockItems = Dock.getItems(context)
-        val suggestions = ArrayList<LauncherItem>(suggestionCount)
-        for (s in allSuggestions) {
-            if (dockItems.contains(s))
-                continue
-            suggestions.add(s)
-            if (suggestions.size == suggestionCount)
-                break
-        }
-        return suggestions
+        return allSuggestions.take(suggestionCount)
     }
 }
