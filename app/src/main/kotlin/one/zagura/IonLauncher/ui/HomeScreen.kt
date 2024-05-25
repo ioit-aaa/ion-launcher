@@ -59,7 +59,8 @@ class HomeScreen : Activity() {
     private lateinit var pinnedGrid: PinnedGridView
     private lateinit var suggestionsView: SuggestionRowView
 
-    private val drawingContext = SharedDrawingContext()
+    private lateinit var drawCtx: SharedDrawingContext
+
     private val screenBackground = FillDrawable(0)
     private var screenBackgroundAlpha = 0
     private var drawerBackgroundAlpha = 0
@@ -67,6 +68,7 @@ class HomeScreen : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        drawCtx = SharedDrawingContext(this)
         homeScreen = createHomeScreen()
         val h = Utils.getDisplayHeight(this) * 2
         setContentView(homeScreen, FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, h, Gravity.BOTTOM))
@@ -161,7 +163,7 @@ class HomeScreen : Activity() {
                 it.luminance < 0.5f
             else ColorThemer.foreground(this).let(ColorThemer::lightness) < 0.5f
         })
-        drawingContext.applyCustomizations(this, settings)
+        drawCtx.applyCustomizations(this, settings)
         pinnedGrid.applyCustomizations(settings)
         drawerArea.applyCustomizations()
         mediaView.applyCustomizations(settings)
@@ -202,10 +204,10 @@ class HomeScreen : Activity() {
         val dp = resources.displayMetrics.density
         val fullHeight = Utils.getDisplayHeight(this)
 
-        summaryView = SummaryView(this, drawingContext)
-        mediaView = MediaView(this, drawingContext)
-        suggestionsView = SuggestionRowView(this, drawingContext, ::showDropTargets, ::search)
-        pinnedGrid = PinnedGridView(this, drawingContext)
+        summaryView = SummaryView(this, drawCtx)
+        mediaView = MediaView(this, drawCtx)
+        suggestionsView = SuggestionRowView(this, drawCtx, ::showDropTargets, ::search)
+        pinnedGrid = PinnedGridView(this, drawCtx)
 
         desktop = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL

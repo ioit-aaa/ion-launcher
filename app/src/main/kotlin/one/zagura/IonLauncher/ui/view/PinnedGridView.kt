@@ -27,7 +27,7 @@ import kotlin.math.abs
 @SuppressLint("UseCompatLoadingForDrawables")
 class PinnedGridView(
     context: Context,
-    private val drawingContext: SharedDrawingContext,
+    private val drawCtx: SharedDrawingContext,
 ) : View(context) {
 
     class ItemPreview(val icon: Drawable, val x: Int, val y: Int)
@@ -95,13 +95,13 @@ class PinnedGridView(
      * Called after [applyCustomizations] if necessary
      */
     fun calculateSideMargin(): Int {
-        val iconSize = drawingContext.iconSize.toInt()
+        val iconSize = drawCtx.iconSize.toInt()
         return (resources.displayMetrics.widthPixels / columns - iconSize) / 2 + paddingLeft
     }
 
     fun calculateGridHeight(): Int {
         val dp = resources.displayMetrics.density
-        val iconSize = drawingContext.iconSize.toInt()
+        val iconSize = drawCtx.iconSize.toInt()
         val vMargin = (12 * dp).toInt()
         val rows = context.ionApplication.settings["dock:rows", 2]
         return paddingBottom + paddingTop + (iconSize + vMargin * 2) * rows
@@ -117,7 +117,7 @@ class PinnedGridView(
         if (!showDropTargets)
             return
         val dp = resources.displayMetrics.density
-        val r = drawingContext.iconSize / 2f + dp
+        val r = drawCtx.iconSize / 2f + dp
         for (x in 0 ..< columns)
             for (y in 0 ..< rows) {
                 canvas.drawCircle(
@@ -135,9 +135,9 @@ class PinnedGridView(
     }
 
     private fun drawItems(canvas: Canvas) {
-        val r = drawingContext.iconSize.toInt() / 2
-        val sr = (drawingContext.iconSize * 0.9f).toInt() / 2
-        val br = drawingContext.iconSize.toInt() * 3 / 4
+        val r = drawCtx.iconSize.toInt() / 2
+        val sr = (drawCtx.iconSize * 0.9f).toInt() / 2
+        val br = drawCtx.iconSize.toInt() * 3 / 4
         val d = dropPreview
         val i = replacePreview
         for (x in 0 until columns)
@@ -149,7 +149,7 @@ class PinnedGridView(
                     else IconLoader.loadIcon(context, getItem(x, y) ?: continue)
                 val centerX = (paddingLeft + (width - paddingLeft - paddingRight) / columns * (0.5f + x)).toInt()
                 val centerY = (paddingTop + (height - paddingTop - paddingBottom) / rows * (0.5f + y)).toInt()
-                icon.copyBounds(drawingContext.tmpRect)
+                icon.copyBounds(drawCtx.tmpRect)
                 icon.setBounds(centerX - r, centerY - r, centerX + r, centerY + r)
                 if (showDropTargets) {
                     val a = icon.alpha
@@ -158,7 +158,7 @@ class PinnedGridView(
                     icon.alpha = a
                 } else
                     icon.draw(canvas)
-                icon.bounds = drawingContext.tmpRect
+                icon.bounds = drawCtx.tmpRect
             }
     }
 

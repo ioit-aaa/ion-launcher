@@ -2,11 +2,8 @@ package one.zagura.IonLauncher.ui.view
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Paint
 import android.graphics.Rect
-import android.text.TextPaint
 import android.text.TextUtils
-import android.util.TypedValue
 import android.view.DragEvent
 import android.view.GestureDetector
 import android.view.Gravity
@@ -25,7 +22,7 @@ import kotlin.math.abs
 
 class SuggestionRowView(
     context: Context,
-    private val drawingContext: SharedDrawingContext,
+    private val drawCtx: SharedDrawingContext,
     private val showDropTargets: () -> Unit,
     private val onSearch: () -> Unit,
 ) : View(context) {
@@ -35,14 +32,6 @@ class SuggestionRowView(
     private var labels = emptyArray<CharSequence>()
 
     private val icSearch = resources.getDrawable(R.drawable.ic_search)
-
-    private val pillPaint = Paint()
-    private val textPaint = TextPaint().apply {
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
-        textAlign = Paint.Align.LEFT
-        isAntiAlias = true
-        isSubpixelText = true
-    }
 
     fun update(allSuggestions: List<LauncherItem>) {
         TaskRunner.submit {
@@ -61,8 +50,6 @@ class SuggestionRowView(
 
     fun applyCustomizations(settings: Settings) {
         showSearchButton = settings["layout:search-in-suggestions", false]
-        pillPaint.color = ColorThemer.iconBackground(context)
-        textPaint.color = ColorThemer.iconForeground(context)
         icSearch.setTint(ColorThemer.iconForeground(context))
         invalidate()
     }
@@ -84,9 +71,9 @@ class SuggestionRowView(
                     pt.toFloat(),
                     (pl + width).toFloat(),
                     (pt + height).toFloat(),
-                    drawingContext.radius,
-                    drawingContext.radius,
-                    pillPaint
+                    drawCtx.radius,
+                    drawCtx.radius,
+                    drawCtx.pillPaint
                 )
                 icSearch.setBounds(pl + (width - height) / 2 + p, pt + p, pl + (width + height) / 2 - p, pt + height - p)
             } else {
@@ -97,9 +84,9 @@ class SuggestionRowView(
                     y.toFloat(),
                     x.toFloat() + height,
                     y.toFloat() + height,
-                    drawingContext.radius,
-                    drawingContext.radius,
-                    pillPaint
+                    drawCtx.radius,
+                    drawCtx.radius,
+                    drawCtx.pillPaint
                 )
                 icSearch.setBounds(x + p, y + p, x + height - p, y + height - p)
             }
@@ -114,14 +101,22 @@ class SuggestionRowView(
         for (i in suggestions.indices) {
             val item = suggestions[i]
             val icon = IconLoader.loadIcon(context, item)
-            canvas.drawRoundRect(x, pt.toFloat(), x + singleWidth - separation, pt + height.toFloat(), drawingContext.radius, drawingContext.radius, pillPaint)
-            icon.copyBounds(drawingContext.tmpRect)
+            canvas.drawRoundRect(
+                x,
+                pt.toFloat(),
+                x + singleWidth - separation,
+                pt + height.toFloat(),
+                drawCtx.radius,
+                drawCtx.radius,
+                drawCtx.pillPaint
+            )
+            icon.copyBounds(drawCtx.tmpRect)
             icon.setBounds(x.toInt() + p, pt + p, x.toInt() + height - p, pt + height - p)
             icon.draw(canvas)
-            icon.bounds = drawingContext.tmpRect
+            icon.bounds = drawCtx.tmpRect
             val textX = x + height - p / 2
             val text = labels[i]
-            canvas.drawText(text, 0, text.length, textX, pt + (height + drawingContext.textHeight) / 2f, textPaint)
+            canvas.drawText(text, 0, text.length, textX, pt + (height + drawCtx.textHeight) / 2f, drawCtx.textPaint)
             x += singleWidth
         }
     }
@@ -213,7 +208,7 @@ class SuggestionRowView(
             else width + separation
         val w = suggestionsWidth / suggestions.size - separation - height
         labels = Array(suggestions.size) {
-            TextUtils.ellipsize(LabelLoader.loadLabel(context, suggestions[it]), textPaint, w, TextUtils.TruncateAt.END)
+            TextUtils.ellipsize(LabelLoader.loadLabel(context, suggestions[it]), drawCtx.textPaint, w, TextUtils.TruncateAt.END)
         }
     }
 

@@ -32,7 +32,7 @@ import kotlin.math.sign
 
 class SummaryView(
     context: Context,
-    private val drawingContext: SharedDrawingContext,
+    private val drawCtx: SharedDrawingContext,
 ) : View(context) {
 
     private var dateString = ""
@@ -177,7 +177,7 @@ class SummaryView(
         val roff = (eventHeight - eventRightHeight) / 2 - rightTextPaint.ascent()
 
         val totalHeight = titleHeight + (eventHeight + separation) * events.size + padding * 2
-        canvas.drawRoundRect(paddingLeft.toFloat(), paddingTop.toFloat(), (width - paddingRight).toFloat(), paddingTop + totalHeight, drawingContext.radius, drawingContext.radius, cardPaint)
+        canvas.drawRoundRect(paddingLeft.toFloat(), paddingTop.toFloat(), (width - paddingRight).toFloat(), paddingTop + totalHeight, drawCtx.radius, drawCtx.radius, cardPaint)
         canvas.drawText(dateString, paddingLeft.toFloat() + padding, paddingTop + padding - titlePaint.ascent(), titlePaint)
 
         var bottomTop = paddingTop + padding + titleHeight + separation

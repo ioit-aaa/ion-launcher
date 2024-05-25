@@ -3,14 +3,10 @@ package one.zagura.IonLauncher.ui.view
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Paint
 import android.graphics.Path
-import android.graphics.Typeface
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.text.TextPaint
 import android.text.TextUtils
-import android.util.TypedValue
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -25,7 +21,7 @@ import kotlin.math.abs
 
 class MediaView(
     context: Context,
-    private val drawingContext: SharedDrawingContext,
+    private val drawCtx: SharedDrawingContext,
 ) : View(context) {
 
     class PreparedMediaData(
@@ -43,23 +39,6 @@ class MediaView(
     private val icPlay = resources.getDrawable(R.drawable.ic_play)
     private val icPause = resources.getDrawable(R.drawable.ic_pause)
     private val icTrackNext = resources.getDrawable(R.drawable.ic_track_next)
-
-    private val pillPaint = Paint()
-
-    private val titlePaint = TextPaint().apply {
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
-        textAlign = Paint.Align.LEFT
-        isAntiAlias = true
-        isSubpixelText = true
-        typeface = Typeface.DEFAULT_BOLD
-    }
-
-    private val subtitlePaint = TextPaint().apply {
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
-        textAlign = Paint.Align.LEFT
-        isAntiAlias = true
-        isSubpixelText = true
-    }
 
     fun update(players: Array<MediaPlayerData>) {
         TaskRunner.submit {
@@ -95,9 +74,6 @@ class MediaView(
         val dp = resources.displayMetrics.density
         separation = 12 * dp
         val c = ColorThemer.iconForeground(context)
-        pillPaint.color = ColorThemer.iconBackground(context)
-        titlePaint.color = c
-        subtitlePaint.color = ColorThemer.iconHint(context)
         icPlay.setTint(c)
         icPause.setTint(c)
         icTrackNext.setTint(c)
@@ -119,32 +95,32 @@ class MediaView(
         for (i in players.indices) {
             val player = players[i]
             val icon = player.icon
-            canvas.drawRoundRect(pl.toFloat(), y, pl + width.toFloat(), y + drawingContext.iconSize, drawingContext.radius, drawingContext.radius, pillPaint)
+            canvas.drawRoundRect(pl.toFloat(), y, pl + width.toFloat(), y + drawCtx.iconSize, drawCtx.radius, drawCtx.radius, drawCtx.pillPaint)
             if (icon != null) {
-                icon.copyBounds(drawingContext.tmpRect)
-                icon.setBounds(pl + iconPadding, y.toInt() + iconPadding, pl + drawingContext.iconSize.toInt() - iconPadding, y.toInt() + drawingContext.iconSize.toInt() - iconPadding)
+                icon.copyBounds(drawCtx.tmpRect)
+                icon.setBounds(pl + iconPadding, y.toInt() + iconPadding, pl + drawCtx.iconSize.toInt() - iconPadding, y.toInt() + drawCtx.iconSize.toInt() - iconPadding)
                 icon.draw(canvas)
-                icon.bounds = drawingContext.tmpRect
+                icon.bounds = drawCtx.tmpRect
             }
-            val textX = pl + drawingContext.iconSize
+            val textX = pl + drawCtx.iconSize
             val s = 3 * dp
-            canvas.drawText(player.title, 0, player.title.length, textX, y + drawingContext.iconSize / 2f - s, titlePaint)
-            canvas.drawText(player.subtitle, 0, player.subtitle.length, textX, y + drawingContext.iconSize / 2f + s + drawingContext.textHeight, subtitlePaint)
+            canvas.drawText(player.title, 0, player.title.length, textX, y + drawCtx.iconSize / 2f - s, drawCtx.titlePaint)
+            canvas.drawText(player.subtitle, 0, player.subtitle.length, textX, y + drawCtx.iconSize / 2f + s + drawCtx.textHeight, drawCtx.subtitlePaint)
 
             val playIcon = if (player.isPlaying) icPause else icPlay
             val lastIconOff = (2 * dp).toInt()
 
             if (player.data.next == null) {
-                val controlX = width - drawingContext.iconSize.toInt() - lastIconOff
+                val controlX = width - drawCtx.iconSize.toInt() - lastIconOff
                 drawIcon(canvas, playIcon, controlX, y.toInt(), controlPadding)
             } else {
-                var controlX = width - drawingContext.iconSize.toInt() * 2
+                var controlX = width - drawCtx.iconSize.toInt() * 2
                 drawIcon(canvas, playIcon, controlX, y.toInt(), controlPadding)
-                controlX += drawingContext.iconSize.toInt() - lastIconOff
+                controlX += drawCtx.iconSize.toInt() - lastIconOff
                 drawIcon(canvas, icTrackNext, controlX, y.toInt(), controlPadding)
             }
 
-            y += drawingContext.iconSize + separation
+            y += drawCtx.iconSize + separation
         }
     }
 
@@ -152,8 +128,8 @@ class MediaView(
         icon.setBounds(
             x + controlPadding,
             y + controlPadding,
-            x + drawingContext.iconSize.toInt() - controlPadding,
-            y + drawingContext.iconSize.toInt() - controlPadding
+            x + drawCtx.iconSize.toInt() - controlPadding,
+            y + drawCtx.iconSize.toInt() - controlPadding
         )
         icon.draw(canvas)
     }
@@ -177,14 +153,14 @@ class MediaView(
             if (i < 0 || i >= players.size)
                 return false
             val player = players[i]
-            var x = drawingContext.iconSize
+            var x = drawCtx.iconSize
             player.data.next?.let {
                 if (e.x >= width - paddingRight - x) {
                     Utils.click(context)
                     it()
                     return true
                 }
-                x += drawingContext.iconSize
+                x += drawCtx.iconSize
             }
             if (e.x >= width - paddingRight - x) {
                 Utils.click(context)
@@ -204,9 +180,9 @@ class MediaView(
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         for (player in players) {
-            val avail = (width - paddingLeft - paddingRight) - drawingContext.iconSize * 3
-            val title = TextUtils.ellipsize(player.data.title, titlePaint, avail, TextUtils.TruncateAt.END)
-            val subtitle = TextUtils.ellipsize(player.data.subtitle, subtitlePaint, avail, TextUtils.TruncateAt.END)
+            val avail = (width - paddingLeft - paddingRight) - drawCtx.iconSize * 3
+            val title = TextUtils.ellipsize(player.data.title, drawCtx.titlePaint, avail, TextUtils.TruncateAt.END)
+            val subtitle = TextUtils.ellipsize(player.data.subtitle, drawCtx.subtitlePaint, avail, TextUtils.TruncateAt.END)
             player.title = title
             player.subtitle = subtitle
         }
@@ -214,7 +190,7 @@ class MediaView(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val height = drawingContext.iconSize.toInt() * players.size + separation.toInt() * (players.size - 1).coerceAtLeast(0)
+        val height = drawCtx.iconSize.toInt() * players.size + separation.toInt() * (players.size - 1).coerceAtLeast(0)
         setMeasuredDimension(
             getDefaultSize(suggestedMinimumWidth, widthMeasureSpec),
             getDefaultSize(height, MeasureSpec.UNSPECIFIED)
