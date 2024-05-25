@@ -1,0 +1,13 @@
+Added suggestion to turn off torch when it's on
+Added alarms suggestion when there's an event tomorrow before 12 and there's no alarm before it
+Added recently missed calls to the summary view
+Added setting to change roundness of icons & other ui elements, made all icons match the current roundness setting
+
+Tweaked color picker
+Reorganized and simplified settings
+App drawer icons are now slightly larger
+Made suggestion row occupy the same space even if there are no suggestions
+Optimizations
+
+Fixed wrong ordering of & missing search results
+Fixed apps with same label missing in app drawer
