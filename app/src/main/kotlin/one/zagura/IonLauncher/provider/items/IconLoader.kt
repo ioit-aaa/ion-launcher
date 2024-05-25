@@ -17,11 +17,15 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.InsetDrawable
 import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.ShapeDrawable
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.alpha
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.get
@@ -45,6 +49,7 @@ import one.zagura.IonLauncher.util.TaskRunner
 import java.io.FileNotFoundException
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlin.math.abs
 
 object IconLoader {
     private val cacheApps = HashMap<App, Drawable>()
@@ -181,27 +186,28 @@ object IconLoader {
     }
 
     private fun themeIcon(context: Context, icon: Drawable): Drawable {
-        val ti = transformIcon(context, icon)
         val iconThemingInfo = iconPacks.firstNotNullOfOrNull {
-            if (it.iconModificationInfo.areUnthemedIconsChanged) it.iconModificationInfo.also {
-                it.size = 128
-            } else null
+            if (it.iconModificationInfo.areUnthemedIconsChanged)
+                it.iconModificationInfo.also { it.size = 128 } else null
         }
+        val ti = transformIcon(context, icon, iconThemingInfo != null)
         return if (iconThemingInfo == null) ti
         else themeIcon(ti, iconThemingInfo, context.resources).apply {
             setGrayscale(context.ionApplication.settings["icon:grayscale", true])
         }
     }
 
-    private fun transformIcon(context: Context, icon: Drawable): Drawable {
+    private fun transformIcon(context: Context, icon: Drawable, willBeThemed: Boolean): Drawable {
         val settings = context.ionApplication.settings
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || icon !is AdaptiveIconDrawable) {
-            val bmp = icon.toBitmap(1, 1)
-            val isOpaqueSquare = bmp[0, 0].alpha == 255
             icon.setGrayscale(settings["icon:grayscale", true])
             val w = icon.intrinsicWidth
             val h = icon.intrinsicHeight
-            val icon = if (isOpaqueSquare) icon else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                settings["icon:monochrome", false] && !settings["icon:monochrome-bg", true]) {
+                return InsetDrawable(icon, w / 12)
+            }
+            val icon = if (icon.toBitmap(1, 1)[0, 0].alpha == 255) icon else {
                 val layers = LayerDrawable(arrayOf(FillDrawable(ColorThemer.iconBackground(context)), icon))
                 layers.setLayerInset(0, w / 6, h / 6, w / 6, h / 6)
                 layers.setLayerInset(1, w / 6, h / 6, w / 6, h / 6)
@@ -225,15 +231,33 @@ object IconLoader {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val monochrome = icon.monochrome
-            if (monochrome != null && settings["icon:monochrome", false]) {
-                if (!settings["icon:monochrome-bg", true]) {
+            if (settings["icon:monochrome", false]) {
+                if (monochrome != null) {
+                    if (!settings["icon:monochrome-bg", true]) {
+                        monochrome.colorFilter = PorterDuffColorFilter(ColorThemer.iconForeground(context), PorterDuff.Mode.SRC_IN)
+                        val w = monochrome.intrinsicWidth
+                        return InsetDrawable(monochrome, -w / if (willBeThemed) 5 else 7)
+                    }
                     monochrome.colorFilter = PorterDuffColorFilter(ColorThemer.iconForeground(context), PorterDuff.Mode.SRC_IN)
-                    val w = monochrome.intrinsicWidth
-                    return InsetDrawable(monochrome, -w / 5)
+                    fg = monochrome
+                    bg = FillDrawable(ColorThemer.iconBackground(context))
+                } else if (!settings["icon:monochrome-bg", true]) {
+                    val i = makeIcon(settings, bg, fg)
+                    return InsetDrawable(i, fg.intrinsicWidth / 12)
+                } else if (bg == null)
+                    bg = FillDrawable(ColorThemer.iconBackground(context))
+                else {
+                    if (bg is ColorDrawable || bg is ShapeDrawable || bg is GradientDrawable) {
+                        val pixel = bg.toBitmap(1, 1)[0, 0]
+                        val lab = DoubleArray(3)
+                        ColorUtils.colorToLAB(pixel, lab)
+                        val bgL = lab[0]
+                        val b = ColorThemer.iconBackground(context)
+                        ColorUtils.colorToLAB(b, lab)
+                        if (abs(bgL - lab[0]) < 30.0)
+                            bg = FillDrawable(b)
+                    }
                 }
-                monochrome.colorFilter = PorterDuffColorFilter(ColorThemer.iconForeground(context), PorterDuff.Mode.SRC_IN)
-                fg = monochrome
-                bg = FillDrawable(ColorThemer.iconBackground(context))
             }
         }
 
