@@ -12,11 +12,9 @@ import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
-import androidx.core.view.isVisible
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
-import one.zagura.IonLauncher.provider.Dock
 import one.zagura.IonLauncher.provider.items.IconLoader
 import one.zagura.IonLauncher.provider.items.LabelLoader
 import one.zagura.IonLauncher.ui.ionApplication
@@ -52,12 +50,10 @@ class SuggestionRowView(
             if (newSuggestions.isEmpty()) post {
                 suggestions = emptyList()
                 labels = emptyArray()
-                isVisible = false
             }
             else post {
                 suggestions = newSuggestions
                 updateLabels()
-                isVisible = true
                 invalidate()
             }
         }
@@ -81,11 +77,32 @@ class SuggestionRowView(
         val dp = resources.displayMetrics.density
 
         if (showSearchButton) {
-            val x = pl + width - height
-            val y = pt
             val p = (8 * dp).toInt()
-            canvas.drawRoundRect(x.toFloat(), y.toFloat(), x.toFloat() + height, y.toFloat() + height, drawingContext.radius, drawingContext.radius, pillPaint)
-            icSearch.setBounds(x + p, y + p, x + height - p, y + height - p)
+            if (suggestions.isEmpty()) {
+                canvas.drawRoundRect(
+                    pl.toFloat(),
+                    pt.toFloat(),
+                    (pl + width).toFloat(),
+                    (pt + height).toFloat(),
+                    drawingContext.radius,
+                    drawingContext.radius,
+                    pillPaint
+                )
+                icSearch.setBounds(pl + (width - height) / 2 + p, pt + p, pl + (width + height) / 2 - p, pt + height - p)
+            } else {
+                val x = pl + width - height
+                val y = pt
+                canvas.drawRoundRect(
+                    x.toFloat(),
+                    y.toFloat(),
+                    x.toFloat() + height,
+                    y.toFloat() + height,
+                    drawingContext.radius,
+                    drawingContext.radius,
+                    pillPaint
+                )
+                icSearch.setBounds(x + p, y + p, x + height - p, y + height - p)
+            }
             icSearch.draw(canvas)
         }
 
@@ -123,7 +140,9 @@ class SuggestionRowView(
         }
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
-            if (showSearchButton && e.x > width - paddingRight - (height - paddingTop - paddingBottom)) {
+            if (showSearchButton && (
+                    suggestions.isEmpty() ||
+                    e.x > width - paddingRight - (height - paddingTop - paddingBottom))) {
                 onSearch()
                 return true
             }
