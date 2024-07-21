@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="color_bg">@android:color/system_neutral1_100</color>
+    <color name="color_bg_sunk">@android:color/system_neutral1_200</color>
+    <color name="color_separator">@android:color/system_neutral1_200</color>
+    <color name="color_hint">@android:color/system_neutral1_600</color>
+    <color name="color_text">@android:color/system_neutral1_900</color>
+
+    <color name="color_heading">@android:color/system_neutral1_600</color>
+    <color name="color_disabled">@android:color/system_neutral1_300</color>
+
+    <color name="color_button">@android:color/system_neutral1_200</color>
+    <color name="color_button_text">@android:color/system_neutral1_900</color>
+</resources>
