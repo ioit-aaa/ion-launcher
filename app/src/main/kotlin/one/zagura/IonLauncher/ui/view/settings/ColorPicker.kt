@@ -141,7 +141,6 @@ object ColorPicker {
         content.addView(GridLayout(context).apply {
             orientation = GridLayout.VERTICAL
             val set = arrayOf(
-                0x000000,
                 ColorThemer.DEFAULT_DARK,
                 ColorThemer.DEFAULT_LIGHT,
                 ColorThemer.background(context) and 0xffffff,

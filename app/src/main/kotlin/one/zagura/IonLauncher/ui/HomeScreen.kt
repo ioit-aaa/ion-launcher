@@ -109,6 +109,7 @@ class HomeScreen : Activity() {
         super.onStart()
         ionApplication.settings.consumeUpdate {
             IconLoader.updateIconPacks(this, ionApplication.settings)
+            suggestionsView.update(SuggestionsManager.getResource())
             applyCustomizations()
         }
         AppLoader.track(false) {

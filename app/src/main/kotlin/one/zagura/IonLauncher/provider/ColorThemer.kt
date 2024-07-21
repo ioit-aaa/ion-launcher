@@ -14,6 +14,9 @@ object ColorThemer {
         val s = context.ionApplication.settings
         return s["icon:bg", DEFAULT_LIGHT] and 0xffffff or (s["icon:bg:alpha", 0xff] shl 24)
     }
+    fun iconBackgroundOpaque(context: Context): Int {
+        return context.ionApplication.settings["icon:bg", DEFAULT_LIGHT] or 0xff000000.toInt()
+    }
     fun iconForeground(context: Context): Int =
         context.ionApplication.settings["icon:fg", DEFAULT_DARK] or 0xff000000.toInt()
     fun iconHint(context: Context): Int =

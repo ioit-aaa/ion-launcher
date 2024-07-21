@@ -9,6 +9,7 @@ import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.view.isVisible
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
@@ -39,18 +40,20 @@ class SuggestionRowView(
             if (newSuggestions.isEmpty()) post {
                 suggestions = emptyList()
                 labels = emptyArray()
+                isVisible = showSearchButton
             }
             else post {
                 suggestions = newSuggestions
                 updateLabels()
                 invalidate()
+                isVisible = true
             }
         }
     }
 
     fun applyCustomizations(settings: Settings) {
         showSearchButton = settings["layout:search-in-suggestions", false]
-        icSearch.setTint(ColorThemer.iconForeground(context))
+        icSearch.setTint(ColorThemer.iconBackgroundOpaque(context))
         invalidate()
     }
 
@@ -63,58 +66,49 @@ class SuggestionRowView(
         val height = height - pt - pb
         val dp = resources.displayMetrics.density
 
+        canvas.drawRoundRect(
+            pl.toFloat(),
+            pt.toFloat(),
+            pl + width.toFloat(),
+            pt + height.toFloat(),
+            drawCtx.radius,
+            drawCtx.radius,
+            drawCtx.pillPaint
+        )
+
+        val iconPadding = 8 * dp
         if (showSearchButton) {
-            val p = (8 * dp).toInt()
-            if (suggestions.isEmpty()) {
-                canvas.drawRoundRect(
-                    pl.toFloat(),
-                    pt.toFloat(),
-                    (pl + width).toFloat(),
-                    (pt + height).toFloat(),
-                    drawCtx.radius,
-                    drawCtx.radius,
-                    drawCtx.pillPaint
-                )
-                icSearch.setBounds(pl + (width - height) / 2 + p, pt + p, pl + (width + height) / 2 - p, pt + height - p)
-            } else {
-                val x = pl + width - height
-                val y = pt
-                canvas.drawRoundRect(
-                    x.toFloat(),
-                    y.toFloat(),
-                    x.toFloat() + height,
-                    y.toFloat() + height,
-                    drawCtx.radius,
-                    drawCtx.radius,
-                    drawCtx.pillPaint
-                )
-                icSearch.setBounds(x + p, y + p, x + height - p, y + height - p)
-            }
+            val r = (drawCtx.radius - iconPadding)
+                .coerceAtLeast(drawCtx.radius / drawCtx.iconSize * (height - iconPadding * 2))
+            val x = pl + width - height
+            canvas.drawRoundRect(
+                x + iconPadding,
+                pt + iconPadding,
+                x + height - iconPadding,
+                pt + height - iconPadding,
+                r, r,
+                drawCtx.titlePaint
+            )
+            val p = (12 * dp).toInt()
+            icSearch.setBounds(x + p, pt + p, x + height - p, pt + height - p)
             icSearch.draw(canvas)
         }
 
-        val separation = 12 * dp
-        val suggestionsWidth = if (showSearchButton) width - height.toFloat() else width + separation
-        val singleWidth = suggestionsWidth / suggestions.size
+        val suggestionsWidth = if (showSearchButton) width - height else width
+        val singleWidth = suggestionsWidth.toFloat() / suggestions.size
         var x = pl.toFloat()
-        val p = (8 * dp).toInt()
         for (i in suggestions.indices) {
             val item = suggestions[i]
             val icon = IconLoader.loadIcon(context, item)
-            canvas.drawRoundRect(
-                x,
-                pt.toFloat(),
-                x + singleWidth - separation,
-                pt + height.toFloat(),
-                drawCtx.radius,
-                drawCtx.radius,
-                drawCtx.pillPaint
-            )
             icon.copyBounds(drawCtx.tmpRect)
-            icon.setBounds(x.toInt() + p, pt + p, x.toInt() + height - p, pt + height - p)
+            icon.setBounds(
+                (x + iconPadding).toInt(),
+                (pt + iconPadding).toInt(),
+                (x + height - iconPadding).toInt(),
+                (pt + height - iconPadding).toInt())
             icon.draw(canvas)
             icon.bounds = drawCtx.tmpRect
-            val textX = x + height - p / 2
+            val textX = x + height - iconPadding / 2
             val text = labels[i]
             canvas.drawText(text, 0, text.length, textX, pt + (height + drawCtx.textHeight) / 2f, drawCtx.textPaint)
             x += singleWidth
@@ -159,11 +153,10 @@ class SuggestionRowView(
                 return
             val item = suggestions[i]
             val dp = resources.displayMetrics.density
-            val separation = 12 * dp
             val xOff = paddingLeft + (if (showSearchButton)
                 (width - paddingLeft - paddingRight - (height - paddingTop - paddingBottom))
             else
-                (width - paddingLeft - paddingRight + separation.toInt())) * i / suggestions.size
+                (width - paddingLeft - paddingRight)) * i / suggestions.size
             LongPressMenu.popup(
                 this@SuggestionRowView, item,
                 Gravity.BOTTOM or Gravity.START,
@@ -185,6 +178,8 @@ class SuggestionRowView(
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        if (suggestions.isEmpty())
+            return
         updateLabels()
         invalidate()
     }
@@ -200,13 +195,13 @@ class SuggestionRowView(
 
     private fun updateLabels() {
         val dp = resources.displayMetrics.density
+        val iconPadding = 8 * dp
         val width = width - paddingLeft - paddingRight
         val height = height - paddingTop - paddingBottom
-        val separation = 12 * dp
         val suggestionsWidth =
-            if (showSearchButton) width - height.toFloat()
-            else width + separation
-        val w = suggestionsWidth / suggestions.size - separation - height
+            if (showSearchButton) width - height
+            else width
+        val w = suggestionsWidth / suggestions.size - height + iconPadding
         labels = Array(suggestions.size) {
             TextUtils.ellipsize(LabelLoader.loadLabel(context, suggestions[it]), drawCtx.textPaint, w, TextUtils.TruncateAt.END)
         }

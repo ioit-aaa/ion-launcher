@@ -48,8 +48,8 @@ class SharedDrawingContext(context: Context) {
 
     fun applyCustomizations(context: Context, settings: Settings) {
         val dp = context.resources.displayMetrics.density
-        radius = settings["dock:icon-size", 48] * settings["icon:radius-ratio", 50] * dp / 100f
         iconSize = settings["dock:icon-size", 48] * dp
+        radius = iconSize * settings["icon:radius-ratio", 50] / 100f
         pillPaint.color = ColorThemer.iconBackground(context)
         val c = ColorThemer.iconForeground(context)
         titlePaint.color = c
