@@ -163,21 +163,37 @@ class PinnedGridView(
     }
 
     private fun viewToGridCoords(vx: Int, vy: Int): Pair<Int, Int> {
-        val gx = ((vx - paddingLeft) * columns / (width - paddingLeft - paddingRight))
+        val ww = width - paddingLeft - paddingRight
+        val hh = height - paddingTop - paddingBottom
+        val l = (ww - drawCtx.iconSize * columns) / (columns + 1) / 2
+        val t = (hh - drawCtx.iconSize * rows) / (rows + 1) / 2
+        val w = ww - l * 2
+        val h = hh - t * 2
+
+        val gx = ((vx - paddingLeft - l) * columns / w).toInt()
             .coerceAtLeast(0)
             .coerceAtMost(columns - 1)
-        val gy = ((vy - paddingTop) * rows / (height - paddingTop - paddingBottom))
+        val gy = ((vy - paddingTop - t) * rows / h).toInt()
             .coerceAtLeast(0)
             .coerceAtMost(rows - 1)
         return gx to gy
     }
 
     private fun gridToPopupCoords(gx: Int, gy: Int): Pair<Int, Int> {
+        val ww = width - paddingLeft - paddingRight
+        val hh = height - paddingTop - paddingBottom
+        val l = (ww - drawCtx.iconSize * columns) / (columns + 1) / 2
+        val t = (hh - drawCtx.iconSize * rows) / (rows + 1) / 2
+        val w = ww - l * 2
+        val h = hh - t * 2
+
         val (sx, sy) = IntArray(2).apply(::getLocationInWindow)
-        val yoff = resources.displayMetrics.heightPixels + Utils.getStatusBarHeight(context) + Utils.getNavigationBarHeight(context) - (sy + height)
-        val vx = calculateSideMargin() + gx * ((width - paddingLeft - paddingRight) / columns)
-        val vy = paddingTop + gy * ((height - paddingTop - paddingBottom) / rows)
-        return sx + vx to height - vy + yoff
+        val vx = paddingLeft + l * 2 + gx * (w / columns)
+        val vy = paddingTop + t + gy * (h / rows)
+        val yoff = resources.displayMetrics.heightPixels +
+            Utils.getStatusBarHeight(context) +
+            Utils.getNavigationBarHeight(context) - sy
+        return (sx + vx).toInt() to (yoff - vy).toInt()
     }
 
     private fun getIconBounds(x: Int, y: Int): Rect {
