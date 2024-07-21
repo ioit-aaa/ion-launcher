@@ -22,7 +22,6 @@
     <string name="contacts_access">Acces a contactes</string>
     <string name="calendar_access">Acces al calendari</string>
     <string name="usage_access">Acces a l\'us d\'apps</string>
-    <string name="call_log_access">Acces a historial de trucades</string>
     <string name="to_show_in_search">Per mostrar en resultats de çerca</string>
     <string name="to_show_media_player">Per mostrar el reproductor d\'audio</string>
     <string name="for_suggestions">Per sugeriments i çerca millorada</string>

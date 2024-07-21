@@ -21,7 +21,6 @@
     <string name="contacts_access">Contacts Access</string>
     <string name="calendar_access">Calendar Access</string>
     <string name="usage_access">App Usage Access</string>
-    <string name="call_log_access">Call Log Access</string>
     <string name="to_show_in_search">To show them in the search results</string>
     <string name="to_show_media_player">To show the media player</string>
     <string name="for_suggestions">For suggestions and tweaked search results</string>

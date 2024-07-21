@@ -22,7 +22,6 @@
     <string name="contacts_access">Доступ к контактам</string>
     <string name="calendar_access">Доступ к календарю</string>
     <string name="usage_access">Доступ к использованию прилошений</string>
-    <string name="call_log_access">Доступ к журналу звонков</string>
     <string name="to_show_in_search">Чтобы их показывать в результатах поиска</string>
     <string name="to_show_media_player">Чтобы показывать играющую музику</string>
     <string name="for_suggestions">Для рекомендацый и улучшеного поиска</string>

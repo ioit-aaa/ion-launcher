@@ -12,7 +12,6 @@ import one.zagura.IonLauncher.provider.items.ContactsLoader
 import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.provider.summary.EventsLoader
-import one.zagura.IonLauncher.provider.summary.MissedCalls
 import one.zagura.IonLauncher.ui.view.settings.colorSettings
 import one.zagura.IonLauncher.ui.view.settings.onClick
 import one.zagura.IonLauncher.ui.view.settings.seekbar
@@ -48,9 +47,8 @@ class SettingsActivity : Activity() {
                 val con = ContactsLoader.hasPermission(view.context)
                 val cal = EventsLoader.hasPermission(view.context)
                 val sug = SuggestionsManager.hasPermission(view.context)
-                val log = MissedCalls.hasPermission(view.context)
                 val not = NotificationService.hasPermission(view.context)
-                if (!not || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !(con && cal && sug && log)))
+                if (!not || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !(con && cal && sug)))
                     title(R.string.grant_permissions)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (!con) setting(R.string.contacts_access, subtitle = R.string.to_show_in_search) {
@@ -71,11 +69,6 @@ class SettingsActivity : Activity() {
                             it.context.startActivity(
                                 Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                        }
-                    }
-                    if (!log) setting(R.string.call_log_access, subtitle = R.string.for_summary_view) {
-                        onClick {
-                            requestPermissions(arrayOf(Manifest.permission.READ_CALL_LOG), 0)
                         }
                     }
                 }

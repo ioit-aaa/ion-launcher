@@ -18,7 +18,6 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.data.summary.Event
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.summary.Alarm
-import one.zagura.IonLauncher.provider.summary.MissedCalls
 import one.zagura.IonLauncher.util.LiveWallpaper
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.Utils
@@ -120,16 +119,11 @@ class SummaryView(
         else
             DateFormat.getMediumDateFormat(context).format(Calendar.getInstance().time)
 
-        val missedCalls = MissedCalls.get(context, Calendar.getInstance().apply {
-            add(Calendar.HOUR_OF_DAY, -2)
-        }.timeInMillis)
         val alarm = Alarm.get(context)
 
         var i = 0
-        val e = arrayOfNulls<CompiledEvent>(events.size + (alarm?.let { 1 } ?: 0) + missedCalls.sign)
+        val e = arrayOfNulls<CompiledEvent>(events.size + (alarm?.let { 1 } ?: 0))
 
-        if (missedCalls != 0)
-            e[i++] = CompiledEvent.MissedCalls(context, missedCalls)
         alarm?.let {
             e[i++] = CompiledEvent.Alarm(
                 it.open,
@@ -237,17 +231,6 @@ class SummaryView(
             override fun open(view: View) {
                 view.context.startActivity(Intent(Intent.ACTION_MAIN)
                     .addCategory(Intent.CATEGORY_APP_CALENDAR)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), LauncherItem.createOpeningAnimation(view))
-            }
-        }
-
-        class MissedCalls(
-            context: Context,
-            missed: Int,
-        ) : CompiledEvent(context.resources.getQuantityString(R.plurals.missed_calls, missed, missed), null, null) {
-            override fun open(view: View) {
-                view.context.startActivity(Intent(Intent.ACTION_VIEW)
-                    .setType(CallLog.Calls.CONTENT_TYPE)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), LauncherItem.createOpeningAnimation(view))
             }
         }

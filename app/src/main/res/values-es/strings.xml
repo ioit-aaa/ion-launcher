@@ -22,7 +22,6 @@
     <string name="contacts_access">Acceso a contactos</string>
     <string name="calendar_access">Acceso al calendario</string>
     <string name="usage_access">Acceso a uso de apps</string>
-    <string name="call_log_access">Acceso a registro de llamadas</string>
     <string name="to_show_in_search">Para mostrarlos en resultados de busqueda</string>
     <string name="to_show_media_player">Para mostrar el reproductor de música</string>
     <string name="for_suggestions">Para sugerencias y ajustar los resultados de busqueda</string>
