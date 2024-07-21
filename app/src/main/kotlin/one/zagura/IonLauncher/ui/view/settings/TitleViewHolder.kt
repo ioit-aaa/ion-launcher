@@ -16,7 +16,7 @@ class TitleViewHolder(context: Context) : RecyclerView.ViewHolder(LinearLayout(c
 
     private val text = TextView(context).apply {
         val dp = context.resources.displayMetrics.density
-        gravity = Gravity.CENTER_VERTICAL
+        gravity = Gravity.CENTER
         val h = (20 * dp).toInt()
         setPadding(h, Utils.getStatusBarHeight(context), h, 0)
         textSize = 18f
@@ -36,12 +36,11 @@ class TitleViewHolder(context: Context) : RecyclerView.ViewHolder(LinearLayout(c
             addView(text,
                 ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    (56 * dp).toInt() + Utils.getStatusBarHeight(context)
+                    (72 * dp).toInt() + Utils.getStatusBarHeight(context)
                 )
             )
             addView(separator,
-                ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp.toInt())
-            )
+                ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp.toInt()))
         }
     }
 

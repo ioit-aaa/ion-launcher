@@ -154,12 +154,17 @@ object ColorPicker {
                 ColorUtils.colorToHSL(a, aa)
                 val bb = FloatArray(3)
                 ColorUtils.colorToHSL(b, bb)
-                if (aa[0] < bb[0]) -1 else 1
+                if (aa[0] == bb[0]) {
+                    if (aa[2] < bb[2]) -1 else 1
+                }
+                else if (aa[0] < bb[0]) -1 else 1
             })
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                set.add(context.getColor(android.R.color.system_accent1_500))
-                set.add(context.getColor(android.R.color.system_accent2_500))
-                set.add(context.getColor(android.R.color.system_accent3_500))
+                set.add(context.getColor(android.R.color.system_accent1_500) and 0xffffff)
+                set.add(context.getColor(android.R.color.system_accent2_500) and 0xffffff)
+                set.add(context.getColor(android.R.color.system_accent3_500) and 0xffffff)
+                set.add(context.getColor(android.R.color.system_neutral1_900) and 0xffffff)
+                set.add(context.getColor(android.R.color.system_neutral2_900) and 0xffffff)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                 val wallColors = WallpaperManager.getInstance(context).getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
