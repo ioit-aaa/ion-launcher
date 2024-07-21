@@ -53,7 +53,7 @@ class SuggestionRowView(
 
     fun applyCustomizations(settings: Settings) {
         showSearchButton = settings["layout:search-in-suggestions", false]
-        icSearch.setTint(ColorThemer.iconBackgroundOpaque(context))
+        icSearch.setTint(ColorThemer.cardBackgroundOpaque(context))
         invalidate()
     }
 
@@ -73,7 +73,7 @@ class SuggestionRowView(
             pt + height.toFloat(),
             drawCtx.radius,
             drawCtx.radius,
-            drawCtx.pillPaint
+            drawCtx.cardPaint
         )
 
         val iconPadding = 8 * dp

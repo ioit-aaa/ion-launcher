@@ -54,6 +54,7 @@
     <string name="alarms">Alarms</string>
     <string name="icons">Icons</string>
     <string name="layout">Layout</string>
+    <string name="cards">Cards</string>
     <plurals name="missed_calls">
         <item quantity="one">One missed call</item>
         <item quantity="other">%d missed calls</item>

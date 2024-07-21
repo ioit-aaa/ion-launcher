@@ -73,7 +73,7 @@ class MediaView(
     fun applyCustomizations(settings: Settings) {
         val dp = resources.displayMetrics.density
         separation = 12 * dp
-        val c = ColorThemer.iconForeground(context)
+        val c = ColorThemer.cardForeground(context)
         icPlay.setTint(c)
         icPause.setTint(c)
         icTrackNext.setTint(c)
@@ -95,7 +95,7 @@ class MediaView(
         for (i in players.indices) {
             val player = players[i]
             val icon = player.icon
-            canvas.drawRoundRect(pl.toFloat(), y, pl + width.toFloat(), y + drawCtx.iconSize, drawCtx.radius, drawCtx.radius, drawCtx.pillPaint)
+            canvas.drawRoundRect(pl.toFloat(), y, pl + width.toFloat(), y + drawCtx.iconSize, drawCtx.radius, drawCtx.radius, drawCtx.cardPaint)
             if (icon != null) {
                 icon.copyBounds(drawCtx.tmpRect)
                 icon.setBounds(pl + iconPadding, y.toInt() + iconPadding, pl + drawCtx.iconSize.toInt() - iconPadding, y.toInt() + drawCtx.iconSize.toInt() - iconPadding)

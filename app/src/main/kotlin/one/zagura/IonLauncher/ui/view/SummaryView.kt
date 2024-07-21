@@ -37,14 +37,7 @@ class SummaryView(
     private var dateString = ""
     private var events = emptyArray<CompiledEvent>()
 
-    private val titlePaint = Paint().apply {
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
-        textAlign = Paint.Align.LEFT
-        isAntiAlias = true
-        isSubpixelText = true
-        typeface = Typeface.DEFAULT_BOLD
-    }
-    private val textPaint = Paint().apply {
+    private val pureTextPaint = Paint().apply {
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
         textAlign = Paint.Align.LEFT
         isAntiAlias = true
@@ -57,7 +50,6 @@ class SummaryView(
         isSubpixelText = true
         typeface = Typeface.MONOSPACE
     }
-    private val cardPaint = Paint().apply { isAntiAlias = true }
     private val colorPaint = Paint().apply {
         isAntiAlias = true
     }
@@ -80,7 +72,7 @@ class SummaryView(
             val separation = 6 * dp
 
             val y = e.y
-            val dateHeight = titlePaint.descent() - titlePaint.ascent()
+            val dateHeight = drawCtx.titlePaint.descent() - drawCtx.titlePaint.ascent()
             val dt = paddingTop + padding + dateHeight + separation
             if (y < dt)
                 return performClick()
@@ -90,7 +82,7 @@ class SummaryView(
             if (x < paddingLeft + padding || x > width - paddingRight - padding)
                 return false
 
-            val eventHeight = textPaint.descent() - textPaint.ascent() + separation
+            val eventHeight = drawCtx.textPaint.descent() - drawCtx.textPaint.ascent() + separation
             val yy = y - dt
             if (yy < 0)
                 return false
@@ -154,13 +146,13 @@ class SummaryView(
 
     override fun onDraw(canvas: Canvas) {
         if (events.isEmpty()) {
-            canvas.drawText(dateString, paddingLeft.toFloat(), paddingTop - titlePaint.ascent(), titlePaint)
+            canvas.drawText(dateString, paddingLeft.toFloat(), paddingTop - pureTextPaint.ascent(), pureTextPaint)
             return
         }
         val dp = resources.displayMetrics.density
 
-        val titleHeight = titlePaint.descent() - titlePaint.ascent()
-        val eventHeight = textPaint.descent() - textPaint.ascent()
+        val titleHeight = drawCtx.titlePaint.descent() - drawCtx.titlePaint.ascent()
+        val eventHeight = drawCtx.textPaint.descent() - drawCtx.textPaint.ascent()
         val eventRightHeight = rightTextPaint.descent() - rightTextPaint.ascent()
 
         val separation = 6 * dp
@@ -171,8 +163,8 @@ class SummaryView(
         val roff = (eventHeight - eventRightHeight) / 2 - rightTextPaint.ascent()
 
         val totalHeight = titleHeight + (eventHeight + separation) * events.size + padding * 2
-        canvas.drawRoundRect(paddingLeft.toFloat(), paddingTop.toFloat(), (width - paddingRight).toFloat(), paddingTop + totalHeight, drawCtx.radius, drawCtx.radius, cardPaint)
-        canvas.drawText(dateString, paddingLeft.toFloat() + padding, paddingTop + padding - titlePaint.ascent(), titlePaint)
+        canvas.drawRoundRect(paddingLeft.toFloat(), paddingTop.toFloat(), (width - paddingRight).toFloat(), paddingTop + totalHeight, drawCtx.radius, drawCtx.radius, drawCtx.cardPaint)
+        canvas.drawText(dateString, paddingLeft.toFloat() + padding, paddingTop + padding - drawCtx.titlePaint.ascent(), drawCtx.titlePaint)
 
         var bottomTop = paddingTop + padding + titleHeight + separation
         for (event in events) {
@@ -180,9 +172,9 @@ class SummaryView(
                 circXOffset,
                 bottomTop + eventHeight / 2f,
                 dotRadius,
-                colorPaint.apply { color = event.color ?: textPaint.color }
+                colorPaint.apply { color = event.color ?: drawCtx.textPaint.color }
             )
-            canvas.drawText(event.left, textXOffset, bottomTop - textPaint.ascent(), textPaint)
+            canvas.drawText(event.left, textXOffset, bottomTop - drawCtx.textPaint.ascent(), drawCtx.textPaint)
             if (event.right != null)
                 canvas.drawText(event.right, width - paddingRight - padding, bottomTop + roff, rightTextPaint)
             bottomTop += eventHeight + separation
@@ -200,12 +192,8 @@ class SummaryView(
     }
 
     fun applyCustomizations(settings: Settings) {
-        val textColor = ColorThemer.foreground(context)
-        val hintColor = ColorThemer.hint(context)
-        titlePaint.color = textColor
-        textPaint.color = textColor
-        rightTextPaint.color = hintColor
-        cardPaint.color = ColorThemer.backgroundToday(context)
+        pureTextPaint.color = ColorThemer.foreground(context)
+        rightTextPaint.color = ColorThemer.cardHint(context)
     }
 
     private sealed class CompiledEvent(

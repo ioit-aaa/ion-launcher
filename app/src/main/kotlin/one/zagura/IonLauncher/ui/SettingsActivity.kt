@@ -26,18 +26,12 @@ class SettingsActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setSettingsContentView(R.string.tweaks) {
-            setting(R.string.layout) {
-                onClick(LayoutSettingsActivity::class.java)
-            }
-            setting(R.string.icons) {
-                onClick(IconsSettingsActivity::class.java)
-            }
+            setting(R.string.layout) { onClick(LayoutSettingsActivity::class.java) }
+            setting(R.string.icons) { onClick(IconsSettingsActivity::class.java) }
+            setting(R.string.cards) { onClick(CardsSettingsActivity::class.java) }
             colorSettings("color", ColorThemer.DEFAULT_DARK, ColorThemer.DEFAULT_LIGHT, 0xdd)
             setting(R.string.app_drawer_background_opacity, isVertical = true) {
                 seekbar("drawer:bg:alpha", 0xf0, min = 0, max = 0xff)
-            }
-            setting(R.string.card_background_opacity, isVertical = true) {
-                seekbar("today:bg:alpha", 0xf0, min = 0, max = 0xff)
             }
             title(R.string.widgets)
             setting(R.string.choose_widget) {

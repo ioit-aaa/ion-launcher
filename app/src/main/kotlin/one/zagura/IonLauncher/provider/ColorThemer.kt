@@ -12,15 +12,22 @@ object ColorThemer {
 
     fun iconBackground(context: Context): Int {
         val s = context.ionApplication.settings
-        return s["icon:bg", DEFAULT_LIGHT] and 0xffffff or (s["icon:bg:alpha", 0xff] shl 24)
-    }
-    fun iconBackgroundOpaque(context: Context): Int {
-        return context.ionApplication.settings["icon:bg", DEFAULT_LIGHT] or 0xff000000.toInt()
+        return s["icon:bg", DEFAULT_LIGHT] and 0xffffff or (s["icon:bg:alpha", 0xdd] shl 24)
     }
     fun iconForeground(context: Context): Int =
         context.ionApplication.settings["icon:fg", DEFAULT_DARK] or 0xff000000.toInt()
-    fun iconHint(context: Context): Int =
-        context.ionApplication.settings["icon:fg", DEFAULT_DARK] and 0xffffff or 0xaa000000.toInt()
+
+
+    fun cardBackground(context: Context): Int {
+        val s = context.ionApplication.settings
+        return s["card:bg", DEFAULT_DARK] and 0xffffff or (s["card:bg:alpha", 0xdd] shl 24)
+    }
+    fun cardBackgroundOpaque(context: Context): Int =
+        context.ionApplication.settings["card:bg", DEFAULT_DARK] or 0xff000000.toInt()
+    fun cardForeground(context: Context): Int =
+        context.ionApplication.settings["card:fg", DEFAULT_LIGHT] or 0xff000000.toInt()
+    fun cardHint(context: Context): Int =
+        context.ionApplication.settings["card:fg", DEFAULT_LIGHT] and 0xffffff or 0xaa000000.toInt()
 
     fun background(context: Context): Int =
         context.ionApplication.settings["color:bg", DEFAULT_DARK] or 0xff000000.toInt()
@@ -28,10 +35,6 @@ object ColorThemer {
         context.ionApplication.settings["color:fg", DEFAULT_LIGHT] or 0xff000000.toInt()
     fun hint(context: Context): Int =
         context.ionApplication.settings["color:fg", DEFAULT_LIGHT] and 0xffffff or 0xaa000000.toInt()
-    fun backgroundToday(context: Context): Int {
-        val s = context.ionApplication.settings
-        return s["color:bg", DEFAULT_DARK] and 0xffffff or (s["today:bg:alpha", 0xbb] shl 24)
-    }
 
     fun level(color: Int, level: Double): Int {
         val lab = DoubleArray(3)

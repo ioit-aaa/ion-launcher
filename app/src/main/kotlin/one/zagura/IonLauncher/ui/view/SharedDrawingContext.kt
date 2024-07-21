@@ -19,7 +19,7 @@ class SharedDrawingContext(context: Context) {
     var iconSize = 0f
         private set
 
-    val pillPaint = Paint()
+    val cardPaint = Paint()
 
     val titlePaint = TextPaint().apply {
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, context.resources.displayMetrics)
@@ -29,7 +29,7 @@ class SharedDrawingContext(context: Context) {
         typeface = Typeface.DEFAULT_BOLD
     }
     val subtitlePaint = TextPaint().apply {
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, context.resources.displayMetrics)
+        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12f, context.resources.displayMetrics)
         textAlign = Paint.Align.LEFT
         isAntiAlias = true
         isSubpixelText = true
@@ -50,10 +50,10 @@ class SharedDrawingContext(context: Context) {
         val dp = context.resources.displayMetrics.density
         iconSize = settings["dock:icon-size", 48] * dp
         radius = iconSize * settings["icon:radius-ratio", 50] / 100f
-        pillPaint.color = ColorThemer.iconBackground(context)
-        val c = ColorThemer.iconForeground(context)
+        cardPaint.color = ColorThemer.cardBackground(context)
+        val c = ColorThemer.cardForeground(context)
         titlePaint.color = c
         textPaint.color = c
-        subtitlePaint.color = ColorThemer.iconHint(context)
+        subtitlePaint.color = ColorThemer.cardHint(context)
     }
 }

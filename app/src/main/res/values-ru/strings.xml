@@ -55,6 +55,7 @@
     <string name="alarms">Будильники</string>
     <string name="icons">Icons</string>
     <string name="layout">Layout</string>
+    <string name="cards">Cards</string>
     <plurals name="missed_calls">
         <item quantity="one">%d потеранный звонок</item>
         <item quantity="few">%d потеранных знонка</item>

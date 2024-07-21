@@ -147,6 +147,8 @@ object ColorPicker {
                 ColorThemer.foreground(context) and 0xffffff,
                 ColorThemer.iconBackground(context) and 0xffffff,
                 ColorThemer.iconForeground(context) and 0xffffff,
+                ColorThemer.cardBackground(context) and 0xffffff,
+                ColorThemer.cardForeground(context) and 0xffffff,
             ).toCollection(TreeSet { a, b ->
                 if (a == b)
                     return@TreeSet 0

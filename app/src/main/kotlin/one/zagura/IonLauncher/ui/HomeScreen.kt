@@ -152,6 +152,11 @@ class HomeScreen : Activity() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        sheetBehavior.state = STATE_COLLAPSED
+    }
+
     private fun applyCustomizations() {
         val settings = ionApplication.settings
         screenBackground.color = ColorThemer.background(this)
