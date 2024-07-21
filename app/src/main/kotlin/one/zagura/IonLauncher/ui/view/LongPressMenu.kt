@@ -6,6 +6,7 @@ import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.net.Uri
+import android.os.Process
 import android.provider.Settings
 import android.view.View
 import android.view.ViewGroup
@@ -15,11 +16,14 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.annotation.StringRes
+import one.zagura.IonLauncher.BuildConfig
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.HiddenApps
+import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
+import one.zagura.IonLauncher.ui.SettingsActivity
 import one.zagura.IonLauncher.ui.ionApplication
 
 object LongPressMenu {
@@ -51,6 +55,28 @@ object LongPressMenu {
                     w.dismiss()
                     HiddenApps.hide(it.context, item)
                 }
+            }
+        }
+        w.showAtLocation(parent, gravity, xoff - (2 * dp).toInt(), yoff)
+        current = w
+    }
+
+    fun popupLauncher(parent: View, gravity: Int, xoff: Int, yoff: Int) {
+        val dp = parent.resources.displayMetrics.density
+        dismissCurrent()
+        val content = LinearLayout(parent.context)
+        val w = PopupWindow(content, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true)
+        w.setOnDismissListener { current = null }
+        with(content) {
+            orientation = LinearLayout.VERTICAL
+            addOption(R.string.tweaks, place = Place.First) {
+                w.dismiss()
+                context.startActivity(Intent(context, SettingsActivity::class.java), LauncherItem.createOpeningAnimation(it))
+                SuggestionsManager.onItemOpened(context, App(BuildConfig.APPLICATION_ID, SettingsActivity::class.java.name, Process.myUserHandle()))
+            }
+            addOption(R.string.wallpaper, place = Place.Last) {
+                w.dismiss()
+                context.startActivity(Intent(Intent.ACTION_SET_WALLPAPER), LauncherItem.createOpeningAnimation(it))
             }
         }
         w.showAtLocation(parent, gravity, xoff - (2 * dp).toInt(), yoff)

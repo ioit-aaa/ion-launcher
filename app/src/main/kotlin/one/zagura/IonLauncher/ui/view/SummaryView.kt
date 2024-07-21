@@ -1,5 +1,6 @@
 package one.zagura.IonLauncher.ui.view
 
+import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -7,10 +8,10 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.os.Build
-import android.provider.CallLog
 import android.text.format.DateFormat
 import android.util.TypedValue
 import android.view.GestureDetector
+import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import one.zagura.IonLauncher.R
@@ -26,7 +27,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Calendar
 import kotlin.math.abs
-import kotlin.math.sign
 
 
 class SummaryView(
@@ -57,7 +57,12 @@ class SummaryView(
     private val gestureDetector = GestureDetector(context, object : GestureDetector.OnGestureListener {
         override fun onDown(e: MotionEvent) = true
         override fun onShowPress(e: MotionEvent) {}
-        override fun onLongPress(e: MotionEvent) {}
+        override fun onLongPress(e: MotionEvent) {
+            val w = resources.displayMetrics.widthPixels
+            val h = Utils.getDisplayHeight(context as Activity)
+            LongPressMenu.popupLauncher(this@SummaryView, Gravity.CENTER, e.x.toInt() - w / 2, e.y.toInt() - h / 2)
+            Utils.click(context)
+        }
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float) = false
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
