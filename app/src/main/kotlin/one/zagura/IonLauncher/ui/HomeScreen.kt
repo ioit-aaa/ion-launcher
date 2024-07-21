@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams
@@ -31,15 +32,16 @@ import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.provider.summary.EventsLoader
 import one.zagura.IonLauncher.ui.drawer.DrawerArea
+import one.zagura.IonLauncher.ui.view.MediaView
 import one.zagura.IonLauncher.ui.view.PinnedGridView
+import one.zagura.IonLauncher.ui.view.SharedDrawingContext
 import one.zagura.IonLauncher.ui.view.SuggestionRowView
 import one.zagura.IonLauncher.ui.view.SummaryView
 import one.zagura.IonLauncher.ui.view.WidgetView
-import one.zagura.IonLauncher.ui.view.MediaView
-import one.zagura.IonLauncher.ui.view.SharedDrawingContext
 import one.zagura.IonLauncher.util.FillDrawable
 import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
+import org.lsposed.hiddenapibypass.HiddenApiBypass
 
 class HomeScreen : Activity() {
 
@@ -67,6 +69,8 @@ class HomeScreen : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        HiddenApiBypass.setHiddenApiExemptions("L")
 
         drawCtx = SharedDrawingContext(this)
         homeScreen = createHomeScreen()
@@ -127,6 +131,7 @@ class HomeScreen : Activity() {
             drawerArea.onAppsChanged()
             // windowToken might not be loaded, so we post this to the view
             val wallpaperManager = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
+            wallpaperManager.setWallpaperOffsetSteps(0f, 0f)
             wallpaperManager.setWallpaperOffsets(homeScreen.windowToken, 0.5f, 0.5f)
             // Just in case it died for some reason (in post cause lower priority)
             if (NotificationService.hasPermission(this))
@@ -181,9 +186,8 @@ class HomeScreen : Activity() {
         mediaView.updateLayoutParams<MarginLayoutParams> {
             leftMargin = m
             rightMargin = m
-            bottomMargin = v
         }
-        suggestionsView.setPadding(m, v, m, v)
+        suggestionsView.setPadding(m, 0, m, v)
         suggestionsView.updateLayoutParams {
             height = (settings["dock:icon-size", 48] * dp).toInt() + v * 2
         }
@@ -247,6 +251,11 @@ class HomeScreen : Activity() {
             peekHeight = fullHeight
             state = STATE_COLLAPSED
             addBottomSheetCallback(object : BottomSheetCallback() {
+                val wallpaperManager = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
+                val setWallpaperZoomOut = WallpaperManager::class.java
+                    .getDeclaredMethod("setWallpaperZoomOut", IBinder::class.java, Float::class.java)
+                    .apply { isAccessible = true }
+
                 override fun onStateChanged(view: View, newState: Int) {
                     if (newState != STATE_EXPANDED)
                         drawerArea.clearSearch()
@@ -269,6 +278,10 @@ class HomeScreen : Activity() {
                     val scale = 1f - slideOffset * 0.02f
                     desktop.scaleX = scale
                     desktop.scaleY = scale
+
+                    try {
+                        setWallpaperZoomOut(wallpaperManager, homeScreen.windowToken, slideOffset)
+                    } catch (_: Exception) {}
                 }
             })
         }
