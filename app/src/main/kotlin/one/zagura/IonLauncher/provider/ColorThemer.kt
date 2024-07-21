@@ -35,6 +35,8 @@ object ColorThemer {
         context.ionApplication.settings["color:fg", DEFAULT_LIGHT] or 0xff000000.toInt()
     fun hint(context: Context): Int =
         context.ionApplication.settings["color:fg", DEFAULT_LIGHT] and 0xffffff or 0xaa000000.toInt()
+    fun highlight(context: Context): Int =
+        context.ionApplication.settings["color:fg", DEFAULT_LIGHT] and 0xffffff or 0x33000000.toInt()
 
     fun level(color: Int, level: Double): Int {
         val lab = DoubleArray(3)

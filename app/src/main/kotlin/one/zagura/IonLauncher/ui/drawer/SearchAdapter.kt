@@ -1,6 +1,9 @@
 package one.zagura.IonLauncher.ui.drawer
 
 import android.app.Activity
+import android.content.res.ColorStateList
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.RoundRectShape
 import android.os.Build
 import android.text.TextUtils
 import android.text.style.ForegroundColorSpan
@@ -22,6 +25,7 @@ import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.items.IconLoader
 import one.zagura.IonLauncher.provider.items.LabelLoader
 import one.zagura.IonLauncher.ui.HomeScreen
+import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.view.LongPressMenu
 import one.zagura.IonLauncher.util.Utils
 
@@ -35,7 +39,9 @@ class SearchAdapter(
         setHasStableIds(true)
     }
 
-    var items = emptyList<LauncherItem>()
+    private var items = emptyList<LauncherItem>()
+    private val transparent = ColorStateList.valueOf(0)
+    private var isSearch = false
 
     class ViewHolder(
         view: View,
@@ -67,6 +73,9 @@ class SearchAdapter(
             setPadding((12 * dp).toInt())
             addView(icon, LinearLayout.LayoutParams(iconSize, iconSize))
             addView(label)
+            val iconRadius = iconSize * parent.context.ionApplication.settings["icon:radius-ratio", 50] / 100f
+            val r = if (iconRadius == 0f) 0f else iconRadius + 12f * dp
+            background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
         }
         return ViewHolder(view, icon, label).apply {
             itemView.setOnClickListener {
@@ -115,6 +124,9 @@ class SearchAdapter(
     override fun onBindViewHolder(holder: ViewHolder, i: Int) {
         val context = holder.itemView.context
         val item = getItem(i)
+        holder.itemView.backgroundTintList = if (isSearch && i == 0)
+            ColorStateList.valueOf(ColorThemer.highlight(context))
+        else transparent
         with(holder.label) {
             setTextColor(ColorThemer.foreground(context))
         }
@@ -129,8 +141,9 @@ class SearchAdapter(
         }
     }
 
-    fun update(items: List<LauncherItem>) {
+    fun update(items: List<LauncherItem>, isSearch: Boolean) {
         this.items = items
+        this.isSearch = isSearch
         notifyDataSetChanged()
     }
 }

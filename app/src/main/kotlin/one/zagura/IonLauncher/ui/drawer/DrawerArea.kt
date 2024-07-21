@@ -133,7 +133,7 @@ class DrawerArea(
         results = emptyList()
         isDrawer = true
         val apps = AppLoader.getResource()
-        searchAdapter.update(apps)
+        searchAdapter.update(apps, false)
         notSearchedYet = true
     }
 
@@ -150,7 +150,7 @@ class DrawerArea(
         }
         isDrawer = false
         results = Search.query(query)
-        searchAdapter.update(results)
+        searchAdapter.update(results, true)
     }
 
     private fun reloadProviders() {
@@ -160,6 +160,7 @@ class DrawerArea(
 
     fun applyCustomizations() {
         searchAdapter.notifyDataSetChanged()
+        recyclerView.adapter = searchAdapter
         if (isDrawer)
             unsearch()
         val fgColor = ColorThemer.foreground(context)
