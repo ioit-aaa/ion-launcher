@@ -108,7 +108,7 @@ class SuggestionRowView(
                 (pt + height - iconPadding).toInt())
             icon.draw(canvas)
             icon.bounds = drawCtx.tmpRect
-            val textX = x + height - iconPadding / 2
+            val textX = x + height
             val text = labels[i]
             canvas.drawText(text, 0, text.length, textX, pt + (height + drawCtx.textHeight) / 2f, drawCtx.textPaint)
             x += singleWidth
@@ -201,7 +201,7 @@ class SuggestionRowView(
         val suggestionsWidth =
             if (showSearchButton) width - height
             else width
-        val w = suggestionsWidth / suggestions.size - height + iconPadding
+        val w = suggestionsWidth / suggestions.size - height.toFloat()
         labels = Array(suggestions.size) {
             TextUtils.ellipsize(LabelLoader.loadLabel(context, suggestions[it]), drawCtx.textPaint, w, TextUtils.TruncateAt.END)
         }

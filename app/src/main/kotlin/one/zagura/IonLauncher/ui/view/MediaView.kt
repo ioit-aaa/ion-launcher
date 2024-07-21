@@ -90,7 +90,7 @@ class MediaView(
         val dp = resources.displayMetrics.density
 
         var y = pt.toFloat()
-        val iconPadding = (6 * dp).toInt()
+        val iconPadding = (4 * dp).toInt()
         val controlPadding = (10 * dp).toInt()
         for (i in players.indices) {
             val player = players[i]
@@ -102,7 +102,7 @@ class MediaView(
                 icon.draw(canvas)
                 icon.bounds = drawCtx.tmpRect
             }
-            val textX = pl + drawCtx.iconSize
+            val textX = pl + drawCtx.iconSize + 4 * dp
             val s = 3 * dp
             canvas.drawText(player.title, 0, player.title.length, textX, y + drawCtx.iconSize / 2f - s, drawCtx.titlePaint)
             canvas.drawText(player.subtitle, 0, player.subtitle.length, textX, y + drawCtx.iconSize / 2f + s + drawCtx.textHeight, drawCtx.subtitlePaint)
