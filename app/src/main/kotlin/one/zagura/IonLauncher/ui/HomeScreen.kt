@@ -189,7 +189,7 @@ class HomeScreen : Activity() {
         }
         suggestionsView.setPadding(m, 0, m, v)
         suggestionsView.updateLayoutParams {
-            height = (settings["dock:icon-size", 48] * dp).toInt() + v * 2
+            height = (settings["dock:icon-size", 48] * dp).toInt() + v
         }
         val widget = Widgets.getWidget(this)
         if (widget != widgetView?.widget) {
