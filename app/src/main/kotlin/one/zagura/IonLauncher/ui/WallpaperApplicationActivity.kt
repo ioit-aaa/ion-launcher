@@ -4,7 +4,9 @@ import android.app.Activity
 import android.app.Dialog
 import android.app.WallpaperManager
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.graphics.Typeface
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
@@ -27,14 +29,26 @@ import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.ui.view.settings.WallpaperDragView
 import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
+import kotlin.math.max
+import kotlin.math.min
 
 class WallpaperApplicationActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val data = intent.data ?: return
-        val wallpaper = Drawable.createFromStream(contentResolver.openInputStream(data), null)
+        var wallpaper = Drawable.createFromStream(contentResolver.openInputStream(data), null)
             ?: return finish()
+        if (wallpaper is BitmapDrawable) {
+            val b = wallpaper.bitmap
+            val w = resources.displayMetrics.widthPixels
+            val h = resources.displayMetrics.heightPixels
+            if (b.width > w && b.height > h) {
+                val s = max(w.toFloat() / b.width, h.toFloat() / b.height)
+                val bb = Bitmap.createScaledBitmap(b, (b.width * s).toInt(), (b.height * s).toInt(), true)
+                wallpaper = BitmapDrawable(resources, bb)
+            }
+        }
         setContentView(createView(wallpaper))
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
