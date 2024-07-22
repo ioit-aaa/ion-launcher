@@ -14,7 +14,7 @@
 
 - Hiding apps
 - More stuff in search
-- Under 1MB APK size (let me dream)
+- Under 2MB APK size
 
 ### Paid extension app
 I plan on making a paid extension app to monetize this somehow,

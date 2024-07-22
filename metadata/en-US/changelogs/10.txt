@@ -1,0 +1,15 @@
+Added highlight to the first item in search results, to indicate that it will be opened when enter/go is pressed
+Added separate color setting for cards
+Added zoom out effect to wallpaper when app drawer is opened
+Added home screen long press menu
+
+App grid is now uniformly spaced
+Launcher settings now adapt to system colors
+Suggestions row is now a single bar
+Tweaked settings UI
+Made app drawer close as soon as you leave the home screen
+
+Fixed incorrect padding of media player and suggestions row
+Fixed predictive back color mismatch
+Fixed suggestions row not disappearing when both suggestions and search button are turned off
+Fixed crash when trying to set a big image as a wallpaper
