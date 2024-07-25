@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
+import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.view.DragEvent
 import android.view.GestureDetector
@@ -110,20 +111,31 @@ class PinnedGridView(
             return
         val dp = resources.displayMetrics.density
         val r = drawCtx.iconSize / 2f + dp
-        val w = width - paddingLeft - paddingRight
-        val h = height - paddingTop - paddingBottom
+
+//        val w = width - paddingLeft - paddingRight
+//        val h = height - paddingTop - paddingBottom
+        val ww = width - paddingLeft - paddingRight
+        val hh = height - paddingTop - paddingBottom
+        val l = paddingLeft + (ww - drawCtx.iconSize * columns) / (columns + 1) / 2
+        val t = paddingTop + (hh - drawCtx.iconSize * rows) / (rows + 1) / 2
+        val w = width - l * 2
+        val h = height - t * 2
+
         for (x in 0 ..< columns)
             for (y in 0 ..< rows) {
-                canvas.drawCircle(
-                    paddingLeft + w / columns * (0.5f + x),
-                    paddingTop + h / rows * (0.5f + y),
-                    r, targetPaint)
+                val x = l + w / columns * (0.5f + x) - r
+                val y = t + h / rows * (0.5f + y) - r
+                canvas.drawRoundRect(
+                    x, y, x + r * 2, y + r * 2,
+                    drawCtx.radius + dp * 2, drawCtx.radius + dp * 2,
+                    targetPaint
+                )
             }
         for (x in 0 .. columns)
             for (y in 0 .. rows) {
                 canvas.drawCircle(
-                    paddingLeft + w / columns * x.toFloat(),
-                    paddingTop + h / rows * y.toFloat(),
+                    l + w / columns * x.toFloat(),
+                    t + h / rows * y.toFloat(),
                     dp, gridPaint)
             }
     }
