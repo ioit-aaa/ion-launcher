@@ -36,6 +36,8 @@ class MediaView(
 
     private var separation = 0f
 
+    private var iconPath: Path? = null
+
     private val icPlay = resources.getDrawable(R.drawable.ic_play)
     private val icPause = resources.getDrawable(R.drawable.ic_pause)
     private val icTrackNext = resources.getDrawable(R.drawable.ic_track_next)
@@ -55,7 +57,8 @@ class MediaView(
                     ClippedDrawable(drawable, Path().apply {
                         val r = bitmap.width / 2f
                         addCircle(r, r, r, Path.Direction.CW)
-                    })
+                    }, 0)
+                    drawable
                 }
                 PreparedMediaData(drawable, "", "", player.isPlaying?.invoke() == true, player)
             }
@@ -77,6 +80,10 @@ class MediaView(
         icPlay.setTint(c)
         icPause.setTint(c)
         icTrackNext.setTint(c)
+        iconPath = Path().apply {
+            val r = drawCtx.radius
+            addRoundRect(0f, 0f, drawCtx.iconSize, drawCtx.iconSize, floatArrayOf(r, r, 0f, 0f, 0f, 0f, r, r), Path.Direction.CW)
+        }
         requestLayout()
         invalidate()
     }
@@ -89,7 +96,6 @@ class MediaView(
         val dp = resources.displayMetrics.density
 
         var y = pt.toFloat()
-        val iconPadding = (4 * dp).toInt()
         val controlPadding = (10 * dp).toInt()
         for (i in players.indices) {
             val player = players[i]
@@ -97,11 +103,15 @@ class MediaView(
             canvas.drawRoundRect(pl.toFloat(), y, pl + w.toFloat(), y + drawCtx.iconSize, drawCtx.radius, drawCtx.radius, drawCtx.cardPaint)
             if (icon != null) {
                 icon.copyBounds(drawCtx.tmpRect)
-                icon.setBounds(pl + iconPadding, y.toInt() + iconPadding, pl + drawCtx.iconSize.toInt() - iconPadding, y.toInt() + drawCtx.iconSize.toInt() - iconPadding)
+                canvas.save()
+                canvas.translate(pl.toFloat(), y)
+                icon.setBounds(0, 0, drawCtx.iconSize.toInt(), drawCtx.iconSize.toInt())
+                canvas.clipPath(iconPath ?: return)
                 icon.draw(canvas)
+                canvas.restore()
                 icon.bounds = drawCtx.tmpRect
             }
-            val textX = pl + drawCtx.iconSize + 4 * dp
+            val textX = pl + drawCtx.iconSize + 8 * dp
             val s = 3 * dp
             canvas.drawText(player.title, 0, player.title.length, textX, y + drawCtx.iconSize / 2f - s, drawCtx.titlePaint)
             canvas.drawText(player.subtitle, 0, player.subtitle.length, textX, y + drawCtx.iconSize / 2f + s + drawCtx.textHeight, drawCtx.subtitlePaint)

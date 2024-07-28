@@ -41,7 +41,6 @@ import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.ClippedDrawable
 import one.zagura.IonLauncher.util.ContactDrawable
-import one.zagura.IonLauncher.util.FillDrawable
 import one.zagura.IonLauncher.util.IconTheming
 import one.zagura.IonLauncher.util.NonDrawable
 import one.zagura.IonLauncher.util.Settings
@@ -132,7 +131,7 @@ object IconLoader {
                     addRoundRect(0f, 0f, w.toFloat(), w.toFloat(),
                         floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
                 }
-                return@getOrPut ClippedDrawable(pic, path)
+                return@getOrPut ClippedDrawable(pic, path, 0)
             } catch (_: FileNotFoundException) {}
             val realName = LabelLoader.loadLabel(context, contact).trim()
             if (realName.isEmpty())
@@ -182,7 +181,7 @@ object IconLoader {
             return InsetDrawable(monochrome, -w / 5)
         }
         monochrome.colorFilter = PorterDuffColorFilter(ColorThemer.iconForeground(context), PorterDuff.Mode.SRC_IN)
-        return makeIcon(settings, FillDrawable(ColorThemer.iconBackground(context)), monochrome)
+        return makeIcon(settings, ColorThemer.iconBackground(context), monochrome)
     }
 
     private fun themeIcon(context: Context, icon: Drawable): Drawable {
@@ -207,13 +206,6 @@ object IconLoader {
                 settings["icon:monochrome", false] && !settings["icon:monochrome-bg", true]) {
                 return InsetDrawable(icon, w / 12)
             }
-            val icon = if (icon.toBitmap(1, 1)[0, 0].alpha == 255) icon else {
-                val layers = LayerDrawable(arrayOf(FillDrawable(ColorThemer.iconBackground(context)), icon))
-                layers.setLayerInset(0, w / 6, h / 6, w / 6, h / 6)
-                layers.setLayerInset(1, w / 6, h / 6, w / 6, h / 6)
-                layers
-            }
-            icon.setBounds(0, 0, w, h)
             val path = Path().apply {
                 val r = w * settings["icon:radius-ratio", 50] / 100f
                 addRoundRect(
@@ -221,7 +213,10 @@ object IconLoader {
                     floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW
                 )
             }
-            return ClippedDrawable(icon, path)
+            val icon = if (icon.toBitmap(1, 1)[0, 0].alpha == 255) icon
+                else InsetDrawable(icon, w / 6)
+            icon.setBounds(0, 0, w, h)
+            return ClippedDrawable(icon, path, ColorThemer.iconBackground(context))
         }
 
         var fg = icon.foreground
@@ -240,28 +235,29 @@ object IconLoader {
                     }
                     monochrome.colorFilter = PorterDuffColorFilter(ColorThemer.iconForeground(context), PorterDuff.Mode.SRC_IN)
                     fg = monochrome
-                    bg = FillDrawable(ColorThemer.iconBackground(context))
+                    return makeIcon(settings, ColorThemer.iconBackground(context), fg)
                 } else if (!settings["icon:monochrome-bg", true]) {
                     val i = makeIcon(settings, bg, fg)
                     return InsetDrawable(i, fg.intrinsicWidth / 12)
                 } else if (bg == null)
-                    bg = FillDrawable(ColorThemer.iconBackground(context))
-                else {
-                    if (bg is ColorDrawable || bg is ShapeDrawable || bg is GradientDrawable) {
-                        val pixel = bg.toBitmap(1, 1)[0, 0]
-                        val lab = DoubleArray(3)
-                        ColorUtils.colorToLAB(pixel, lab)
-                        val bgL = lab[0]
-                        val b = ColorThemer.iconBackground(context)
-                        ColorUtils.colorToLAB(b, lab)
-                        if (abs(bgL - lab[0]) < 30.0)
-                            bg = FillDrawable(b)
-                    }
+                    return makeIcon(settings, ColorThemer.iconBackground(context), fg)
+                else if (bg is ColorDrawable || bg is ShapeDrawable || bg is GradientDrawable) {
+                    val pixel = bg.toBitmap(1, 1)[0, 0]
+                    val lab = DoubleArray(3)
+                    ColorUtils.colorToLAB(pixel, lab)
+                    val bgL = lab[0]
+                    val b = ColorThemer.iconBackground(context)
+                    ColorUtils.colorToLAB(b, lab)
+                    if (abs(bgL - lab[0]) < 30.0)
+                        return makeIcon(settings, b, fg)
                 }
             }
         }
-
-        return makeIcon(settings, bg, fg)
+        return when (bg) {
+            is ShapeDrawable -> makeIcon(settings, bg.paint.color, fg)
+            is ColorDrawable -> makeIcon(settings, bg.color, fg)
+            else -> makeIcon(settings, bg, fg)
+        }
     }
 
     private fun makeIcon(
@@ -283,7 +279,30 @@ object IconLoader {
                 floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW
             )
         }
-        return ClippedDrawable(layers, path)
+        return ClippedDrawable(layers, path, 0)
+    }
+
+    private fun makeIcon(
+        settings: Settings,
+        bg: Int,
+        fg: Drawable,
+    ): ClippedDrawable {
+//        val layers = LayerDrawable(arrayOf(bg, fg))
+        val w = fg.intrinsicWidth
+        val h = fg.intrinsicHeight
+//        layers.setLayerInset(0, -w / 6, -h / 6, -w / 6, -h / 6)
+//        layers.setLayerInset(1, -w / 6, -h / 6, -w / 6, -h / 6)
+        val layers = InsetDrawable(fg, -w / 6)
+        layers.setBounds(0, 0, w, h)
+
+        val path = Path().apply {
+            val r = w * settings["icon:radius-ratio", 50] / 100f
+            addRoundRect(
+                0f, 0f, w.toFloat(), w.toFloat(),
+                floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW
+            )
+        }
+        return ClippedDrawable(layers, path, bg)
     }
 
     private val p = Paint(Paint.FILTER_BITMAP_FLAG).apply {

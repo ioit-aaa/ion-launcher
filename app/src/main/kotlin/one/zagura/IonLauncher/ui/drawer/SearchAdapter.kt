@@ -63,15 +63,16 @@ class SearchAdapter(
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.END
             layoutParams = MarginLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                marginStart = (12 * dp).toInt()
+                marginEnd = (12 * dp).toInt()
             }
         }
         val view = LinearLayout(parent.context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             val iconSize = (40 * dp).toInt()
-            setPadding((12 * dp).toInt())
-            addView(icon, LinearLayout.LayoutParams(iconSize, iconSize))
+            val p = (12 * dp).toInt()
+            icon.setPadding(p)
+            addView(icon, LinearLayout.LayoutParams(iconSize + p * 2, iconSize + p * 2))
             addView(label)
             val iconRadius = iconSize * parent.context.ionApplication.settings["icon:radius-ratio", 50] / 100f
             val r = if (iconRadius == 0f) 0f else iconRadius + 12f * dp
