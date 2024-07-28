@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui
+package one.zagura.IonLauncher.ui.settings
 
 import android.Manifest
 import android.app.Activity

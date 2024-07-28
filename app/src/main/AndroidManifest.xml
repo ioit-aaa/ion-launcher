@@ -79,7 +79,7 @@
         </activity>
 
         <activity
-            android:name=".ui.SettingsActivity"
+            android:name=".ui.settings.SettingsActivity"
             android:theme="@style/IonLauncher.Settings"
             android:label="@string/tweaks"
             android:launchMode="singleInstancePerTask"
@@ -92,11 +92,11 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.IconsSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
-        <activity android:name=".ui.CardsSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
-        <activity android:name=".ui.DrawerSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
-        <activity android:name=".ui.WallpaperSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
-        <activity android:name=".ui.PinnedGridSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
+        <activity android:name=".ui.settings.IconsSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
+        <activity android:name=".ui.settings.CardsSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
+        <activity android:name=".ui.settings.DrawerSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
+        <activity android:name=".ui.settings.WallpaperSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
+        <activity android:name=".ui.settings.PinnedGridSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
 
         <activity
             android:name="one.zagura.IonLauncher.ui.iconPackPicker.IconPackPickerActivity"
@@ -108,7 +108,7 @@
             android:theme="@style/IonLauncher.Settings"/>
 
         <activity
-            android:name=".ui.SetupActivity"
+            android:name=".ui.settings.SetupActivity"
             android:theme="@style/IonLauncher.Settings"
             android:exported="true">
             <intent-filter>

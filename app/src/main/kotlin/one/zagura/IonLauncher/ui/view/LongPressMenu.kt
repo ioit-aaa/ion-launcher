@@ -23,7 +23,7 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.HiddenApps
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
-import one.zagura.IonLauncher.ui.SettingsActivity
+import one.zagura.IonLauncher.ui.settings.SettingsActivity
 import one.zagura.IonLauncher.ui.ionApplication
 
 object LongPressMenu {

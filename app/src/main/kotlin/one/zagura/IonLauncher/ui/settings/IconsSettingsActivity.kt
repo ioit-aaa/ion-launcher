@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui
+package one.zagura.IonLauncher.ui.settings
 
 import android.app.Activity
 import android.os.Build
@@ -12,6 +12,7 @@ import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
 import one.zagura.IonLauncher.ui.view.settings.setting
 import one.zagura.IonLauncher.ui.view.settings.switch
 import one.zagura.IonLauncher.ui.iconPackPicker.IconPackPickerActivity
+import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.view.settings.colorSettings
 
 class IconsSettingsActivity : Activity() {
