@@ -85,8 +85,7 @@ class MediaView(
         val pl = paddingLeft
         val pt = paddingTop
         val pr = paddingRight
-        val pb = paddingBottom
-        val width = width - pl - pr
+        val w = width - pl - pr
         val dp = resources.displayMetrics.density
 
         var y = pt.toFloat()
@@ -95,7 +94,7 @@ class MediaView(
         for (i in players.indices) {
             val player = players[i]
             val icon = player.icon
-            canvas.drawRoundRect(pl.toFloat(), y, pl + width.toFloat(), y + drawCtx.iconSize, drawCtx.radius, drawCtx.radius, drawCtx.cardPaint)
+            canvas.drawRoundRect(pl.toFloat(), y, pl + w.toFloat(), y + drawCtx.iconSize, drawCtx.radius, drawCtx.radius, drawCtx.cardPaint)
             if (icon != null) {
                 icon.copyBounds(drawCtx.tmpRect)
                 icon.setBounds(pl + iconPadding, y.toInt() + iconPadding, pl + drawCtx.iconSize.toInt() - iconPadding, y.toInt() + drawCtx.iconSize.toInt() - iconPadding)
@@ -111,10 +110,10 @@ class MediaView(
             val lastIconOff = (2 * dp).toInt()
 
             if (player.data.next == null) {
-                val controlX = width - drawCtx.iconSize.toInt() - lastIconOff
+                val controlX = width - paddingRight - drawCtx.iconSize.toInt() - lastIconOff
                 drawIcon(canvas, playIcon, controlX, y.toInt(), controlPadding)
             } else {
-                var controlX = width - drawCtx.iconSize.toInt() * 2
+                var controlX = width - paddingRight - drawCtx.iconSize.toInt() * 2
                 drawIcon(canvas, playIcon, controlX, y.toInt(), controlPadding)
                 controlX += drawCtx.iconSize.toInt() - lastIconOff
                 drawIcon(canvas, icTrackNext, controlX, y.toInt(), controlPadding)
@@ -190,7 +189,7 @@ class MediaView(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val height = drawCtx.iconSize.toInt() * players.size + separation.toInt() * (players.size - 1).coerceAtLeast(0)
+        val height = drawCtx.iconSize.toInt() * players.size + separation.toInt() * (players.size - 1).coerceAtLeast(0) + paddingTop + paddingBottom
         setMeasuredDimension(
             getDefaultSize(suggestedMinimumWidth, widthMeasureSpec),
             getDefaultSize(height, MeasureSpec.UNSPECIFIED)

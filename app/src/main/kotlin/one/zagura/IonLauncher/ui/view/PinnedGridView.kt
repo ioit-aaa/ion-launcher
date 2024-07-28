@@ -94,7 +94,7 @@ class PinnedGridView(
 
     fun calculateGridHeight(): Int {
         val iconSize = drawCtx.iconSize
-        val h = iconSize * rows + calculateSideMargin() * (rows + 1)
+        val h = iconSize * rows + calculateSideMargin() * rows
         return paddingBottom + paddingTop + h.toInt()
     }
 
@@ -111,16 +111,14 @@ class PinnedGridView(
         val r = drawCtx.iconSize / 2f + dp
 
         val ww = width - paddingLeft - paddingRight
-        val hh = height - paddingTop - paddingBottom
         val l = paddingLeft + (ww - drawCtx.iconSize * columns) / (columns + 1) / 2
-        val t = paddingTop + (hh - drawCtx.iconSize * rows) / (rows + 1) / 2
         val w = width - l * 2
-        val h = height - t * 2
+        val h = height
 
         for (x in 0 ..< columns)
             for (y in 0 ..< rows) {
                 val x = l + w / columns * (0.5f + x) - r
-                val y = t + h / rows * (0.5f + y) - r
+                val y = h / rows * (0.5f + y) - r
                 canvas.drawRoundRect(
                     x, y, x + r * 2, y + r * 2,
                     drawCtx.radius + dp * 2, drawCtx.radius + dp * 2,
@@ -131,7 +129,7 @@ class PinnedGridView(
             for (y in 0 .. rows) {
                 canvas.drawCircle(
                     l + w / columns * x.toFloat(),
-                    t + h / rows * y.toFloat(),
+                    h / rows * y.toFloat(),
                     dp, gridPaint)
             }
     }
@@ -143,11 +141,9 @@ class PinnedGridView(
         val d = dropPreview
         val i = replacePreview
         val ww = width - paddingLeft - paddingRight
-        val hh = height - paddingTop - paddingBottom
         val l = paddingLeft + (ww - drawCtx.iconSize * columns) / (columns + 1) / 2
-        val t = paddingTop + (hh - drawCtx.iconSize * rows) / (rows + 1) / 2
         val w = width - l * 2
-        val h = height - t * 2
+        val h = height
         for (x in 0 until columns)
             for (y in 0 until rows) {
                 val r = if (highlight?.let { it.first == x && it.second == y } == true)
@@ -156,7 +152,7 @@ class PinnedGridView(
                     else if (i?.let { it.x == x && it.y == y } == true) i.icon
                     else IconLoader.loadIcon(context, getItem(x, y) ?: continue)
                 val centerX = l + w * (0.5f + x) / columns
-                val centerY = t + h * (0.5f + y) / rows
+                val centerY = h * (0.5f + y) / rows
                 icon.copyBounds(drawCtx.tmpRect)
                 icon.setBounds((centerX - r).toInt(), (centerY - r).toInt(), (centerX + r).toInt(), (centerY + r).toInt())
                 if (showDropTargets) {
@@ -172,16 +168,14 @@ class PinnedGridView(
 
     private fun viewToGridCoords(vx: Int, vy: Int): Pair<Int, Int> {
         val ww = width - paddingLeft - paddingRight
-        val hh = height - paddingTop - paddingBottom
         val l = (ww - drawCtx.iconSize * columns) / (columns + 1) / 2
-        val t = (hh - drawCtx.iconSize * rows) / (rows + 1) / 2
         val w = ww - l * 2
-        val h = hh - t * 2
+        val h = height - paddingTop - paddingBottom
 
         val gx = ((vx - paddingLeft - l) * columns / w).toInt()
             .coerceAtLeast(0)
             .coerceAtMost(columns - 1)
-        val gy = ((vy - paddingTop - t) * rows / h).toInt()
+        val gy = (vy * rows / h)
             .coerceAtLeast(0)
             .coerceAtMost(rows - 1)
         return gx to gy
@@ -189,15 +183,14 @@ class PinnedGridView(
 
     private fun gridToPopupCoords(gx: Int, gy: Int): Pair<Int, Int> {
         val ww = width - paddingLeft - paddingRight
-        val hh = height - paddingTop - paddingBottom
         val l = (ww - drawCtx.iconSize * columns) / (columns + 1) / 2
-        val t = (hh - drawCtx.iconSize * rows) / (rows + 1) / 2
         val w = ww - l * 2
-        val h = hh - t * 2
+        val h = height
+        val dp = resources.displayMetrics.density
 
         val (sx, sy) = IntArray(2).apply(::getLocationInWindow)
         val vx = paddingLeft + l * 2 + gx * (w / columns)
-        val vy = paddingTop + t * 3 / 2 + gy * (h / rows)
+        val vy = gy * (h / rows) - 4 * dp
         val yoff = resources.displayMetrics.heightPixels +
             Utils.getStatusBarHeight(context) +
             Utils.getNavigationBarHeight(context) - sy

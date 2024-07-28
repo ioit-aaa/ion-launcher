@@ -6,6 +6,7 @@ import android.graphics.Rect
 import android.graphics.Typeface
 import android.text.TextPaint
 import android.util.TypedValue
+import androidx.core.graphics.alpha
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.util.Settings
 
@@ -51,6 +52,9 @@ class SharedDrawingContext(context: Context) {
         iconSize = settings["dock:icon-size", 48] * dp
         radius = iconSize * settings["icon:radius-ratio", 50] / 100f
         cardPaint.color = ColorThemer.cardBackground(context)
+        if (cardPaint.color.alpha == 255 && ColorThemer.lightness(cardPaint.color) - ColorThemer.lightness(ColorThemer.wallBackground(context)) > 0.1)
+            cardPaint.setShadowLayer(21f, 0f, 3f, 0x18000000)
+        else cardPaint.clearShadowLayer()
         val c = ColorThemer.cardForeground(context)
         titlePaint.color = c
         textPaint.color = c

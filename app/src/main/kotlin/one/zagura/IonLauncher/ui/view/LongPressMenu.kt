@@ -40,7 +40,7 @@ object LongPressMenu {
             orientation = LinearLayout.VERTICAL
             if (item is App) {
                 val bg = if (inDrawer) ColorThemer.drawerForeground(context)
-                    else ColorThemer.cardBackground(context)
+                    else ColorThemer.cardBackgroundOpaque(context)
                 val fg = if (inDrawer) ColorThemer.drawerBackgroundOpaque(context)
                     else ColorThemer.cardForeground(context)
                 addOption(R.string.app_info, bg, fg, place = Place.First) {
@@ -72,7 +72,7 @@ object LongPressMenu {
         val w = PopupWindow(content, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true)
         w.setOnDismissListener { current = null }
         with(content) {
-            val bg = ColorThemer.cardBackground(context)
+            val bg = ColorThemer.cardBackgroundOpaque(context)
             val fg = ColorThemer.cardForeground(context)
             orientation = LinearLayout.VERTICAL
             addOption(R.string.tweaks, bg, fg, place = Place.First) {

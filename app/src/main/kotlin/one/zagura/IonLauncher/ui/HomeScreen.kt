@@ -188,16 +188,15 @@ class HomeScreen : Activity() {
         suggestionsView.applyCustomizations(settings)
         val m = pinnedGrid.calculateSideMargin()
         summaryView.setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 2), m, m)
-        mediaView.updateLayoutParams<MarginLayoutParams> {
-            leftMargin = m
-            rightMargin = m
-        }
-        suggestionsView.setPadding(m, 0, m, 0)
+        mediaView.setPadding(m, m / 2, m, m / 2)
+        val b = Utils.getNavigationBarHeight(this@HomeScreen)
+            .coerceAtLeast(m / 2)
+        val bb = (m - b).coerceAtLeast(0)
+        suggestionsView.setPadding(m, m / 2, m, bb)
         suggestionsView.updateLayoutParams {
-            height = (settings["dock:icon-size", 48] * dp).toInt()
+            height = (settings["dock:icon-size", 48] * dp).toInt() + m / 2 + bb
         }
-        desktop.setPadding(0, 0, 0, Utils.getNavigationBarHeight(this@HomeScreen)
-            .coerceAtLeast(m))
+        desktop.setPadding(0, 0, 0, b)
         val widget = Widgets.getWidget(this)
         if (widget != widgetView?.widget) {
             if (widgetView != null) {
@@ -235,7 +234,7 @@ class HomeScreen : Activity() {
                 LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f))
             addView(
                 mediaView,
-                MarginLayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+                LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
             addView(pinnedGrid,
                 MarginLayoutParams(LayoutParams.MATCH_PARENT, pinnedGrid.calculateGridHeight()))
             addView(
