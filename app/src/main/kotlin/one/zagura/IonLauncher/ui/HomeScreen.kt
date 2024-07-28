@@ -15,7 +15,7 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.graphics.luminance
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -65,13 +65,14 @@ class HomeScreen : Activity() {
     private lateinit var drawCtx: SharedDrawingContext
 
     private val screenBackground = FillDrawable(0)
-    private var screenBackgroundAlpha = 0
-    private var drawerBackgroundAlpha = 0
+    private var screenBackgroundColor = 0
+    private var drawerBackgroundColor = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        HiddenApiBypass.setHiddenApiExemptions("L")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+            HiddenApiBypass.setHiddenApiExemptions("L")
 
         drawCtx = SharedDrawingContext(this)
         homeScreen = createHomeScreen()
@@ -174,16 +175,11 @@ class HomeScreen : Activity() {
 
     private fun applyCustomizations() {
         val settings = ionApplication.settings
-        screenBackground.color = ColorThemer.background(this)
-        screenBackgroundAlpha = settings["color:bg:alpha", 0xdd]
-        drawerBackgroundAlpha = settings["drawer:bg:alpha", 0xf0]
-        screenBackground.alpha = screenBackgroundAlpha
+        screenBackgroundColor = ColorThemer.wallBackground(this)
+        drawerBackgroundColor = ColorThemer.drawerBackground(this)
+        screenBackground.color = screenBackgroundColor
         val dp = resources.displayMetrics.density
-        Utils.setDarkStatusFG(window, ColorThemer.foreground(this).let {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                it.luminance < 0.5f
-            else ColorThemer.foreground(this).let(ColorThemer::lightness) < 0.5f
-        })
+        Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.wallForeground(this)) < 0.5f)
         drawCtx.applyCustomizations(this, settings)
         pinnedGrid.applyCustomizations(settings)
         drawerArea.applyCustomizations()
@@ -192,15 +188,16 @@ class HomeScreen : Activity() {
         suggestionsView.applyCustomizations(settings)
         val m = pinnedGrid.calculateSideMargin()
         summaryView.setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 2), m, m)
-        val v = (dp * 6).toInt()
         mediaView.updateLayoutParams<MarginLayoutParams> {
             leftMargin = m
             rightMargin = m
         }
-        suggestionsView.setPadding(m, 0, m, v)
+        suggestionsView.setPadding(m, 0, m, 0)
         suggestionsView.updateLayoutParams {
-            height = (settings["dock:icon-size", 48] * dp).toInt() + v
+            height = (settings["dock:icon-size", 48] * dp).toInt()
         }
+        desktop.setPadding(0, 0, 0, Utils.getNavigationBarHeight(this@HomeScreen)
+            .coerceAtLeast(m))
         val widget = Widgets.getWidget(this)
         if (widget != widgetView?.widget) {
             if (widgetView != null) {
@@ -214,6 +211,7 @@ class HomeScreen : Activity() {
                     (96 * dp).toInt(),
                 ).apply {
                     gravity = Gravity.CENTER
+                    val v = (dp * 6).toInt()
                     setMargins(m, 0, m, v)
                 })
             }
@@ -243,7 +241,6 @@ class HomeScreen : Activity() {
             addView(
                 suggestionsView,
                 MarginLayoutParams(LayoutParams.MATCH_PARENT, 0))
-            setPadding(0, 0, 0, Utils.getNavigationBarHeight(this@HomeScreen))
         }
 
         val offset = (256 * dp).toInt()
@@ -262,17 +259,22 @@ class HomeScreen : Activity() {
             state = STATE_COLLAPSED
             addBottomSheetCallback(object : BottomSheetCallback() {
                 val wallpaperManager = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
-                val setWallpaperZoomOut = WallpaperManager::class.java
-                    .getDeclaredMethod("setWallpaperZoomOut", IBinder::class.java, Float::class.java)
-                    .apply { isAccessible = true }
+                val setWallpaperZoomOut = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) try {
+                    WallpaperManager::class.java
+                        .getDeclaredMethod("setWallpaperZoomOut", IBinder::class.java, Float::class.java)
+                        .apply { isAccessible = true }
+                } catch (_: Exception) { null } else null
 
                 override fun onStateChanged(view: View, newState: Int) {
-                    if (newState != STATE_EXPANDED)
+                    if (newState == STATE_EXPANDED)
+                        Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.drawerForeground(this@HomeScreen)) < 0.5f)
+                    else
                         drawerArea.clearSearch()
                     desktop.isVisible = newState != STATE_EXPANDED
                     if (newState == STATE_COLLAPSED) {
                         drawerArea.isInvisible = true
                         desktop.bringToFront()
+                        Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.wallForeground(this@HomeScreen)) < 0.5f)
                     } else {
                         drawerArea.isInvisible = false
                         drawerArea.bringToFront()
@@ -282,16 +284,14 @@ class HomeScreen : Activity() {
                 override fun onSlide(view: View, slideOffset: Float) {
                     drawerArea.alpha = slideOffset * slideOffset / 0.6f - 0.4f
                     val a = (slideOffset * 2f).coerceAtMost(1f)
-                    screenBackground.alpha = (screenBackgroundAlpha * (1f - a) + drawerBackgroundAlpha * a).toInt()
-                    desktop.alpha = 1f - a
-                    desktop.translationY = slideOffset * offset * 0.75f
-                    val scale = 1f - slideOffset * 0.02f
+                    val inva = 1f - a
+                    screenBackground.color = ColorUtils.blendARGB(screenBackgroundColor, drawerBackgroundColor, a)
+                    desktop.alpha = inva
+                    desktop.translationY = a * offset * 0.4f
+                    val scale = 1f - a * 0.05f
                     desktop.scaleX = scale
                     desktop.scaleY = scale
-
-                    try {
-                        setWallpaperZoomOut(wallpaperManager, homeScreen.windowToken, slideOffset)
-                    } catch (_: Exception) {}
+                    setWallpaperZoomOut?.invoke(wallpaperManager, homeScreen.windowToken, slideOffset)
                 }
             })
         }

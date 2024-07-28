@@ -53,9 +53,10 @@
     <string name="turn_off_torch">Apagar llanterna</string>
     <string name="radius_percent">Percentatge de radi</string>
     <string name="alarms">Alarmes</string>
-    <string name="icons">Icons</string>
-    <string name="layout">Layout</string>
-    <string name="cards">Cards</string>
+    <string name="icons">Icones</string>
+    <string name="drawer">Cajon</string>
+    <string name="cards">Targetes</string>
+    <string name="labels">Etiquetes</string>
     <plurals name="missed_calls">
         <item quantity="one">Una trucada perduda</item>
         <item quantity="many">%d trucades perdudes</item>

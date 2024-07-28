@@ -5,7 +5,6 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
-import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.view.DragEvent
 import android.view.GestureDetector
@@ -18,7 +17,6 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Dock
 import one.zagura.IonLauncher.provider.items.IconLoader
-import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.LiveWallpaper
 import one.zagura.IonLauncher.util.NonDrawable
 import one.zagura.IonLauncher.util.Settings
@@ -79,7 +77,7 @@ class PinnedGridView(
             height = calculateGridHeight()
         }
 
-        val fg = ColorThemer.foreground(context)
+        val fg = ColorThemer.wallForeground(context)
         gridPaint.color = fg and 0xffffff or 0xdd000000.toInt()
         targetPaint.color = fg and 0xffffff or 0x88000000.toInt()
 
@@ -112,8 +110,6 @@ class PinnedGridView(
         val dp = resources.displayMetrics.density
         val r = drawCtx.iconSize / 2f + dp
 
-//        val w = width - paddingLeft - paddingRight
-//        val h = height - paddingTop - paddingBottom
         val ww = width - paddingLeft - paddingRight
         val hh = height - paddingTop - paddingBottom
         val l = paddingLeft + (ww - drawCtx.iconSize * columns) / (columns + 1) / 2
@@ -201,7 +197,7 @@ class PinnedGridView(
 
         val (sx, sy) = IntArray(2).apply(::getLocationInWindow)
         val vx = paddingLeft + l * 2 + gx * (w / columns)
-        val vy = paddingTop + t + gy * (h / rows)
+        val vy = paddingTop + t * 3 / 2 + gy * (h / rows)
         val yoff = resources.displayMetrics.heightPixels +
             Utils.getStatusBarHeight(context) +
             Utils.getNavigationBarHeight(context) - sy
@@ -251,7 +247,7 @@ class PinnedGridView(
             val (x, y) = viewToGridCoords(e.x.toInt(), e.y.toInt())
             val item = getItem(x, y) ?: return
             val (vx, vy) = gridToPopupCoords(x, y)
-            LongPressMenu.popup(this@PinnedGridView, item, Gravity.BOTTOM or Gravity.START, vx, vy)
+            LongPressMenu.popup(this@PinnedGridView, item, Gravity.BOTTOM or Gravity.START, vx, vy, false)
             Utils.click(context)
             replacePreview = ItemPreview(NonDrawable, x, y)
             dropPreview = ItemPreview(NonDrawable, x, y)

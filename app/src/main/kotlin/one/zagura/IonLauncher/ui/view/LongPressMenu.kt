@@ -30,7 +30,7 @@ object LongPressMenu {
 
     private var current: PopupWindow? = null
 
-    fun popup(parent: View, item: LauncherItem, gravity: Int, xoff: Int, yoff: Int) {
+    fun popup(parent: View, item: LauncherItem, gravity: Int, xoff: Int, yoff: Int, inDrawer: Boolean) {
         val dp = parent.resources.displayMetrics.density
         dismissCurrent()
         val content = LinearLayout(parent.context)
@@ -39,7 +39,11 @@ object LongPressMenu {
         with(content) {
             orientation = LinearLayout.VERTICAL
             if (item is App) {
-                addOption(R.string.app_info, place = Place.First) {
+                val bg = if (inDrawer) ColorThemer.drawerForeground(context)
+                    else ColorThemer.cardBackground(context)
+                val fg = if (inDrawer) ColorThemer.drawerBackgroundOpaque(context)
+                    else ColorThemer.cardForeground(context)
+                addOption(R.string.app_info, bg, fg, place = Place.First) {
                     w.dismiss()
                     context.startActivity(
                         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
@@ -47,11 +51,11 @@ object LongPressMenu {
                             .setData(Uri.parse("package:${item.packageName}"))
                     )
                 }
-                if (HiddenApps.isHidden(context.ionApplication.settings, item)) addOption(R.string.unhide, place = Place.Last) {
+                if (HiddenApps.isHidden(context.ionApplication.settings, item)) addOption(R.string.unhide, bg, fg, place = Place.Last) {
                     w.dismiss()
                     HiddenApps.show(it.context, item)
                 }
-                else addOption(R.string.hide, place = Place.Last) {
+                else addOption(R.string.hide, bg, fg, place = Place.Last) {
                     w.dismiss()
                     HiddenApps.hide(it.context, item)
                 }
@@ -68,13 +72,15 @@ object LongPressMenu {
         val w = PopupWindow(content, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true)
         w.setOnDismissListener { current = null }
         with(content) {
+            val bg = ColorThemer.cardBackground(context)
+            val fg = ColorThemer.cardForeground(context)
             orientation = LinearLayout.VERTICAL
-            addOption(R.string.tweaks, place = Place.First) {
+            addOption(R.string.tweaks, bg, fg, place = Place.First) {
                 w.dismiss()
                 context.startActivity(Intent(context, SettingsActivity::class.java), LauncherItem.createOpeningAnimation(it))
                 SuggestionsManager.onItemOpened(context, App(BuildConfig.APPLICATION_ID, SettingsActivity::class.java.name, Process.myUserHandle()))
             }
-            addOption(R.string.wallpaper, place = Place.Last) {
+            addOption(R.string.wallpaper, bg, fg, place = Place.Last) {
                 w.dismiss()
                 context.startActivity(Intent(Intent.ACTION_SET_WALLPAPER), LauncherItem.createOpeningAnimation(it))
             }
@@ -98,14 +104,14 @@ object LongPressMenu {
         First, Other, Last
     }
 
-    private fun ViewGroup.addOption(@StringRes label: Int, place: Place = Place.Other, onClick: (View) -> Unit) {
+    private fun ViewGroup.addOption(@StringRes label: Int, bg: Int, fg: Int, place: Place = Place.Other, onClick: (View) -> Unit) {
         val dp = resources.displayMetrics.density
         addView(TextView(context).apply {
             background = RippleDrawable(
-                ColorStateList.valueOf(ColorThemer.background(context) and 0xffffff or 0x55000000),
+                ColorStateList.valueOf(fg and 0xffffff or 0x55000000),
                 GradientDrawable().apply {
-                    color = ColorStateList.valueOf(ColorThemer.foreground(context))
-                    setStroke((2 * dp).toInt(), ColorThemer.background(context))
+                    color = ColorStateList.valueOf(bg)
+                    setStroke((1.5f * dp).toInt(), fg)
                     val bigR = 21 * dp
                     val smallR = 8 * dp
                     cornerRadii = when (place) {
@@ -115,7 +121,7 @@ object LongPressMenu {
                     }
                 }, null)
             setText(label)
-            setTextColor(ColorThemer.background(context))
+            setTextColor(fg)
             textSize = 16f
             typeface = Typeface.DEFAULT_BOLD
             val h = (20 * dp).toInt()

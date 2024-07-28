@@ -53,9 +53,10 @@
     <string name="turn_off_torch">Apagar linterna</string>
     <string name="radius_percent">Porcentage de radio</string>
     <string name="alarms">Alarmas</string>
-    <string name="icons">Icons</string>
-    <string name="layout">Layout</string>
-    <string name="cards">Cards</string>
+    <string name="icons">Iconos</string>
+    <string name="drawer">Cajón de aplicaciones</string>
+    <string name="cards">Targetas</string>
+    <string name="labels">Etiquetas</string>
     <plurals name="missed_calls">
         <item quantity="one">Una llamada perdida</item>
         <item quantity="many">%d llamadas perdidas</item>

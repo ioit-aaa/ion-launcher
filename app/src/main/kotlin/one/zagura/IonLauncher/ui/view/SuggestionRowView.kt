@@ -29,6 +29,7 @@ class SuggestionRowView(
 ) : View(context) {
 
     private var showSearchButton = false
+    private var showLabels = false
     private var suggestions = emptyList<LauncherItem>()
     private var labels = emptyArray<CharSequence>()
 
@@ -44,7 +45,8 @@ class SuggestionRowView(
             }
             else post {
                 suggestions = newSuggestions
-                updateLabels()
+                if (showLabels)
+                    updateLabels()
                 invalidate()
                 isVisible = true
             }
@@ -53,7 +55,11 @@ class SuggestionRowView(
 
     fun applyCustomizations(settings: Settings) {
         showSearchButton = settings["layout:search-in-suggestions", false]
+        showLabels = settings["suggestion:labels", false]
         icSearch.setTint(ColorThemer.cardBackgroundOpaque(context))
+        if (showLabels)
+            updateLabels()
+        else labels = emptyArray()
         invalidate()
     }
 
@@ -94,6 +100,24 @@ class SuggestionRowView(
             icSearch.draw(canvas)
         }
 
+        if (!showLabels) {
+            var x = pl.toFloat()
+            val singleWidth = height - iconPadding
+            for (i in suggestions.indices) {
+                val item = suggestions[i]
+                val icon = IconLoader.loadIcon(context, item)
+                icon.copyBounds(drawCtx.tmpRect)
+                icon.setBounds(
+                    (x + iconPadding).toInt(),
+                    (pt + iconPadding).toInt(),
+                    (x + height - iconPadding).toInt(),
+                    (pt + height - iconPadding).toInt())
+                icon.draw(canvas)
+                icon.bounds = drawCtx.tmpRect
+                x += singleWidth
+            }
+            return
+        }
         val suggestionsWidth = if (showSearchButton) width - height else width
         val singleWidth = suggestionsWidth.toFloat() / suggestions.size
         var x = pl.toFloat()
@@ -128,6 +152,33 @@ class SuggestionRowView(
             return true
         }
 
+        private fun xToI(x: Float): Int {
+            val xi = x.toInt() - paddingLeft
+            val h = height - paddingTop - paddingBottom
+            return if (showLabels) {
+                val w = width - paddingLeft - paddingRight
+                val s = if (showSearchButton) h else 0
+                xi * suggestions.size / (w - s)
+            } else {
+                val dp = resources.displayMetrics.density
+                val iconPadding = (8 * dp).toInt()
+                (xi - iconPadding / 2) / (h - iconPadding)
+            }
+        }
+
+        private fun iToX(i: Int): Int {
+            val h = height - paddingTop - paddingBottom
+            return paddingLeft + if (showLabels) {
+                val w = width - paddingLeft - paddingRight
+                val s = if (showSearchButton) h else 0
+                (w - s) * i / suggestions.size
+            } else {
+                val dp = resources.displayMetrics.density
+                val iconPadding = (8 * dp).toInt()
+                iconPadding + i * (h - iconPadding)
+            }
+        }
+
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             if (showSearchButton && (
                     suggestions.isEmpty() ||
@@ -135,7 +186,7 @@ class SuggestionRowView(
                 onSearch()
                 return true
             }
-            val i = (e.x.toInt() - paddingLeft) * suggestions.size / (width - paddingLeft - paddingRight)
+            val i = xToI(e.x)
             if (i < 0 || i >= suggestions.size)
                 return false
             suggestions[i].open(this@SuggestionRowView, run {
@@ -148,20 +199,18 @@ class SuggestionRowView(
         }
 
         override fun onLongPress(e: MotionEvent) {
-            val i = (e.x.toInt() - paddingLeft) * suggestions.size / (width - paddingLeft - paddingRight)
+            val i = xToI(e.x)
             if (i < 0 || i >= suggestions.size)
                 return
             val item = suggestions[i]
             val dp = resources.displayMetrics.density
-            val xOff = paddingLeft + (if (showSearchButton)
-                (width - paddingLeft - paddingRight - (height - paddingTop - paddingBottom))
-            else
-                (width - paddingLeft - paddingRight)) * i / suggestions.size
+            val xOff = iToX(i)
             LongPressMenu.popup(
                 this@SuggestionRowView, item,
                 Gravity.BOTTOM or Gravity.START,
                 xOff,
-                height + Utils.getNavigationBarHeight(context) + (4 * dp).toInt()
+                height + Utils.getNavigationBarHeight(context).coerceAtLeast(paddingLeft) + (8 * dp).toInt(),
+                false,
             )
             Utils.click(context)
             Utils.startDrag(this@SuggestionRowView, item, this@SuggestionRowView)
@@ -180,7 +229,8 @@ class SuggestionRowView(
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         if (suggestions.isEmpty())
             return
-        updateLabels()
+        if (showLabels)
+            updateLabels()
         invalidate()
     }
 
@@ -194,8 +244,6 @@ class SuggestionRowView(
     }
 
     private fun updateLabels() {
-        val dp = resources.displayMetrics.density
-        val iconPadding = 8 * dp
         val width = width - paddingLeft - paddingRight
         val height = height - paddingTop - paddingBottom
         val suggestionsWidth =

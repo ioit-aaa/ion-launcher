@@ -143,8 +143,10 @@ object ColorPicker {
             val set = arrayOf(
                 ColorThemer.DEFAULT_DARK,
                 ColorThemer.DEFAULT_LIGHT,
-                ColorThemer.background(context) and 0xffffff,
-                ColorThemer.foreground(context) and 0xffffff,
+                ColorThemer.wallBackground(context) and 0xffffff,
+                ColorThemer.wallForeground(context) and 0xffffff,
+                ColorThemer.drawerBackground(context) and 0xffffff,
+                ColorThemer.drawerForeground(context) and 0xffffff,
                 ColorThemer.iconBackground(context) and 0xffffff,
                 ColorThemer.iconForeground(context) and 0xffffff,
                 ColorThemer.cardBackground(context) and 0xffffff,

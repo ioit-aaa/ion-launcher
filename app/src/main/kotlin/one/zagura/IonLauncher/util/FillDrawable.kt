@@ -6,7 +6,13 @@ import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import androidx.core.graphics.alpha
 
-class FillDrawable(var color: Int) : Drawable() {
+class FillDrawable(color: Int) : Drawable() {
+
+    var color: Int = color
+        set(value) {
+            field = value
+            invalidateSelf()
+        }
 
     override fun draw(canvas: Canvas) {
         canvas.drawColor(color)

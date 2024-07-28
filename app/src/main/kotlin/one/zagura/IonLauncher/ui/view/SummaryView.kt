@@ -285,9 +285,18 @@ class SummaryView(
     }
 
     fun applyCustomizations(settings: Settings) {
-        pureTextPaint.color = ColorThemer.foreground(context)
-        pureTitlePaint.color = ColorThemer.foreground(context)
         rightTextPaint.color = ColorThemer.cardHint(context)
+        val fg = ColorThemer.wallForeground(context)
+        pureTextPaint.color = fg
+        pureTitlePaint.color = fg
+        if (ColorThemer.lightness(fg) < 0.5) {
+            pureTitlePaint.clearShadowLayer()
+            pureTextPaint.clearShadowLayer()
+        }
+        else {
+            pureTitlePaint.setShadowLayer(21f, 0f, 0f, 0x1d000000)
+            pureTextPaint.setShadowLayer(14f, 0f, 0f, 0x1d000000)
+        }
     }
 
     private sealed class CompiledEvent(

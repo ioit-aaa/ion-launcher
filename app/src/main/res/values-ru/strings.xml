@@ -53,9 +53,10 @@
     <string name="turn_off_torch">Выключить фонарь</string>
     <string name="radius_percent">Процент радиуса</string>
     <string name="alarms">Будильники</string>
-    <string name="icons">Icons</string>
-    <string name="layout">Layout</string>
-    <string name="cards">Cards</string>
+    <string name="icons">Иконки</string>
+    <string name="drawer">Панель приложений</string>
+    <string name="cards">Карточки</string>
+    <string name="labels">Этикетки</string>
     <plurals name="missed_calls">
         <item quantity="one">%d потеранный звонок</item>
         <item quantity="few">%d потеранных знонка</item>

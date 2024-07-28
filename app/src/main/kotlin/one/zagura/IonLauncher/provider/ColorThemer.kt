@@ -29,14 +29,25 @@ object ColorThemer {
     fun cardHint(context: Context): Int =
         context.ionApplication.settings["card:fg", DEFAULT_LIGHT] and 0xffffff or 0xaa000000.toInt()
 
-    fun background(context: Context): Int =
-        context.ionApplication.settings["color:bg", DEFAULT_DARK] or 0xff000000.toInt()
-    fun foreground(context: Context): Int =
-        context.ionApplication.settings["color:fg", DEFAULT_LIGHT] or 0xff000000.toInt()
-    fun hint(context: Context): Int =
-        context.ionApplication.settings["color:fg", DEFAULT_LIGHT] and 0xffffff or 0xaa000000.toInt()
-    fun highlight(context: Context): Int =
-        context.ionApplication.settings["color:fg", DEFAULT_LIGHT] and 0xffffff or 0x33000000.toInt()
+    fun wallBackground(context: Context): Int {
+        val s = context.ionApplication.settings
+        return s["wall:bg", DEFAULT_DARK] and 0xffffff or (s["wall:bg:alpha", 0xdd] shl 24)
+    }
+    fun wallForeground(context: Context): Int =
+        context.ionApplication.settings["wall:fg", DEFAULT_LIGHT] or 0xff000000.toInt()
+
+    fun drawerBackground(context: Context): Int {
+        val s = context.ionApplication.settings
+        return s["drawer:bg", DEFAULT_DARK] and 0xffffff or (s["drawer:bg:alpha", 0xdd] shl 24)
+    }
+    fun drawerBackgroundOpaque(context: Context): Int =
+        context.ionApplication.settings["drawer:bg", DEFAULT_DARK] or 0xff000000.toInt()
+    fun drawerForeground(context: Context): Int =
+        context.ionApplication.settings["drawer:fg", DEFAULT_LIGHT] or 0xff000000.toInt()
+    fun drawerHint(context: Context): Int =
+        context.ionApplication.settings["drawer:fg", DEFAULT_LIGHT] and 0xffffff or 0xaa000000.toInt()
+    fun drawerHighlight(context: Context): Int =
+        context.ionApplication.settings["drawer:fg", DEFAULT_LIGHT] and 0xffffff or 0x33000000.toInt()
 
     fun level(color: Int, level: Double): Int {
         val lab = DoubleArray(3)
@@ -69,6 +80,6 @@ object ColorThemer {
     fun lightness(color: Int): Double {
         val lab = DoubleArray(3)
         ColorUtils.colorToLAB(color, lab)
-        return lab[0]
+        return lab[0] / 100f
     }
 }

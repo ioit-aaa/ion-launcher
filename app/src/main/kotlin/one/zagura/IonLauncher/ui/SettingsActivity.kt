@@ -7,12 +7,10 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import one.zagura.IonLauncher.R
-import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.items.ContactsLoader
 import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.provider.summary.EventsLoader
-import one.zagura.IonLauncher.ui.view.settings.colorSettings
 import one.zagura.IonLauncher.ui.view.settings.onClick
 import one.zagura.IonLauncher.ui.view.settings.seekbar
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
@@ -26,12 +24,13 @@ class SettingsActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setSettingsContentView(R.string.tweaks) {
-            setting(R.string.layout) { onClick(LayoutSettingsActivity::class.java) }
             setting(R.string.icons) { onClick(IconsSettingsActivity::class.java) }
             setting(R.string.cards) { onClick(CardsSettingsActivity::class.java) }
-            colorSettings("color", ColorThemer.DEFAULT_DARK, ColorThemer.DEFAULT_LIGHT, 0xdd)
-            setting(R.string.app_drawer_background_opacity, isVertical = true) {
-                seekbar("drawer:bg:alpha", 0xf0, min = 0, max = 0xff)
+            setting(R.string.pinned_grid) { onClick(PinnedGridSettingsActivity::class.java) }
+            setting(R.string.drawer) { onClick(DrawerSettingsActivity::class.java) }
+            setting(R.string.wallpaper) { onClick(WallpaperSettingsActivity::class.java) }
+            setting(R.string.radius_percent, isVertical = true) {
+                seekbar("icon:radius-ratio", 50, min = 0, max = 50, multiplier = 5)
             }
             title(R.string.widgets)
             setting(R.string.choose_widget) {

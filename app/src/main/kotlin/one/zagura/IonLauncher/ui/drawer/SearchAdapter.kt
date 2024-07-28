@@ -94,13 +94,15 @@ class SearchAdapter(
                     LongPressMenu.popup(
                         it, item,
                         Gravity.BOTTOM or Gravity.START,
-                        lx + h, Utils.getDisplayHeight(activity) - ly + v
+                        lx + h, Utils.getDisplayHeight(activity) - ly + v,
+                        true,
                     )
                 } else {
                     LongPressMenu.popup(
                         it, item,
                         Gravity.TOP or Gravity.START,
-                        lx + h, ly + icon.height + v
+                        lx + h, ly + icon.height + v,
+                        true,
                     )
                 }
                 Utils.startDrag(it, item, it to bindingAdapterPosition)
@@ -125,15 +127,15 @@ class SearchAdapter(
         val context = holder.itemView.context
         val item = getItem(i)
         holder.itemView.backgroundTintList = if (isSearch && i == 0)
-            ColorStateList.valueOf(ColorThemer.highlight(context))
+            ColorStateList.valueOf(ColorThemer.drawerHighlight(context))
         else transparent
         with(holder.label) {
-            setTextColor(ColorThemer.foreground(context))
+            setTextColor(ColorThemer.drawerForeground(context))
         }
         holder.icon.setImageDrawable(IconLoader.loadIcon(context, item))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && item is StaticShortcut) {
             holder.label.text = buildSpannedString {
-                append(LabelLoader.loadLabel(context, item.packageName, item.userHandle) + ": ", ForegroundColorSpan(ColorThemer.hint(context)), 0)
+                append(LabelLoader.loadLabel(context, item.packageName, item.userHandle) + ": ", ForegroundColorSpan(ColorThemer.drawerHint(context)), 0)
                 append(LabelLoader.loadLabel(context, item))
             }
         } else {

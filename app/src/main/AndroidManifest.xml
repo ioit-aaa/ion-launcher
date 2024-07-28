@@ -93,8 +93,10 @@
         </activity>
 
         <activity android:name=".ui.IconsSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
-        <activity android:name=".ui.LayoutSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
         <activity android:name=".ui.CardsSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
+        <activity android:name=".ui.DrawerSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
+        <activity android:name=".ui.WallpaperSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
+        <activity android:name=".ui.PinnedGridSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
 
         <activity
             android:name="one.zagura.IonLauncher.ui.iconPackPicker.IconPackPickerActivity"

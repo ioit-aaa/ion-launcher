@@ -3,7 +3,6 @@ package one.zagura.IonLauncher.ui.drawer
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.os.Build
 import android.text.Editable
@@ -163,8 +162,8 @@ class DrawerArea(
         recyclerView.adapter = searchAdapter
         if (isDrawer)
             unsearch()
-        val fgColor = ColorThemer.foreground(context)
-        val hintColor = ColorThemer.hint(context)
+        val fgColor = ColorThemer.drawerForeground(context)
+        val hintColor = ColorThemer.drawerHint(context)
         val separatorColor = hintColor and 0xffffff or 0x44000000
         with(entry) {
             setTextColor(fgColor)
