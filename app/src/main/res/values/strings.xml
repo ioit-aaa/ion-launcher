@@ -55,6 +55,9 @@
     <string name="icons">Icons</string>
     <string name="layout">Layout</string>
     <string name="cards">Cards</string>
+    <string name="fully_charged">Fully charged</string>
+    <string name="charging">Charging %1$d%%</string>
+    <string name="discharging">%1$d%%</string>
     <plurals name="missed_calls">
         <item quantity="one">One missed call</item>
         <item quantity="other">%d missed calls</item>

@@ -18,6 +18,7 @@ import one.zagura.IonLauncher.provider.items.IconLoader
 import one.zagura.IonLauncher.provider.items.LabelLoader
 import one.zagura.IonLauncher.provider.search.Search
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
+import one.zagura.IonLauncher.provider.summary.Battery
 import one.zagura.IonLauncher.util.CrashActivity
 import one.zagura.IonLauncher.util.Settings
 
@@ -39,14 +40,11 @@ class IonLauncherApp : Application() {
         val launcherApps = getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
         launcherApps.registerCallback(AppLoader.AppCallback(this))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            registerReceiver(
-                AppReceiver,
-                IntentFilter().apply {
-                    addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
-                    addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
-                    addAction(Intent.ACTION_MANAGED_PROFILE_UNLOCKED)
-                }
-            )
+            registerReceiver(AppReceiver, IntentFilter().apply {
+                addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
+                addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
+                addAction(Intent.ACTION_MANAGED_PROFILE_UNLOCKED)
+            })
         }
         AppLoader.reloadApps(this)
 
@@ -54,6 +52,12 @@ class IonLauncherApp : Application() {
             if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH))
                 (getSystemService(Context.CAMERA_SERVICE) as CameraManager?)
                     ?.registerTorchCallback(torchCallback, Handler(Looper.getMainLooper()))
+
+        registerReceiver(Battery.Receiver, IntentFilter().apply {
+            addAction(Intent.ACTION_BATTERY_CHANGED)
+            addAction(Intent.ACTION_POWER_CONNECTED)
+            addAction(Intent.ACTION_POWER_DISCONNECTED)
+        })
     }
 
     @RequiresApi(Build.VERSION_CODES.M)

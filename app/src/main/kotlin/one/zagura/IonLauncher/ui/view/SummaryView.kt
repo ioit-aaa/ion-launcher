@@ -16,9 +16,12 @@ import android.view.MotionEvent
 import android.view.View
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.LauncherItem
+import one.zagura.IonLauncher.data.summary.BatteryStatus
 import one.zagura.IonLauncher.data.summary.Event
 import one.zagura.IonLauncher.provider.ColorThemer
+import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.summary.Alarm
+import one.zagura.IonLauncher.provider.summary.Battery
 import one.zagura.IonLauncher.util.LiveWallpaper
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.Utils
@@ -34,9 +37,19 @@ class SummaryView(
     private val drawCtx: SharedDrawingContext,
 ) : View(context) {
 
-    private var dateString = ""
+    private var topString = ""
+    private var bottomString: String? = ""
     private var events = emptyArray<CompiledEvent>()
+    private var isGlanceMultiline = false
+    private var onGlanceTap: (() -> Unit)? = null
 
+    private val pureTitlePaint = Paint().apply {
+        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 18f, resources.displayMetrics)
+        textAlign = Paint.Align.LEFT
+        isAntiAlias = true
+        isSubpixelText = true
+        typeface = Typeface.DEFAULT_BOLD
+    }
     private val pureTextPaint = Paint().apply {
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
         textAlign = Paint.Align.LEFT
@@ -54,68 +67,74 @@ class SummaryView(
         isAntiAlias = true
     }
 
-    private val gestureDetector = GestureDetector(context, object : GestureDetector.OnGestureListener {
-        override fun onDown(e: MotionEvent) = true
-        override fun onShowPress(e: MotionEvent) {}
-        override fun onLongPress(e: MotionEvent) {
-            val w = resources.displayMetrics.widthPixels
-            val h = Utils.getDisplayHeight(context as Activity)
-            LongPressMenu.popupLauncher(this@SummaryView, Gravity.CENTER, e.x.toInt() - w / 2, e.y.toInt() - h / 2)
-            Utils.click(context)
+    private fun batteryStatusToString(status: BatteryStatus): String {
+        return when (status) {
+            BatteryStatus.Charged -> context.getString(R.string.fully_charged)
+            is BatteryStatus.Charging -> context.getString(R.string.charging, status.level)
+            is BatteryStatus.Discharging -> context.getString(R.string.discharging, status.level)
         }
-        override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float) = false
+    }
 
-        override fun onSingleTapUp(e: MotionEvent): Boolean {
-            if (tryConsumeTap(e)) return true
-            LiveWallpaper.tap(context, windowToken, e.x.toInt(), e.y.toInt())
-            return false
-        }
-
-        private fun tryConsumeTap(e: MotionEvent): Boolean {
-            val dp = resources.displayMetrics.density
-            val padding = 16 * dp
-            val separation = 6 * dp
-
-            val y = e.y
-            val dateHeight = drawCtx.titlePaint.descent() - drawCtx.titlePaint.ascent()
-            val dt = paddingTop + padding + dateHeight + separation
-            if (y < dt)
-                return performClick()
-            if (events.isEmpty())
-                return false
-            val x = e.x
-            if (x < paddingLeft + padding || x > width - paddingRight - padding)
-                return false
-
-            val eventHeight = drawCtx.textPaint.descent() - drawCtx.textPaint.ascent() + separation
-            val yy = y - dt
-            if (yy < 0)
-                return false
-            val i = yy.toInt() / eventHeight.toInt()
-            if (i >= events.size)
-                return false
-            events[i].open(this@SummaryView)
-            return true
-        }
-
-        override fun onFling(
-            e1: MotionEvent?,
-            e2: MotionEvent,
-            velocityX: Float,
-            velocityY: Float
-        ): Boolean {
-            if (abs(velocityY) > abs(velocityX) && velocityY > 0)
-                Utils.pullStatusBar(context)
-            return true
-        }
-    })
-
-    fun updateEvents(events: List<Event>) {
-        dateString = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+    private fun getDateString(): String {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG))
         else
             DateFormat.getMediumDateFormat(context).format(Calendar.getInstance().time)
+    }
 
+    private fun updateAtAGlanceInternal() {
+        isGlanceMultiline = false
+
+        val batteryStatus = Battery.getStatus(context)
+        if (batteryStatus is BatteryStatus.Discharging && batteryStatus.level <= 20) {
+            topString = getDateString()
+            bottomString = batteryStatusToString(batteryStatus)
+            onGlanceTap = ::openBatterySettings
+            return
+        }
+
+        val notif = NotificationService.Top.getResource()
+        if (notif != null) {
+            if (notif.subtitle == null) {
+                topString = getDateString()
+                bottomString = notif.title
+                onGlanceTap = notif.open?.let {{ it.send() }}
+            } else {
+                topString = notif.title
+                bottomString = notif.subtitle
+                isGlanceMultiline = true
+                onGlanceTap = notif.open?.let {{ it.send() }}
+            }
+            return
+        }
+
+        val media = NotificationService.MediaObserver.getResource()
+        if (media.isNotEmpty()) {
+            val item = media.firstOrNull { it.isPlaying?.invoke() == true }
+            if (item != null) {
+                topString = getDateString()
+                bottomString = "${item.title} • ${item.subtitle}"
+                onGlanceTap = item.onTap?.let {{ it.send() }}
+                return
+            }
+        }
+
+        topString = getDateString()
+        bottomString = batteryStatusToString(batteryStatus)
+        onGlanceTap = ::openBatterySettings
+    }
+
+    fun updateAtAGlance() {
+        // dependencies: notification, media, battery
+        updateAtAGlanceInternal()
+        post {
+            contentDescription = if (bottomString == null) topString
+            else "$topString\n$bottomString"
+            invalidate()
+        }
+    }
+
+    fun updateEvents(events: List<Event>) {
         val alarm = Alarm.get(context)
 
         var i = 0
@@ -137,41 +156,42 @@ class SummaryView(
             e[i++] = CompiledEvent.Calendar(event.title, textRight, event.color)
         }
         this.events = e as Array<CompiledEvent>
-        post {
-            contentDescription = dateString
-            invalidate()
-        }
+        postInvalidate()
     }
 
     fun clearData() {
         events = emptyArray()
-        dateString = ""
+        topString = ""
         contentDescription = ""
+        bottomString = null
     }
 
     override fun onDraw(canvas: Canvas) {
-        if (events.isEmpty()) {
-            canvas.drawText(dateString, paddingLeft.toFloat(), paddingTop - pureTextPaint.ascent(), pureTextPaint)
-            return
-        }
         val dp = resources.displayMetrics.density
 
-        val titleHeight = drawCtx.titlePaint.descent() - drawCtx.titlePaint.ascent()
+        val separation = 6 * dp
+        val padding = 14 * dp
+        val dotRadius = 2 * dp
+
+        var y = paddingTop - pureTitlePaint.ascent()
+        canvas.drawText(topString, paddingLeft.toFloat(), y, pureTitlePaint)
+        bottomString?.let {
+            y += pureTitlePaint.descent() + separation - pureTextPaint.ascent()
+            canvas.drawText(it, paddingLeft.toFloat(), y, pureTextPaint)
+        }
+        y += paddingLeft
+
         val eventHeight = drawCtx.textPaint.descent() - drawCtx.textPaint.ascent()
         val eventRightHeight = rightTextPaint.descent() - rightTextPaint.ascent()
 
-        val separation = 6 * dp
-        val padding = 16 * dp
-        val dotRadius = 2 * dp
         val circXOffset = paddingLeft + padding + dotRadius + 4 * dp
         val textXOffset = paddingLeft + padding + dotRadius * 2 + 12 * dp
         val roff = (eventHeight - eventRightHeight) / 2 - rightTextPaint.ascent()
 
-        val totalHeight = titleHeight + (eventHeight + separation) * events.size + padding * 2
-        canvas.drawRoundRect(paddingLeft.toFloat(), paddingTop.toFloat(), (width - paddingRight).toFloat(), paddingTop + totalHeight, drawCtx.radius, drawCtx.radius, drawCtx.cardPaint)
-        canvas.drawText(dateString, paddingLeft.toFloat() + padding, paddingTop + padding - drawCtx.titlePaint.ascent(), drawCtx.titlePaint)
+        val totalHeight = eventHeight * events.size + separation * (events.size - 1) + padding * 2
+        canvas.drawRoundRect(paddingLeft.toFloat(), y, (width - paddingRight).toFloat(), y + totalHeight, drawCtx.radius, drawCtx.radius, drawCtx.cardPaint)
 
-        var bottomTop = paddingTop + padding + titleHeight + separation
+        var bottomTop = y + padding
         for (event in events) {
             canvas.drawCircle(
                 circXOffset,
@@ -188,6 +208,74 @@ class SummaryView(
 
     override fun onTouchEvent(e: MotionEvent) = gestureDetector.onTouchEvent(e)
 
+    private val gestureDetector = GestureDetector(context, object : GestureDetector.OnGestureListener {
+        override fun onDown(e: MotionEvent) = true
+        override fun onShowPress(e: MotionEvent) {}
+        override fun onLongPress(e: MotionEvent) {
+            val w = resources.displayMetrics.widthPixels
+            val h = Utils.getDisplayHeight(context as Activity)
+            LongPressMenu.popupLauncher(this@SummaryView, Gravity.CENTER, e.x.toInt() - w / 2, e.y.toInt() - h / 2)
+            Utils.click(context)
+        }
+        override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float) = false
+
+        override fun onSingleTapUp(e: MotionEvent): Boolean {
+            if (tryConsumeTap(e)) return true
+            LiveWallpaper.tap(context, windowToken, e.x.toInt(), e.y.toInt())
+            return false
+        }
+
+        private fun tryConsumeTap(e: MotionEvent): Boolean {
+            val dp = resources.displayMetrics.density
+            val padding = 14 * dp
+            val separation = 6 * dp
+
+            val y = e.y
+            val dateHeight = pureTitlePaint.descent() - pureTitlePaint.ascent()
+            var dt = paddingTop + dateHeight + separation
+            if (!isGlanceMultiline && y < dt)
+                return performClick()
+            val extraHeight = pureTextPaint.descent() - pureTextPaint.ascent()
+            dt += extraHeight + paddingLeft / 2
+            if (y < dt) {
+                onGlanceTap?.invoke()
+                return true
+            }
+            if (events.isEmpty())
+                return false
+            val x = e.x
+            if (x < paddingLeft + padding || x > width - paddingRight - padding)
+                return false
+
+            dt += paddingLeft / 2 + padding
+            val yy = y - dt
+            if (yy < 0)
+                return false
+            val eventHeight = drawCtx.textPaint.descent() - drawCtx.textPaint.ascent() + separation
+            val i = yy.toInt() / eventHeight.toInt()
+            if (i >= events.size)
+                return false
+            events[i].open(this@SummaryView)
+            return true
+        }
+
+        override fun onFling(
+            e1: MotionEvent?,
+            e2: MotionEvent,
+            velocityX: Float,
+            velocityY: Float
+        ): Boolean {
+            if (abs(velocityY) > abs(velocityX) && velocityY > 0)
+                Utils.pullStatusBar(context)
+            return true
+        }
+    })
+
+    private fun openBatterySettings() {
+        context.startActivity(Intent(Intent.ACTION_POWER_USAGE_SUMMARY)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), LauncherItem.createOpeningAnimation(this))
+    }
+
     override fun performClick(): Boolean {
         super.performClick()
         context.startActivity(Intent(Intent.ACTION_MAIN)
@@ -198,6 +286,7 @@ class SummaryView(
 
     fun applyCustomizations(settings: Settings) {
         pureTextPaint.color = ColorThemer.foreground(context)
+        pureTitlePaint.color = ColorThemer.foreground(context)
         rightTextPaint.color = ColorThemer.cardHint(context)
     }
 

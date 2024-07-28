@@ -21,6 +21,7 @@ import one.zagura.IonLauncher.data.items.TorchToggleItem
 import one.zagura.IonLauncher.provider.Dock
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.UpdatingResource
+import one.zagura.IonLauncher.provider.summary.Battery
 import one.zagura.IonLauncher.provider.summary.EventsLoader
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.TaskRunner
@@ -151,10 +152,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
 
         val batteryLevel = batteryManager
             .getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-        val isPluggedIn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            batteryManager
-                .getIntProperty(BatteryManager.BATTERY_PROPERTY_STATUS) == BatteryManager.BATTERY_STATUS_CHARGING
-        else false
+        val isPluggedIn = Battery.isCharging(batteryManager)
         val currentMinuteIn24Format = rightNow[Calendar.HOUR_OF_DAY] * 60 + rightNow[Calendar.MINUTE]
         val isHeadSetConnected = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS).isNotEmpty()
