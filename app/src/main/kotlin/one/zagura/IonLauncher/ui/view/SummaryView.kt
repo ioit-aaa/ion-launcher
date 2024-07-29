@@ -47,17 +47,22 @@ class SummaryView(
     private var onGlanceTap: (() -> Unit)? = null
 
     private val pureTitlePaint = Paint().apply {
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 18f, resources.displayMetrics)
+        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 24f, resources.displayMetrics)
         textAlign = Paint.Align.LEFT
         isAntiAlias = true
         isSubpixelText = true
-        typeface = Typeface.DEFAULT_BOLD
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+            typeface = Typeface.create(null, 300, false)
     }
     private val pureTextPaint = TextPaint().apply {
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
         textAlign = Paint.Align.LEFT
         isAntiAlias = true
         isSubpixelText = true
+        typeface = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+            Typeface.create(null, 500, false)
+        else
+            Typeface.DEFAULT_BOLD
     }
     private val rightTextPaint = Paint().apply {
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12f, resources.displayMetrics)
@@ -133,8 +138,15 @@ class SummaryView(
         post {
             contentDescription = if (bottomString == null) topString
             else "$topString\n$bottomString"
-            if (bottomString != null)
-                bottomString = TextUtils.ellipsize(bottomString, pureTextPaint, (width - paddingLeft - paddingRight).toFloat(), TextUtils.TruncateAt.END)
+            if (bottomString != null) {
+                val ax = drawCtx.radius / 3
+                bottomString = TextUtils.ellipsize(
+                    bottomString,
+                    pureTextPaint,
+                    width - paddingLeft - paddingRight - ax * 2,
+                    TextUtils.TruncateAt.END,
+                )
+            }
             invalidate()
         }
     }
@@ -179,10 +191,11 @@ class SummaryView(
         val dotRadius = 2 * dp
 
         var y = paddingTop - pureTitlePaint.ascent()
-        canvas.drawText(topString, paddingLeft.toFloat(), y, pureTitlePaint)
+        val ax = drawCtx.radius / 3
+        canvas.drawText(topString, paddingLeft + ax, y, pureTitlePaint)
         bottomString?.let {
             y += pureTitlePaint.descent() + separation - pureTextPaint.ascent()
-            canvas.drawText(it, 0, it.length, paddingLeft.toFloat(), y, pureTextPaint)
+            canvas.drawText(it, 0, it.length, paddingLeft + ax, y, pureTextPaint)
         }
         if (events.isEmpty())
             return
@@ -192,8 +205,8 @@ class SummaryView(
         val eventHeight = drawCtx.textPaint.descent() - drawCtx.textPaint.ascent()
         val eventRightHeight = rightTextPaint.descent() - rightTextPaint.ascent()
 
-        val circXOffset = paddingLeft + padding + dotRadius + 4 * dp
-        val textXOffset = paddingLeft + padding + dotRadius * 2 + 12 * dp
+        val circXOffset = paddingLeft + padding
+        val textXOffset = paddingLeft + padding + dotRadius * 2 + 6 * dp
         val roff = (eventHeight - eventRightHeight) / 2 - rightTextPaint.ascent()
 
         val totalHeight = eventHeight * events.size + separation * (events.size - 1) + padding * 2
@@ -201,10 +214,12 @@ class SummaryView(
 
         var bottomTop = y + padding
         for (event in events) {
-            canvas.drawCircle(
+            canvas.drawRoundRect(
                 circXOffset,
-                bottomTop + eventHeight / 2f,
-                dotRadius,
+                bottomTop,
+                circXOffset + dotRadius * 2,
+                bottomTop + eventHeight,
+                dotRadius, dotRadius,
                 colorPaint.apply { color = event.color ?: drawCtx.textPaint.color }
             )
             canvas.drawText(event.left, textXOffset, bottomTop - drawCtx.textPaint.ascent(), drawCtx.textPaint)
