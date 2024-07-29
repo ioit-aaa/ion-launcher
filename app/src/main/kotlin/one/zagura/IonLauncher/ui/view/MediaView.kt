@@ -52,13 +52,9 @@ class MediaView(
                         it.width < it.height -> Bitmap.createBitmap(it, 0, (it.height - it.width) / 2, it.width, it.width)
                         else -> it
                     }
-                    val drawable = BitmapDrawable(bitmap)
-                    drawable.setBounds(0, 0, bitmap.width, bitmap.height)
-                    ClippedDrawable(drawable, Path().apply {
-                        val r = bitmap.width / 2f
-                        addCircle(r, r, r, Path.Direction.CW)
-                    }, 0)
-                    drawable
+                    BitmapDrawable(bitmap).apply {
+                        setBounds(0, 0, bitmap.width, bitmap.height)
+                    }
                 }
                 PreparedMediaData(drawable, "", "", player.isPlaying?.invoke() == true, player)
             }
@@ -189,7 +185,7 @@ class MediaView(
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         for (player in players) {
-            val avail = (width - paddingLeft - paddingRight) - drawCtx.iconSize * 3
+            val avail = (width - paddingLeft - paddingRight) - drawCtx.iconSize * if (player.data.next == null) 2 else 3
             val title = TextUtils.ellipsize(player.data.title, drawCtx.titlePaint, avail, TextUtils.TruncateAt.END)
             val subtitle = TextUtils.ellipsize(player.data.subtitle, drawCtx.subtitlePaint, avail, TextUtils.TruncateAt.END)
             player.title = title

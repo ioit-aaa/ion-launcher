@@ -198,8 +198,9 @@ object IconLoader {
 
     private fun transformIcon(context: Context, icon: Drawable, willBeThemed: Boolean): Drawable {
         val settings = context.ionApplication.settings
+        val doGrayscale = settings["icon:grayscale", true]
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || icon !is AdaptiveIconDrawable) {
-            icon.setGrayscale(settings["icon:grayscale", true])
+            icon.setGrayscale(doGrayscale)
             val w = icon.intrinsicWidth
             val h = icon.intrinsicHeight
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
@@ -221,8 +222,8 @@ object IconLoader {
 
         var fg = icon.foreground
         var bg = icon.background
-        fg?.setGrayscale(settings["icon:grayscale", true])
-        bg?.setGrayscale(settings["icon:grayscale", true])
+        fg?.setGrayscale(doGrayscale)
+        bg?.setGrayscale(doGrayscale)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val monochrome = icon.monochrome
@@ -253,11 +254,16 @@ object IconLoader {
                 }
             }
         }
-        return when (bg) {
-            is ShapeDrawable -> makeIcon(settings, bg.paint.color, fg)
-            is ColorDrawable -> makeIcon(settings, bg.color, fg)
-            else -> makeIcon(settings, bg, fg)
+        val color = when (bg) {
+            is ShapeDrawable -> bg.paint.color
+            is ColorDrawable -> bg.color
+            is GradientDrawable -> bg.color?.defaultColor
+                ?: return makeIcon(settings, bg, fg)
+            else -> return makeIcon(settings, bg, fg)
         }
+        return makeIcon(settings, if (doGrayscale)
+            ColorThemer.colorize(color, ColorThemer.iconBackground(context))
+        else color, fg)
     }
 
     private fun makeIcon(

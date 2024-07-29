@@ -82,4 +82,12 @@ object ColorThemer {
         ColorUtils.colorToLAB(color, lab)
         return lab[0] / 100f
     }
+
+    fun colorize(color: Int, tint: Int): Int {
+        val lab = DoubleArray(3)
+        ColorUtils.colorToLAB(color, lab)
+        val l = lab[0]
+        ColorUtils.colorToLAB(tint, lab)
+        return ColorUtils.LABToColor(l, lab[1], lab[2])
+    }
 }

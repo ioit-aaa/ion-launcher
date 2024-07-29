@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
+import androidx.core.graphics.alpha
 
 internal class ClippedDrawable(
     private val content: Drawable,
@@ -19,7 +20,9 @@ internal class ClippedDrawable(
 
     override fun draw(canvas: Canvas) {
         val s = bounds.width() / content.bounds.width().toFloat()
-        shadowPaint.setShadowLayer(21f / s, 0f, 6f / s, 0x22000000)
+        if (shadowPaint.color.alpha < 100)
+            shadowPaint.clearShadowLayer()
+        else shadowPaint.setShadowLayer(21f / s, 0f, 6f / s, 0x22000000)
         canvas.save()
         canvas.translate(bounds.left.toFloat(), bounds.top.toFloat())
         canvas.scale(s, s)
