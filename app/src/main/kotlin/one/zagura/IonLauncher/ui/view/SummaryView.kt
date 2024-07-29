@@ -8,6 +8,8 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.os.Build
+import android.text.TextPaint
+import android.text.TextUtils
 import android.text.format.DateFormat
 import android.util.TypedValue
 import android.view.GestureDetector
@@ -38,7 +40,7 @@ class SummaryView(
 ) : View(context) {
 
     private var topString = ""
-    private var bottomString: String? = ""
+    private var bottomString: CharSequence? = ""
     private var events = emptyArray<CompiledEvent>()
     private var isGlanceMultiline = false
     private var onGlanceTap: (() -> Unit)? = null
@@ -50,7 +52,7 @@ class SummaryView(
         isSubpixelText = true
         typeface = Typeface.DEFAULT_BOLD
     }
-    private val pureTextPaint = Paint().apply {
+    private val pureTextPaint = TextPaint().apply {
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
         textAlign = Paint.Align.LEFT
         isAntiAlias = true
@@ -130,6 +132,7 @@ class SummaryView(
         post {
             contentDescription = if (bottomString == null) topString
             else "$topString\n$bottomString"
+            bottomString = TextUtils.ellipsize(bottomString, pureTextPaint, (width - paddingLeft - paddingRight).toFloat(), TextUtils.TruncateAt.END)
             invalidate()
         }
     }
@@ -177,7 +180,7 @@ class SummaryView(
         canvas.drawText(topString, paddingLeft.toFloat(), y, pureTitlePaint)
         bottomString?.let {
             y += pureTitlePaint.descent() + separation - pureTextPaint.ascent()
-            canvas.drawText(it, paddingLeft.toFloat(), y, pureTextPaint)
+            canvas.drawText(it, 0, it.length, paddingLeft.toFloat(), y, pureTextPaint)
         }
         if (events.isEmpty())
             return
