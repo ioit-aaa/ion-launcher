@@ -104,8 +104,8 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
                 if (dockItems.contains(item))
                     continue
                 val d = contextMap.calculateDistance(currentData, data)
-                if (d < 0.0003f)
-                    newSuggestions.add(item to d / 0.0003f)
+                if (d < 0.0004f)
+                    newSuggestions.add(item to d / 0.0004f)
             }
         }
 
