@@ -179,6 +179,9 @@ class SummaryView(
             y += pureTitlePaint.descent() + separation - pureTextPaint.ascent()
             canvas.drawText(it, paddingLeft.toFloat(), y, pureTextPaint)
         }
+        if (events.isEmpty())
+            return
+
         y += paddingLeft
 
         val eventHeight = drawCtx.textPaint.descent() - drawCtx.textPaint.ascent()
