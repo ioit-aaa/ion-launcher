@@ -59,6 +59,8 @@
     <string name="charging">Charging %1$d%%</string>
     <string name="discharging">%1$d%%</string>
     <string name="labels">Labels</string>
+    <string name="media_player">Media Player</string>
+    <string name="dynamically_tint">Dynamically tint</string>
     <plurals name="missed_calls">
         <item quantity="one">One missed call</item>
         <item quantity="other">%d missed calls</item>

@@ -42,18 +42,15 @@ class MediaView(
     private val icPause = resources.getDrawable(R.drawable.ic_pause)
     private val icTrackNext = resources.getDrawable(R.drawable.ic_track_next)
 
+    private var fgColor = 0
+
     fun update(players: Array<MediaPlayerData>) {
         TaskRunner.submit {
             this.players = Array(players.size) {
                 val player = players[it]
                 val drawable = player.cover?.let {
-                    val bitmap = when {
-                        it.width > it.height -> Bitmap.createBitmap(it, (it.width - it.height) / 2, 0, it.height, it.height)
-                        it.width < it.height -> Bitmap.createBitmap(it, 0, (it.height - it.width) / 2, it.width, it.width)
-                        else -> it
-                    }
-                    BitmapDrawable(bitmap).apply {
-                        setBounds(0, 0, bitmap.width, bitmap.height)
+                    BitmapDrawable(it).apply {
+                        setBounds(0, 0, it.width, it.height)
                     }
                 }
                 PreparedMediaData(drawable, "", "", player.isPlaying?.invoke() == true, player)
@@ -72,10 +69,7 @@ class MediaView(
     fun applyCustomizations(settings: Settings) {
         val dp = resources.displayMetrics.density
         separation = 12 * dp
-        val c = ColorThemer.cardForeground(context)
-        icPlay.setTint(c)
-        icPause.setTint(c)
-        icTrackNext.setTint(c)
+        fgColor = ColorThemer.cardForeground(context)
         iconPath = Path().apply {
             val r = drawCtx.radius
             addRoundRect(0f, 0f, drawCtx.iconSize, drawCtx.iconSize, floatArrayOf(r, r, 0f, 0f, 0f, 0f, r, r), Path.Direction.CW)
@@ -96,7 +90,15 @@ class MediaView(
         for (i in players.indices) {
             val player = players[i]
             val icon = player.icon
-            canvas.drawRoundRect(pl.toFloat(), y, pl + w.toFloat(), y + drawCtx.iconSize, drawCtx.radius, drawCtx.radius, drawCtx.cardPaint)
+
+            if (player.data.color == 0)
+                canvas.drawRoundRect(pl.toFloat(), y, pl + w.toFloat(), y + drawCtx.iconSize, drawCtx.radius, drawCtx.radius, drawCtx.cardPaint)
+            else {
+                val c = drawCtx.cardPaint.color
+                drawCtx.cardPaint.color = player.data.color
+                canvas.drawRoundRect(pl.toFloat(), y, pl + w.toFloat(), y + drawCtx.iconSize, drawCtx.radius, drawCtx.radius, drawCtx.cardPaint)
+                drawCtx.cardPaint.color = c
+            }
             if (icon != null) {
                 icon.copyBounds(drawCtx.tmpRect)
                 canvas.save()
@@ -107,18 +109,33 @@ class MediaView(
                 canvas.restore()
                 icon.bounds = drawCtx.tmpRect
             }
+
             val textX = pl + drawCtx.iconSize + 8 * dp
             val s = 3 * dp
-            canvas.drawText(player.title, 0, player.title.length, textX, y + drawCtx.iconSize / 2f - s, drawCtx.titlePaint)
-            canvas.drawText(player.subtitle, 0, player.subtitle.length, textX, y + drawCtx.iconSize / 2f + s + drawCtx.textHeight, drawCtx.subtitlePaint)
+            if (player.data.textColor == 0) {
+                canvas.drawText(player.title, 0, player.title.length, textX, y + drawCtx.iconSize / 2f - s, drawCtx.titlePaint)
+                canvas.drawText(player.subtitle, 0, player.subtitle.length, textX, y + drawCtx.iconSize / 2f + s + drawCtx.textHeight, drawCtx.subtitlePaint)
+            } else {
+                val h = drawCtx.titlePaint.color
+                val b = drawCtx.subtitlePaint.color
+                drawCtx.titlePaint.color = player.data.textColor
+                drawCtx.subtitlePaint.color = (player.data.textColor and 0xffffff) or 0xaa000000.toInt()
+                canvas.drawText(player.title, 0, player.title.length, textX, y + drawCtx.iconSize / 2f - s, drawCtx.titlePaint)
+                canvas.drawText(player.subtitle, 0, player.subtitle.length, textX, y + drawCtx.iconSize / 2f + s + drawCtx.textHeight, drawCtx.subtitlePaint)
+                drawCtx.titlePaint.color = h
+                drawCtx.subtitlePaint.color = b
+            }
 
             val playIcon = if (player.isPlaying) icPause else icPlay
             val lastIconOff = (2 * dp).toInt()
 
+            val c = if (player.data.color != 0) player.data.textColor else fgColor
+            playIcon.setTint(c)
             if (player.data.next == null) {
                 val controlX = width - paddingRight - drawCtx.iconSize.toInt() - lastIconOff
                 drawIcon(canvas, playIcon, controlX, y.toInt(), controlPadding)
             } else {
+                icTrackNext.setTint(c)
                 var controlX = width - paddingRight - drawCtx.iconSize.toInt() * 2
                 drawIcon(canvas, playIcon, controlX, y.toInt(), controlPadding)
                 controlX += drawCtx.iconSize.toInt() - lastIconOff

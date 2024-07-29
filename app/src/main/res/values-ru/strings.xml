@@ -57,6 +57,8 @@
     <string name="drawer">Панель приложений</string>
     <string name="cards">Карточки</string>
     <string name="labels">Этикетки</string>
+    <string name="media_player">Медиа плеер</string>
+    <string name="dynamically_tint">Динамическы перекрашивать</string>
     <plurals name="missed_calls">
         <item quantity="one">%d потеранный звонок</item>
         <item quantity="few">%d потеранных знонка</item>

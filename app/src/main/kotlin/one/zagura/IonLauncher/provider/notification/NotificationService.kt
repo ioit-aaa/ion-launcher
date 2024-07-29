@@ -24,24 +24,24 @@ class NotificationService : NotificationListenerService() {
             stopSelf()
             return
         }
-        val msm = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
-        msm.addOnActiveSessionsChangedListener(::activeSessionsCallback, componentName)
-        MediaObserver.updateMediaItem(applicationContext)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        val msm = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
-        msm.removeOnActiveSessionsChangedListener(::activeSessionsCallback)
-        activeSessionsCallback(null)
     }
 
     private fun activeSessionsCallback(controllers: MutableList<MediaController>?) {
         MediaObserver.onMediaControllersUpdated(applicationContext, controllers)
     }
 
-    override fun onListenerConnected() = TopNotificationProvider.update(activeNotifications, currentRanking)
-    override fun onListenerDisconnected() = TopNotificationProvider.update(emptyArray(), currentRanking)
+    override fun onListenerConnected() {
+        val msm = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
+        msm.addOnActiveSessionsChangedListener(::activeSessionsCallback, ComponentName(BuildConfig.APPLICATION_ID, NotificationService::class.java.name))
+        MediaObserver.updateMediaItem(applicationContext)
+        TopNotificationProvider.update(activeNotifications, currentRanking)
+    }
+    override fun onListenerDisconnected() {
+        val msm = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
+        msm.removeOnActiveSessionsChangedListener(::activeSessionsCallback)
+        activeSessionsCallback(null)
+        TopNotificationProvider.update(emptyArray(), currentRanking)
+    }
 
     override fun onNotificationPosted(sbn: StatusBarNotification, rankingMap: RankingMap) =
         TopNotificationProvider.update(activeNotifications, rankingMap)
@@ -75,7 +75,7 @@ class NotificationService : NotificationListenerService() {
             if (!hasPermission(context))
                 return
             val msm = context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
-            onMediaControllersUpdated(context, msm.getActiveSessions(componentName))
+            onMediaControllersUpdated(context, msm.getActiveSessions(ComponentName(BuildConfig.APPLICATION_ID, NotificationService::class.java.name)))
         }
 
         fun onMediaControllersUpdated(context: Context, controllers: MutableList<MediaController>?) {
@@ -94,15 +94,15 @@ class NotificationService : NotificationListenerService() {
                 controller.registerCallback(object : MediaController.Callback() {
                     var oldItem = item
                     override fun onMetadataChanged(metadata: MediaMetadata?) {
-                        if (metadata != null) {
+                        if (metadata == null)
+                            list.remove(oldItem)
+                        else {
                             val newItem = MediaItemCreator.create(context, controller, metadata)
                             if (newItem == oldItem)
                                 return
-                            list.remove(oldItem)
-                            list.add(newItem)
+                            list[list.indexOf(oldItem)] = newItem
                             oldItem = newItem
-                        } else
-                            list.remove(oldItem)
+                        }
                         mediaItems = list.toTypedArray()
                         update(mediaItems)
                     }
@@ -118,8 +118,6 @@ class NotificationService : NotificationListenerService() {
     }
 
     companion object {
-        private val componentName = ComponentName(BuildConfig.APPLICATION_ID, NotificationService::class.java.name)
-
         fun hasPermission(context: Context): Boolean =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1 &&
             NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)

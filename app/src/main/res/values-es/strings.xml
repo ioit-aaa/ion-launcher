@@ -57,6 +57,8 @@
     <string name="drawer">Cajón de aplicaciones</string>
     <string name="cards">Targetas</string>
     <string name="labels">Etiquetas</string>
+    <string name="media_player">Reproductor de música</string>
+    <string name="dynamically_tint">Teñir dinamicamente</string>
     <plurals name="missed_calls">
         <item quantity="one">Una llamada perdida</item>
         <item quantity="many">%d llamadas perdidas</item>

@@ -32,6 +32,10 @@ class CardsSettingsActivity : Activity() {
             setting(R.string.labels) {
                 switch("suggestion:labels", false)
             }
+            title(R.string.media_player)
+            setting(R.string.dynamically_tint) {
+                switch("media:tint", true)
+            }
         }
     }
 }

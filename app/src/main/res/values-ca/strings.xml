@@ -57,6 +57,8 @@
     <string name="drawer">Cajon</string>
     <string name="cards">Targetes</string>
     <string name="labels">Etiquetes</string>
+    <string name="media_player">Reproductor d\'audio</string>
+    <string name="dynamically_tint">Tenyir dinamicament</string>
     <plurals name="missed_calls">
         <item quantity="one">Una trucada perduda</item>
         <item quantity="many">%d trucades perdudes</item>
