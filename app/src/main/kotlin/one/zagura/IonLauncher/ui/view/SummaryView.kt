@@ -22,6 +22,7 @@ import one.zagura.IonLauncher.data.summary.BatteryStatus
 import one.zagura.IonLauncher.data.summary.Event
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.notification.NotificationService
+import one.zagura.IonLauncher.provider.notification.TopNotificationProvider
 import one.zagura.IonLauncher.provider.summary.Alarm
 import one.zagura.IonLauncher.provider.summary.Battery
 import one.zagura.IonLauncher.util.LiveWallpaper
@@ -95,7 +96,7 @@ class SummaryView(
             return
         }
 
-        val notif = NotificationService.Top.getResource()
+        val notif = TopNotificationProvider.getResource()
         if (notif != null) {
             if (notif.subtitle == null) {
                 topString = getDateString()

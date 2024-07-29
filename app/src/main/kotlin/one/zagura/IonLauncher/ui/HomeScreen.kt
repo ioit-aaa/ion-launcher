@@ -29,6 +29,7 @@ import one.zagura.IonLauncher.provider.Widgets
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.items.IconLoader
 import one.zagura.IonLauncher.provider.notification.NotificationService
+import one.zagura.IonLauncher.provider.notification.TopNotificationProvider
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.provider.summary.Battery
 import one.zagura.IonLauncher.provider.summary.EventsLoader
@@ -124,7 +125,7 @@ class HomeScreen : Activity() {
                 pinnedGrid.updateGridApps()
             }
         }
-        NotificationService.Top.track {
+        TopNotificationProvider.track {
             summaryView.updateAtAGlance()
         }
         NotificationService.MediaObserver.track {
@@ -152,7 +153,7 @@ class HomeScreen : Activity() {
         super.onStop()
         AppLoader.release()
         NotificationService.MediaObserver.release()
-        NotificationService.Top.release()
+        TopNotificationProvider.release()
         Battery.release()
         mediaView.clearData()
         widgetView?.stopListening()
