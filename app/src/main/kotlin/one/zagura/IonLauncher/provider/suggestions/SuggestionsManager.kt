@@ -200,7 +200,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
                 "stat:open-ctx" set contextMap
                     .map { it.key.toString() }
                 contextMap.forEach { (item, data) ->
-                    setInts("stat:open-ctx:$item", data.map { it.data })
+                    setInts("stat:open-ctx:$item", IntArray(data.size) { data[it].data })
                 }
             }
         }

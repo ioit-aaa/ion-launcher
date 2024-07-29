@@ -13,17 +13,19 @@ import one.zagura.IonLauncher.provider.items.ShortcutLoader
 @RequiresApi(Build.VERSION_CODES.N_MR1)
 object ShortcutsProvider : SearchProvider {
 
-    private var shortcuts = emptyList<Triple<StaticShortcut, String, String>>()
+    private var shortcuts = emptyArray<Triple<StaticShortcut, String, String>>()
 
     override fun updateData(context: Context) {
         val s = ArrayList<StaticShortcut>()
         AppLoader.getResource().forEach { ShortcutLoader.getStaticShortcuts(context, it, s) }
-//        s.trimToSize()
-        shortcuts = s.map { Triple(it, LabelLoader.loadLabel(context, it), LabelLoader.loadLabel(context, it.packageName, it.userHandle)) }
+        shortcuts = Array(s.size) {
+            val item = s[it]
+            Triple(item, LabelLoader.loadLabel(context, item), LabelLoader.loadLabel(context, item.packageName, item.userHandle))
+        }
     }
 
     override fun clearData() {
-        shortcuts = emptyList()
+        shortcuts = emptyArray()
     }
 
     fun extraFactor(query: String, item: StaticShortcut, label: String, appLabel: String): Float {

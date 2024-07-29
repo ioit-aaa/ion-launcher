@@ -133,7 +133,8 @@ class SummaryView(
         post {
             contentDescription = if (bottomString == null) topString
             else "$topString\n$bottomString"
-            bottomString = TextUtils.ellipsize(bottomString, pureTextPaint, (width - paddingLeft - paddingRight).toFloat(), TextUtils.TruncateAt.END)
+            if (bottomString != null)
+                bottomString = TextUtils.ellipsize(bottomString, pureTextPaint, (width - paddingLeft - paddingRight).toFloat(), TextUtils.TruncateAt.END)
             invalidate()
         }
     }
