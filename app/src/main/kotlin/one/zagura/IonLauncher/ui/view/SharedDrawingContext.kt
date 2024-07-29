@@ -53,7 +53,7 @@ class SharedDrawingContext(context: Context) {
         radius = iconSize * settings["icon:radius-ratio", 50] / 100f
         cardPaint.color = ColorThemer.cardBackground(context)
         if (cardPaint.color.alpha == 255 && ColorThemer.lightness(cardPaint.color) - ColorThemer.lightness(ColorThemer.wallBackground(context)) > 0.1)
-            cardPaint.setShadowLayer(21f, 0f, 3f, 0x18000000)
+            cardPaint.setShadowLayer(21f, 0f, 0f, 0x22000000)
         else cardPaint.clearShadowLayer()
         val c = ColorThemer.cardForeground(context)
         titlePaint.color = c

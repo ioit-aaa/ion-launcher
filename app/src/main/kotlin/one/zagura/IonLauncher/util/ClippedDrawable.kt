@@ -22,7 +22,7 @@ internal class ClippedDrawable(
         val s = bounds.width() / content.bounds.width().toFloat()
         if (shadowPaint.color.alpha < 100)
             shadowPaint.clearShadowLayer()
-        else shadowPaint.setShadowLayer(21f / s, 0f, 6f / s, 0x22000000)
+        else shadowPaint.setShadowLayer(21f / s, 0f, 4f / s, 0x22000000)
         canvas.save()
         canvas.translate(bounds.left.toFloat(), bounds.top.toFloat())
         canvas.scale(s, s)

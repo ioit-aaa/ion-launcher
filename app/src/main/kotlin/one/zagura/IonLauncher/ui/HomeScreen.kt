@@ -191,13 +191,12 @@ class HomeScreen : Activity() {
         val m = pinnedGrid.calculateSideMargin()
         summaryView.setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 2), m, m)
         mediaView.setPadding(m, m / 2, m, m / 2)
-        val b = Utils.getNavigationBarHeight(this@HomeScreen)
-            .coerceAtLeast(m / 2)
-        val bb = (m - b).coerceAtLeast(0)
-        suggestionsView.setPadding(m, m / 2, m, bb)
+        suggestionsView.setPadding(m, m / 2, m, m / 2)
         suggestionsView.updateLayoutParams {
-            height = (settings["dock:icon-size", 48] * dp).toInt() + m / 2 + bb
+            height = (settings["dock:icon-size", 48] * dp).toInt() + m
         }
+        val b = (Utils.getNavigationBarHeight(this@HomeScreen) - m / 2)
+            .coerceAtLeast(m / 2)
         desktop.setPadding(0, 0, 0, b)
         val widget = Widgets.getWidget(this)
         if (widget != widgetView?.widget) {
