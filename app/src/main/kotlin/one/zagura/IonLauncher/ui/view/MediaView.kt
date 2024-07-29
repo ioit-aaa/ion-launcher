@@ -86,7 +86,7 @@ class MediaView(
         val dp = resources.displayMetrics.density
 
         var y = pt.toFloat()
-        val controlPadding = (10 * dp).toInt()
+        val controlPadding = (10 * dp).coerceAtLeast((drawCtx.iconSize - dp * 42) / 2f).toInt()
         for (i in players.indices) {
             val player = players[i]
             val icon = player.icon
