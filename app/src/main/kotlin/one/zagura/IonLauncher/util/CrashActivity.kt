@@ -14,6 +14,7 @@ import androidx.core.widget.NestedScrollView
 import one.zagura.IonLauncher.BuildConfig
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.ui.ionApplication
+import one.zagura.IonLauncher.util.drawable.FillDrawable
 import kotlin.system.exitProcess
 
 class CrashActivity : Activity() {

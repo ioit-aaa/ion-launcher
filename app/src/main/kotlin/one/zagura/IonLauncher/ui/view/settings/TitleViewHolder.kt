@@ -4,13 +4,10 @@ import android.content.Context
 import android.graphics.Typeface
 import android.os.Build
 import android.view.Gravity
-import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.R
-import one.zagura.IonLauncher.util.FillDrawable
 import one.zagura.IonLauncher.util.Utils
 
 class TitleViewHolder(context: Context) : RecyclerView.ViewHolder(TextView(context)) {

@@ -2,7 +2,6 @@ package one.zagura.IonLauncher.ui.widgetChooser
 
 import android.appwidget.AppWidgetProviderInfo
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +14,6 @@ import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.ui.view.settings.TitleViewHolder
-import one.zagura.IonLauncher.util.FillDrawable
 
 class WidgetChooserAdapter(
     private val providers: List<AppWidgetProviderInfo>,

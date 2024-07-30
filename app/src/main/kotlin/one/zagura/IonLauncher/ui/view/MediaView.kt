@@ -1,7 +1,6 @@
 package one.zagura.IonLauncher.ui.view
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Path
 import android.graphics.drawable.BitmapDrawable
@@ -13,7 +12,6 @@ import android.view.View
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.media.MediaPlayerData
 import one.zagura.IonLauncher.provider.ColorThemer
-import one.zagura.IonLauncher.util.ClippedDrawable
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils

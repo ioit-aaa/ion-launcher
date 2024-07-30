@@ -1,40 +1,40 @@
-package one.zagura.IonLauncher.util
+package one.zagura.IonLauncher.util.drawable
 
 import android.graphics.Canvas
 import android.graphics.ColorFilter
 import android.graphics.Paint
-import android.graphics.Path
 import android.graphics.PixelFormat
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
-import one.zagura.IonLauncher.ui.ionApplication
+import android.os.Build
 
 internal class ContactDrawable(
     private val text: String,
     private val radiusRatio: Float,
+    bgColor: Int,
+    fgColor: Int,
 ) : Drawable() {
 
-    companion object {
-        private val textPaint = Paint().apply {
-            color = 0xffdddddd.toInt()
-            typeface = Typeface.SERIF
-            textAlign = Paint.Align.CENTER
-            textSize = 48f
-            isAntiAlias = true
-            isSubpixelText = true
-        }
+    private val textPaint = Paint().apply {
+        color = fgColor
+        textAlign = Paint.Align.CENTER
+        isAntiAlias = true
+        isSubpixelText = true
+        typeface = Typeface.create("serif", Typeface.BOLD)
+    }
 
-        private val bgPaint = Paint().apply {
-            this.color = 0xff444444.toInt()
-            isAntiAlias = true
-        }
+    private val bgPaint = Paint().apply {
+        this.color = bgColor
+        isAntiAlias = true
+        setShadowLayer(21f, 0f, 4f, 0x22000000)
     }
 
     override fun draw(canvas: Canvas) {
+        textPaint.textSize = bounds.height() / 2.5f
         val r = bounds.width() * radiusRatio
         canvas.drawRoundRect(bounds.left.toFloat(), bounds.top.toFloat(), bounds.right.toFloat(), bounds.bottom.toFloat(), r, r, bgPaint)
-        val x = bounds.width() / 2f
-        val y = (bounds.height() - (textPaint.descent() + textPaint.ascent())) / 2f
+        val x = bounds.left + bounds.width() / 2f
+        val y = bounds.top + (bounds.height() - (textPaint.descent() + textPaint.ascent())) / 2f
         canvas.drawText(text, x, y, textPaint)
     }
 

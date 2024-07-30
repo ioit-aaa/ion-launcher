@@ -45,7 +45,7 @@ import one.zagura.IonLauncher.ui.view.SharedDrawingContext
 import one.zagura.IonLauncher.ui.view.SuggestionRowView
 import one.zagura.IonLauncher.ui.view.SummaryView
 import one.zagura.IonLauncher.ui.view.WidgetView
-import one.zagura.IonLauncher.util.FillDrawable
+import one.zagura.IonLauncher.util.drawable.FillDrawable
 import one.zagura.IonLauncher.util.FloatingIconView
 import one.zagura.IonLauncher.util.GestureNavContract
 import one.zagura.IonLauncher.util.TaskRunner

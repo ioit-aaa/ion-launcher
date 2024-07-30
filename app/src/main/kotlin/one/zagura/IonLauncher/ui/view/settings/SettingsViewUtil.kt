@@ -39,7 +39,7 @@ import androidx.core.widget.NestedScrollView
 import androidx.core.widget.doOnTextChanged
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.ui.ionApplication
-import one.zagura.IonLauncher.util.FillDrawable
+import one.zagura.IonLauncher.util.drawable.FillDrawable
 import one.zagura.IonLauncher.util.Utils
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind

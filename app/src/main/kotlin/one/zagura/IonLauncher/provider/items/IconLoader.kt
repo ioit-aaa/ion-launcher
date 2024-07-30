@@ -39,10 +39,10 @@ import one.zagura.IonLauncher.data.items.StaticShortcut
 import one.zagura.IonLauncher.data.items.TorchToggleItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.ui.ionApplication
-import one.zagura.IonLauncher.util.ClippedDrawable
-import one.zagura.IonLauncher.util.ContactDrawable
+import one.zagura.IonLauncher.util.drawable.ClippedDrawable
+import one.zagura.IonLauncher.util.drawable.ContactDrawable
 import one.zagura.IonLauncher.util.IconTheming
-import one.zagura.IonLauncher.util.NonDrawable
+import one.zagura.IonLauncher.util.drawable.NonDrawable
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.TaskRunner
 import java.io.FileNotFoundException
@@ -131,14 +131,17 @@ object IconLoader {
                     addRoundRect(0f, 0f, w.toFloat(), w.toFloat(),
                         floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
                 }
-                return@getOrPut ClippedDrawable(pic, path, 0)
+                return@getOrPut ClippedDrawable(pic, path, ColorThemer.iconBackground(context))
             } catch (_: FileNotFoundException) {}
             val realName = LabelLoader.loadLabel(context, contact).trim()
             if (realName.isEmpty())
                 return@getOrPut NonDrawable
             ContactDrawable(
                 realName.substring(0, realName.length.coerceAtMost(2)),
-                context.ionApplication.settings["icon:radius-ratio", 50] / 100f)
+                context.ionApplication.settings["icon:radius-ratio", 50] / 100f,
+                ColorThemer.iconBackground(context),
+                ColorThemer.iconForeground(context),
+            )
         }
     }
 
@@ -238,7 +241,7 @@ object IconLoader {
                     fg = monochrome
                     return makeIcon(settings, ColorThemer.iconBackground(context), fg)
                 } else if (!settings["icon:monochrome-bg", true]) {
-                    val i = makeIcon(settings, bg, fg)
+                    val i = makeIcon(context, settings, bg, fg)
                     return InsetDrawable(i, fg.intrinsicWidth / 12)
                 } else if (bg == null)
                     return makeIcon(settings, ColorThemer.iconBackground(context), fg)
@@ -258,8 +261,8 @@ object IconLoader {
             is ShapeDrawable -> bg.paint.color
             is ColorDrawable -> bg.color
             is GradientDrawable -> bg.color?.defaultColor
-                ?: return makeIcon(settings, bg, fg)
-            else -> return makeIcon(settings, bg, fg)
+                ?: return makeIcon(context, settings, bg, fg)
+            else -> return makeIcon(context, settings, bg, fg)
         }
         return makeIcon(settings, if (doGrayscale)
             ColorThemer.colorize(color, ColorThemer.iconBackground(context))
@@ -267,6 +270,7 @@ object IconLoader {
     }
 
     private fun makeIcon(
+        context: Context,
         settings: Settings,
         bg: Drawable?,
         fg: Drawable?,
@@ -285,7 +289,7 @@ object IconLoader {
                 floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW
             )
         }
-        return ClippedDrawable(layers, path, 0)
+        return ClippedDrawable(layers, path, ColorThemer.iconBackground(context))
     }
 
     private fun makeIcon(

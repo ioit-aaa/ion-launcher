@@ -19,7 +19,7 @@ import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Dock
 import one.zagura.IonLauncher.provider.items.IconLoader
 import one.zagura.IonLauncher.util.LiveWallpaper
-import one.zagura.IonLauncher.util.NonDrawable
+import one.zagura.IonLauncher.util.drawable.NonDrawable
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.Utils
 import kotlin.math.abs
