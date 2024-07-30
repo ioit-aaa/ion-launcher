@@ -103,7 +103,7 @@
         <activity android:name=".ui.settings.PinnedGridSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
 
         <activity
-            android:name="one.zagura.IonLauncher.ui.iconPackPicker.IconPackPickerActivity"
+            android:name="one.zagura.IonLauncher.ui.settings.iconPackPicker.IconPackPickerActivity"
             android:theme="@style/IonLauncher.Settings"
             android:exported="true"/>
 

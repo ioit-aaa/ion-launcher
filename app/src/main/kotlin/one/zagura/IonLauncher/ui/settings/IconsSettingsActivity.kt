@@ -11,7 +11,7 @@ import one.zagura.IonLauncher.ui.view.settings.onClick
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
 import one.zagura.IonLauncher.ui.view.settings.setting
 import one.zagura.IonLauncher.ui.view.settings.switch
-import one.zagura.IonLauncher.ui.iconPackPicker.IconPackPickerActivity
+import one.zagura.IonLauncher.ui.settings.iconPackPicker.IconPackPickerActivity
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.view.settings.colorSettings
 

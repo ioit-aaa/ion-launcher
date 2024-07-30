@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.iconPackPicker
+package one.zagura.IonLauncher.ui.settings.iconPackPicker
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.view.settings.setupWindow
-import one.zagura.IonLauncher.ui.iconPackPicker.viewHolder.IconPackViewHolder
+import one.zagura.IonLauncher.ui.settings.iconPackPicker.viewHolder.IconPackViewHolder
 import one.zagura.IonLauncher.util.IconTheming
 import one.zagura.IonLauncher.util.Utils
 import java.util.*

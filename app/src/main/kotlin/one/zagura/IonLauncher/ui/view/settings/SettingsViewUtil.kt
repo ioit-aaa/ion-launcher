@@ -76,18 +76,18 @@ inline fun Activity.setSettingsContentView(@StringRes titleId: Int, builder: Set
             addView(TextView(context).apply {
                 gravity = Gravity.CENTER
                 val h = (20 * dp).toInt()
-                setPadding(h, Utils.getStatusBarHeight(context), h, 0)
-                textSize = 18f
+                setPadding(h, Utils.getStatusBarHeight(context).coerceAtLeast((64 * dp).toInt()), h, 0)
+                textSize = 32f
                 setTextColor(resources.getColor(R.color.color_hint))
-                background = FillDrawable(resources.getColor(R.color.color_bg))
-                typeface = Typeface.DEFAULT_BOLD
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                    typeface = Typeface.create(null, 200, false)
                 setText(titleId)
-            }, LayoutParams(MATCH_PARENT, (72 * dp).toInt() + Utils.getStatusBarHeight(context)))
-            addView(View(context).apply {
-                background = FillDrawable(resources.getColor(R.color.color_separator))
-            }, MarginLayoutParams(MATCH_PARENT, dp.toInt()).apply {
-                bottomMargin = (12 * dp).toInt()
-            })
+            }, LayoutParams(MATCH_PARENT, (256 * dp).toInt() + Utils.getStatusBarHeight(context)))
+//            addView(View(context).apply {
+//                background = FillDrawable(resources.getColor(R.color.color_separator))
+//            }, MarginLayoutParams(MATCH_PARENT, dp.toInt()).apply {
+//                bottomMargin = (12 * dp).toInt()
+//            })
             builder(SettingsPageScope(this))
         }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
     })
@@ -99,16 +99,18 @@ fun SettingsPageScope.title(@StringRes text: Int) {
     view.addView(View(view.context).apply {
         background = FillDrawable(resources.getColor(R.color.color_separator))
     }, MarginLayoutParams(MATCH_PARENT, dp.toInt()).apply {
-        topMargin = (12 * dp).toInt()
+        topMargin = (14 * dp).toInt()
     })
     view.addView(TextView(view.context).apply {
         gravity = Gravity.CENTER_VERTICAL
         val h = (20 * dp).toInt()
-        setPadding(h, (24 * dp).toInt(), h, (6 * dp).toInt())
+        setPadding(h, (20 * dp).toInt(), h, (10 * dp).toInt())
         setText(text)
         setTextColor(resources.getColor(R.color.color_heading))
         textSize = 14f
         typeface = Typeface.DEFAULT_BOLD
+        includeFontPadding = false
+        isAllCaps = true
     }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
 }
 
@@ -133,20 +135,22 @@ inline fun SettingsPageScope.setting(
         val dp = resources.displayMetrics.density
         minimumHeight = (48 * dp).toInt()
         val h = (20 * dp).toInt()
-        val v = (6 * dp).toInt()
+        val v = (12 * dp).toInt()
         setPadding(h, v, h, v)
         var updateSubtitle: (String) -> Unit = {}
         if (isVertical) {
             addView(TextView(context).apply {
                 setText(title)
                 setTextColor(resources.getColor(R.color.color_text))
-                textSize = 18f
+                textSize = 20f
             }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
             if (subtitle != null) {
                 val sub = TextView(context).apply {
                     text = subtitle
                     setTextColor(resources.getColor(R.color.color_hint))
-                    textSize = 14f
+                    textSize = 15f
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                        typeface = Typeface.create(null, 300, false)
                 }
                 addView(sub, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
                 updateSubtitle = sub::setText
@@ -156,20 +160,22 @@ inline fun SettingsPageScope.setting(
                 addView(TextView(context).apply {
                     setText(title)
                     setTextColor(resources.getColor(R.color.color_text))
-                    textSize = 18f
+                    textSize = 20f
                 }, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
             } else {
                 val sub = TextView(context).apply {
                     text = subtitle
                     setTextColor(resources.getColor(R.color.color_hint))
-                    textSize = 14f
+                    textSize = 15f
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                        typeface = Typeface.create(null, 300, false)
                 }
                 addView(LinearLayout(context).apply {
                     orientation = LinearLayout.VERTICAL
                     addView(TextView(context).apply {
                         setText(title)
                         setTextColor(resources.getColor(R.color.color_text))
-                        textSize = 18f
+                        textSize = 20f
                     }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
                     addView(sub, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
                 }, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
@@ -322,17 +328,18 @@ fun SettingViewScope.seekbar(
         })
     }
     with(number) {
-        val r = 6 * dp
+        val r = 99 * dp
         background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null)).apply {
-            paint.color = resources.getColor(R.color.color_bg_sunk)
+            paint.color = resources.getColor(R.color.color_bg_sunk) and 0xffffff or 0x66000000
         }
         val h = (12 * dp).toInt()
-        val v = (6 * dp).toInt()
+        val v = (4 * dp).toInt()
         setPadding(h, v, h, v)
         textSize = 16f
-        typeface = Typeface.DEFAULT_BOLD
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+            typeface = Typeface.create(null, 300, false)
         includeFontPadding = false
-        setTextColor(resources.getColor(R.color.color_hint))
+        setTextColor(resources.getColor(R.color.color_button_text))
         setText(context.ionApplication.settings[settingId, default].toString())
         doOnTextChanged { text, _, _, _ ->
             val value = text.toString().toIntOrNull()

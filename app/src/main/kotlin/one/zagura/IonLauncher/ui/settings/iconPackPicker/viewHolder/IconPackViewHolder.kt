@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.iconPackPicker.viewHolder
+package one.zagura.IonLauncher.ui.settings.iconPackPicker.viewHolder
 
 import android.content.Context
 import android.content.res.ColorStateList
@@ -10,8 +10,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.R
-import one.zagura.IonLauncher.ui.iconPackPicker.IconPackPickerActivity
-import one.zagura.IonLauncher.ui.iconPackPicker.IconPackPickerAdapter
+import one.zagura.IonLauncher.ui.settings.iconPackPicker.IconPackPickerActivity
+import one.zagura.IonLauncher.ui.settings.iconPackPicker.IconPackPickerAdapter
 
 class IconPackViewHolder(context: Context, val type: Int) : RecyclerView.ViewHolder(LinearLayout(context)) {
 
@@ -23,8 +23,7 @@ class IconPackViewHolder(context: Context, val type: Int) : RecyclerView.ViewHol
         val dp = context.resources.displayMetrics.density
         with(itemView as LinearLayout) {
             val h = (20 * dp).toInt()
-            val v = (8 * dp).toInt()
-            setPadding(h, v, h, v)
+            setPadding(h, 0, h, 0)
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
             val s = (32 * dp).toInt()
@@ -42,7 +41,9 @@ class IconPackViewHolder(context: Context, val type: Int) : RecyclerView.ViewHol
             }
         }
         with(text) {
-            textSize = 18f
+            val v = (12 * dp).toInt()
+            setPadding(0, v, 0, v)
+            textSize = 20f
             ellipsize = TextUtils.TruncateAt.END
             setTextColor(resources.getColor(R.color.color_text))
         }

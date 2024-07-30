@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.iconPackPicker
+package one.zagura.IonLauncher.ui.settings.iconPackPicker
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.ui.view.settings.TitleViewHolder
-import one.zagura.IonLauncher.ui.iconPackPicker.viewHolder.IconPackViewHolder
-import one.zagura.IonLauncher.ui.iconPackPicker.viewHolder.SectionViewHolder
+import one.zagura.IonLauncher.ui.settings.iconPackPicker.viewHolder.IconPackViewHolder
+import one.zagura.IonLauncher.ui.settings.iconPackPicker.viewHolder.SectionViewHolder
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.Utils
 import java.util.*
