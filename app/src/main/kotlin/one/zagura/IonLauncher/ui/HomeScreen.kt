@@ -109,9 +109,102 @@ class HomeScreen : Activity() {
         IconLoader.updateIconPacks(this, ionApplication.settings)
         applyCustomizations()
         SuggestionsManager.track {
-            runOnUiThread {
-                suggestionsView.update(it)
+            suggestionsView.update(it)
+        }
+        homeScreen.post {
+            // windowToken might not be loaded, so we post this to the view
+            val wallpaperManager = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
+            wallpaperManager.setWallpaperOffsetSteps(0f, 0f)
+            wallpaperManager.setWallpaperOffsets(homeScreen.windowToken, 0.5f, 0.5f)
+        }
+    }
+
+    private fun createHomeScreen(): CoordinatorLayout {
+        val dp = resources.displayMetrics.density
+        val fullHeight = Utils.getDisplayHeight(this)
+
+        summaryView = SummaryView(this, drawCtx)
+        mediaView = MediaView(this, drawCtx)
+        suggestionsView = SuggestionRowView(this, drawCtx, ::showDropTargets, ::search)
+        pinnedGrid = PinnedGridView(this, drawCtx)
+
+        desktop = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            addView(
+                summaryView,
+                LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f))
+            addView(
+                mediaView,
+                LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+            addView(pinnedGrid,
+                MarginLayoutParams(LayoutParams.MATCH_PARENT, pinnedGrid.calculateGridHeight()))
+            addView(
+                suggestionsView,
+                MarginLayoutParams(LayoutParams.MATCH_PARENT, 0))
+        }
+
+        val offset = (256 * dp).toInt()
+        drawerArea = DrawerArea(this, ::showDropTargets, ::onDrawerItemOpened).apply {
+            setPadding(0, offset, 0, 0)
+        }
+
+        sheet = FrameLayout(this).apply {
+            addView(desktop, LayoutParams(LayoutParams.MATCH_PARENT, fullHeight))
+            addView(drawerArea, LayoutParams(LayoutParams.MATCH_PARENT, fullHeight + offset))
+        }
+
+        sheetBehavior = BottomSheetBehavior<View>().apply {
+            isHideable = false
+            peekHeight = fullHeight
+            state = STATE_COLLAPSED
+            addBottomSheetCallback(DrawerSheetCallback())
+        }
+
+        return CoordinatorLayout(this).apply {
+            fitsSystemWindows = false
+            addView(sheet, CoordinatorLayout.LayoutParams(LayoutParams.MATCH_PARENT, fullHeight + offset).apply {
+                behavior = sheetBehavior
+            })
+        }
+    }
+
+    inner class DrawerSheetCallback : BottomSheetCallback() {
+        private val wallpaperManager = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
+        private val setWallpaperZoomOut = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) try {
+            WallpaperManager::class.java
+                .getDeclaredMethod("setWallpaperZoomOut", IBinder::class.java, Float::class.java)
+                .apply { isAccessible = true }
+        } catch (_: Exception) { null } else null
+        private val offset = 256 * resources.displayMetrics.density * 0.4f
+
+        override fun onStateChanged(view: View, newState: Int) {
+            if (newState == STATE_EXPANDED)
+                Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.drawerForeground(this@HomeScreen)) < 0.5f)
+            else
+                drawerArea.clearSearch()
+            desktop.isVisible = newState != STATE_EXPANDED
+            if (newState == STATE_COLLAPSED) {
+                drawerArea.isInvisible = true
+                desktop.bringToFront()
+                Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.wallForeground(this@HomeScreen)) < 0.5f)
+            } else {
+                drawerArea.isInvisible = false
+                drawerArea.bringToFront()
             }
+        }
+
+        override fun onSlide(view: View, slideOffset: Float) {
+            drawerArea.alpha = slideOffset * slideOffset / 0.6f - 0.4f
+            val a = (slideOffset * 2f).coerceAtMost(1f)
+            val inva = 1f - a
+            screenBackground.color = ColorUtils.blendARGB(screenBackgroundColor, drawerBackgroundColor, a)
+            desktop.alpha = inva
+            desktop.translationY = a * offset
+            val scale = 1f - a * 0.05f
+            desktop.scaleX = scale
+            desktop.scaleY = scale
+            setWallpaperZoomOut?.invoke(wallpaperManager, homeScreen.windowToken, slideOffset)
         }
     }
 
@@ -129,29 +222,27 @@ class HomeScreen : Activity() {
             applyCustomizations()
         }
         AppLoader.track(false) {
+            drawerArea.onAppsChanged()
             runOnUiThread {
-                drawerArea.onAppsChanged()
                 pinnedGrid.updateGridApps()
             }
         }
-        TopNotificationProvider.track {
+        Battery.track(false) {
+            summaryView.updateAtAGlance()
+        }
+        TopNotificationProvider.track(false) {
             summaryView.updateAtAGlance()
         }
         NotificationService.MediaObserver.track {
             mediaView.update(it)
             summaryView.updateAtAGlance()
         }
-        Battery.track {
-            summaryView.updateAtAGlance()
-        }
         widgetView?.startListening()
         pinnedGrid.updateGridApps()
-        homeScreen.post {
+        TaskRunner.submit {
             drawerArea.onAppsChanged()
-            // windowToken might not be loaded, so we post this to the view
-            val wallpaperManager = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
-            wallpaperManager.setWallpaperOffsetSteps(0f, 0f)
-            wallpaperManager.setWallpaperOffsets(homeScreen.windowToken, 0.5f, 0.5f)
+        }
+        homeScreen.post {
             // Just in case it died for some reason (in post cause lower priority)
             if (NotificationService.hasPermission(this))
                 startService(Intent(this, NotificationService::class.java))
@@ -176,6 +267,73 @@ class HomeScreen : Activity() {
             val events = EventsLoader.load(this)
             summaryView.updateEvents(events)
         }
+    }
+
+    private fun showDropTargets() {
+        // Otherwise the bottom sheet behavior gets confused, idk why
+        drawerArea.recyclerView.requestDisallowInterceptTouchEvent(true)
+        sheetBehavior.state = STATE_COLLAPSED
+        pinnedGrid.showDropTargets = true
+    }
+
+    private fun onDrawerItemOpened(item: LauncherItem) {
+        sheetBehavior.state = STATE_COLLAPSED
+    }
+
+    private fun search() {
+        sheetBehavior.state = STATE_EXPANDED
+        drawerArea.focusSearch()
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (sheetBehavior.state != STATE_COLLAPSED)
+            sheetBehavior.state = STATE_COLLAPSED
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        val alreadyOnHome = (hasWindowFocus() || LongPressMenu.isInFocus()) && ((intent.flags and
+                Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
+
+        when (intent.action) {
+            Intent.ACTION_MAIN -> {
+                if (alreadyOnHome) {
+                    if (sheetBehavior.state == STATE_EXPANDED) {
+                        LongPressMenu.dismissCurrent()
+                        sheetBehavior.state = STATE_COLLAPSED
+                    } else if (sheetBehavior.state == STATE_COLLAPSED) {
+                        if (!LongPressMenu.dismissCurrent())
+                            sheetBehavior.state = STATE_EXPANDED
+                    }
+                }
+                else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                    handleGestureContract(intent)
+            }
+            Intent.ACTION_ALL_APPS -> sheetBehavior.state = STATE_EXPANDED
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun handleGestureContract(intent: Intent) {
+        val gnc = GestureNavContract.fromIntent(intent) ?: return
+        val app = App(gnc.componentName.packageName, gnc.componentName.className, gnc.user)
+        val bounds = pinnedGrid.hideIconAndGetBounds(app) ?: return
+
+        bounds.offset(-drawCtx.iconSize / 2, -drawCtx.iconSize / 2)
+
+        val icon = IconLoader.loadIcon(this, app)
+
+        val s = (drawCtx.iconSize * 2).toInt()
+        val picture = Picture().record(s, s) {
+            icon.setBounds(width / 4, height / 4, width / 4 * 3, height / 4 * 3)
+            icon.draw(this)
+        }
+
+        val surfaceView = FloatingIconView(this, gnc, bounds, picture) {
+            pinnedGrid.unhideIcon()
+        }
+        homeScreen.addView(surfaceView, LayoutParams(s, s))
+        surfaceView.bringToFront()
     }
 
     private fun applyCustomizations() {
@@ -219,160 +377,5 @@ class HomeScreen : Activity() {
                 })
             }
         }
-    }
-
-    private fun createHomeScreen(): CoordinatorLayout {
-        val dp = resources.displayMetrics.density
-        val fullHeight = Utils.getDisplayHeight(this)
-
-        summaryView = SummaryView(this, drawCtx)
-        mediaView = MediaView(this, drawCtx)
-        suggestionsView = SuggestionRowView(this, drawCtx, ::showDropTargets, ::search)
-        pinnedGrid = PinnedGridView(this, drawCtx)
-
-        desktop = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            addView(
-                summaryView,
-                LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f))
-            addView(
-                mediaView,
-                LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
-            addView(pinnedGrid,
-                MarginLayoutParams(LayoutParams.MATCH_PARENT, pinnedGrid.calculateGridHeight()))
-            addView(
-                suggestionsView,
-                MarginLayoutParams(LayoutParams.MATCH_PARENT, 0))
-        }
-
-        val offset = (256 * dp).toInt()
-        drawerArea = DrawerArea(this, ::showDropTargets, ::onDrawerItemOpened).apply {
-            setPadding(0, offset, 0, 0)
-        }
-
-        sheet = FrameLayout(this).apply {
-            addView(desktop, LayoutParams(LayoutParams.MATCH_PARENT, fullHeight))
-            addView(drawerArea, LayoutParams(LayoutParams.MATCH_PARENT, fullHeight + offset))
-        }
-
-        sheetBehavior = BottomSheetBehavior<View>().apply {
-            isHideable = false
-            peekHeight = fullHeight
-            state = STATE_COLLAPSED
-            addBottomSheetCallback(object : BottomSheetCallback() {
-                val wallpaperManager = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
-                val setWallpaperZoomOut = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) try {
-                    WallpaperManager::class.java
-                        .getDeclaredMethod("setWallpaperZoomOut", IBinder::class.java, Float::class.java)
-                        .apply { isAccessible = true }
-                } catch (_: Exception) { null } else null
-
-                override fun onStateChanged(view: View, newState: Int) {
-                    if (newState == STATE_EXPANDED)
-                        Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.drawerForeground(this@HomeScreen)) < 0.5f)
-                    else
-                        drawerArea.clearSearch()
-                    desktop.isVisible = newState != STATE_EXPANDED
-                    if (newState == STATE_COLLAPSED) {
-                        drawerArea.isInvisible = true
-                        desktop.bringToFront()
-                        Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.wallForeground(this@HomeScreen)) < 0.5f)
-                    } else {
-                        drawerArea.isInvisible = false
-                        drawerArea.bringToFront()
-                    }
-                }
-
-                override fun onSlide(view: View, slideOffset: Float) {
-                    drawerArea.alpha = slideOffset * slideOffset / 0.6f - 0.4f
-                    val a = (slideOffset * 2f).coerceAtMost(1f)
-                    val inva = 1f - a
-                    screenBackground.color = ColorUtils.blendARGB(screenBackgroundColor, drawerBackgroundColor, a)
-                    desktop.alpha = inva
-                    desktop.translationY = a * offset * 0.4f
-                    val scale = 1f - a * 0.05f
-                    desktop.scaleX = scale
-                    desktop.scaleY = scale
-                    setWallpaperZoomOut?.invoke(wallpaperManager, homeScreen.windowToken, slideOffset)
-                }
-            })
-        }
-
-        return CoordinatorLayout(this).apply {
-            fitsSystemWindows = false
-            addView(sheet, CoordinatorLayout.LayoutParams(LayoutParams.MATCH_PARENT, fullHeight + offset).apply {
-                behavior = sheetBehavior
-            })
-        }
-    }
-
-    private fun showDropTargets() {
-        // Otherwise the bottom sheet behavior gets confused, idk why
-        drawerArea.recyclerView.requestDisallowInterceptTouchEvent(true)
-        sheetBehavior.state = STATE_COLLAPSED
-        pinnedGrid.showDropTargets = true
-    }
-
-    private fun onDrawerItemOpened(item: LauncherItem) {
-        sheetBehavior.state = STATE_COLLAPSED
-    }
-
-    private fun search() {
-        sheetBehavior.state = STATE_EXPANDED
-        drawerArea.focusSearch()
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (sheetBehavior.state != STATE_COLLAPSED)
-            sheetBehavior.state = STATE_COLLAPSED
-    }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-
-        val alreadyOnHome = (hasWindowFocus() || LongPressMenu.isInFocus()) && ((intent.flags and
-                Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
-
-        when (intent.action) {
-            Intent.ACTION_MAIN -> {
-                if (alreadyOnHome) {
-                    if (sheetBehavior.state == STATE_EXPANDED) {
-                        LongPressMenu.dismissCurrent()
-                        sheetBehavior.state = STATE_COLLAPSED
-                    } else if (sheetBehavior.state == STATE_COLLAPSED) {
-                        if (!LongPressMenu.dismissCurrent())
-                            sheetBehavior.state = STATE_EXPANDED
-                    }
-                }
-                else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                    handleGestureContract(intent)
-            }
-            Intent.ACTION_ALL_APPS -> sheetBehavior.state = STATE_EXPANDED
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private fun handleGestureContract(intent: Intent) {
-        val gnc = GestureNavContract.fromIntent(intent) ?: return
-        val app = App(gnc.componentName.packageName, gnc.componentName.className, gnc.user)
-        val bounds = pinnedGrid.hideIconAndGetBounds(app) ?: return
-
-        bounds.offset(-drawCtx.iconSize / 2, -drawCtx.iconSize / 2)
-
-        val icon = IconLoader.loadIcon(this, app)
-
-        val s = (drawCtx.iconSize * 2).toInt()
-        val picture = Picture().record(s, s) {
-            icon.setBounds(width / 4, height / 4, width / 4 * 3, height / 4 * 3)
-            icon.draw(this)
-        }
-
-        val surfaceView = FloatingIconView(this, gnc, bounds, picture) {
-            pinnedGrid.unhideIcon()
-        }
-        homeScreen.addView(surfaceView, LayoutParams(s, s))
-        surfaceView.bringToFront()
     }
 }

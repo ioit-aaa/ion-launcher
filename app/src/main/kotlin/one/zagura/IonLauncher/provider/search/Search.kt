@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.search.SearchProvider.Companion.removeDiacritics
+import one.zagura.IonLauncher.util.Cancellable
 import java.util.TreeSet
 
 object Search {
@@ -28,7 +29,7 @@ object Search {
             p.clearData()
     }
 
-    fun query(query: String): List<LauncherItem> {
+    fun query(query: String, cancellable: Cancellable): List<LauncherItem> {
         val results = TreeSet<Pair<LauncherItem, Float>> { a, b ->
             when {
                 a.first == b.first -> 0
@@ -38,7 +39,8 @@ object Search {
         }
         val q = query.trim().lowercase().removeDiacritics()
         for (provider in providers)
-            provider.query(q, results)
+            if (cancellable.isCancelled) return emptyList()
+            else provider.query(q, results, cancellable)
         return results.map { it.first }
     }
 }

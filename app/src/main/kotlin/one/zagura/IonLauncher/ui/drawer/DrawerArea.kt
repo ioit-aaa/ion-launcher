@@ -22,6 +22,8 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.search.Search
+import one.zagura.IonLauncher.util.Cancellable
+import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.drawable.FillDrawable
 import one.zagura.IonLauncher.util.Utils
 
@@ -58,7 +60,10 @@ class DrawerArea(
                 override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
                 override fun afterTextChanged(s: Editable) {}
                 override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                    search(s.toString())
+                    searchCancellable.cancel()
+                    TaskRunner.submit {
+                        search(s.toString())
+                    }
                 }
             })
             setOnEditorActionListener { v, actionId, _ ->
@@ -122,10 +127,13 @@ class DrawerArea(
     }
 
     fun onAppsChanged() {
-        if (isDrawer)
+        if (isDrawer) post {
             searchAdapter.notifyDataSetChanged()
-        else
-            reloadProviders()
+        } else {
+            searchCancellable.cancel()
+            Search.updateData(context)
+            search(entry.text.toString())
+        }
     }
 
     private fun unsearch() {
@@ -137,24 +145,23 @@ class DrawerArea(
     }
 
     private var notSearchedYet = true
+    private var searchCancellable = Cancellable()
 
     private fun search(query: String) {
         if (query.isBlank()) {
-            unsearch()
+            post { unsearch() }
             return
         }
         if (notSearchedYet) {
             notSearchedYet = false
-            reloadProviders()
+            Search.updateData(context)
         }
         isDrawer = false
-        results = Search.query(query)
-        searchAdapter.update(results, true)
-    }
-
-    private fun reloadProviders() {
-        Search.updateData(context)
-        search(entry.text.toString())
+        searchCancellable = Cancellable()
+        results = Search.query(query, searchCancellable)
+        post {
+            searchAdapter.update(results, true)
+        }
     }
 
     fun applyCustomizations() {

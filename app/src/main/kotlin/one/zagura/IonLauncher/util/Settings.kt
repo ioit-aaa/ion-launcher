@@ -114,8 +114,8 @@ class Settings(
 
     inline fun consumeUpdate(update: () -> Unit) {
         if (updated) {
-            update()
             updated = false
+            update()
         }
     }
 

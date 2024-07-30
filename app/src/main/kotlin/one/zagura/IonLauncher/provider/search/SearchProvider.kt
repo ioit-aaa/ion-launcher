@@ -2,6 +2,7 @@ package one.zagura.IonLauncher.provider.search
 
 import android.content.Context
 import one.zagura.IonLauncher.data.items.LauncherItem
+import one.zagura.IonLauncher.util.Cancellable
 import java.text.Normalizer
 
 sealed interface SearchProvider {
@@ -9,7 +10,7 @@ sealed interface SearchProvider {
     fun updateData(context: Context) {}
     fun clearData() {}
 
-    fun query(query: String, out: MutableCollection<Pair<LauncherItem, Float>>)
+    fun query(query: String, out: MutableCollection<Pair<LauncherItem, Float>>, cancellable: Cancellable)
 
     companion object {
         fun CharSequence.removeDiacritics(): String {

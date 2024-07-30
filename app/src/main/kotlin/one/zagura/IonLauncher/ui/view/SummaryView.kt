@@ -135,9 +135,10 @@ class SummaryView(
     fun updateAtAGlance() {
         // dependencies: notification, media, battery
         updateAtAGlanceInternal()
-        post {
-            contentDescription = if (bottomString == null) topString
+        val cd = if (bottomString == null) topString
             else "$topString\n$bottomString"
+        post {
+            contentDescription = cd
             if (bottomString != null) {
                 val ax = drawCtx.radius / 3
                 bottomString = TextUtils.ellipsize(

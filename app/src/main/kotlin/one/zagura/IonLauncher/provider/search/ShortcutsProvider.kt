@@ -9,6 +9,7 @@ import one.zagura.IonLauncher.data.items.StaticShortcut
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.items.LabelLoader
 import one.zagura.IonLauncher.provider.items.ShortcutLoader
+import one.zagura.IonLauncher.util.Cancellable
 
 @RequiresApi(Build.VERSION_CODES.N_MR1)
 object ShortcutsProvider : SearchProvider {
@@ -40,8 +41,10 @@ object ShortcutsProvider : SearchProvider {
         return initialsFactor + labelFactor
     }
 
-    override fun query(query: String, out: MutableCollection<Pair<LauncherItem, Float>>) {
+    override fun query(query: String, out: MutableCollection<Pair<LauncherItem, Float>>, cancellable: Cancellable) {
         for ((item, label, appLabel) in shortcuts) {
+            if (cancellable.isCancelled)
+                break
             val extraFactor = extraFactor(query, item, label, appLabel)
             val labelFactor = FuzzySearch.tokenSortPartialRatio(query, label) / 100f
             val r = labelFactor + extraFactor
