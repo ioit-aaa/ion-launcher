@@ -187,7 +187,7 @@ class SummaryView(
         val dp = resources.displayMetrics.density
 
         val separation = 6 * dp
-        val padding = 14 * dp
+        val padding = (14 * dp).coerceAtLeast(drawCtx.radius * 3 / 4)
         val dotRadius = 2 * dp
 
         var y = paddingTop - pureTitlePaint.ascent()
