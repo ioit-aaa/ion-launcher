@@ -57,6 +57,7 @@ class HomeScreen : Activity() {
 
     private lateinit var sheetBehavior: BottomSheetBehavior<View>
     private lateinit var sheet: View
+    private var sheetCallback: BottomSheetCallback = MinimalDrawerSheetCallback()
 
     private lateinit var homeScreen: CoordinatorLayout
     private lateinit var desktop: LinearLayout
@@ -158,7 +159,6 @@ class HomeScreen : Activity() {
             isHideable = false
             peekHeight = fullHeight
             state = STATE_COLLAPSED
-            addBottomSheetCallback(DrawerSheetCallback())
         }
 
         return CoordinatorLayout(this).apply {
@@ -178,21 +178,8 @@ class HomeScreen : Activity() {
         } catch (_: Exception) { null } else null
         private val offset = 256 * resources.displayMetrics.density * 0.4f
 
-        override fun onStateChanged(view: View, newState: Int) {
-            if (newState == STATE_EXPANDED)
-                Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.drawerForeground(this@HomeScreen)) < 0.5f)
-            else
-                drawerArea.clearSearch()
-            desktop.isVisible = newState != STATE_EXPANDED
-            if (newState == STATE_COLLAPSED) {
-                drawerArea.isInvisible = true
-                desktop.bringToFront()
-                Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.wallForeground(this@HomeScreen)) < 0.5f)
-            } else {
-                drawerArea.isInvisible = false
-                drawerArea.bringToFront()
-            }
-        }
+        override fun onStateChanged(view: View, newState: Int) =
+            onDrawerStateChanged(view, newState)
 
         override fun onSlide(view: View, slideOffset: Float) {
             drawerArea.alpha = slideOffset * slideOffset / 0.6f - 0.4f
@@ -205,6 +192,34 @@ class HomeScreen : Activity() {
             desktop.scaleX = scale
             desktop.scaleY = scale
             setWallpaperZoomOut?.invoke(wallpaperManager, homeScreen.windowToken, slideOffset)
+        }
+    }
+
+    inner class MinimalDrawerSheetCallback : BottomSheetCallback() {
+        override fun onStateChanged(view: View, newState: Int) =
+            onDrawerStateChanged(view, newState)
+
+        override fun onSlide(view: View, slideOffset: Float) {
+            val a = (slideOffset * 1.5f).coerceAtMost(1f)
+            screenBackground.color = ColorUtils.blendARGB(screenBackgroundColor, drawerBackgroundColor, a)
+            drawerArea.alpha = a * a * a
+            desktop.alpha = 1f - a
+        }
+    }
+
+    fun onDrawerStateChanged(view: View, newState: Int) {
+        if (newState == STATE_EXPANDED)
+            Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.drawerForeground(this@HomeScreen)) < 0.5f)
+        else
+            drawerArea.clearSearch()
+        desktop.isVisible = newState != STATE_EXPANDED
+        if (newState == STATE_COLLAPSED) {
+            drawerArea.isInvisible = true
+            desktop.bringToFront()
+            Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.wallForeground(this@HomeScreen)) < 0.5f)
+        } else {
+            drawerArea.isInvisible = false
+            drawerArea.bringToFront()
         }
     }
 
@@ -239,6 +254,10 @@ class HomeScreen : Activity() {
         }
         widgetView?.startListening()
         pinnedGrid.updateGridApps()
+        Battery.PowerSaver.track {
+            if (it != sheetCallback is MinimalDrawerSheetCallback)
+                onPowerSaverModeChanged(it)
+        }
         TaskRunner.submit {
             drawerArea.onAppsChanged()
         }
@@ -255,6 +274,7 @@ class HomeScreen : Activity() {
         NotificationService.MediaObserver.release()
         TopNotificationProvider.release()
         Battery.release()
+        Battery.PowerSaver.release()
         mediaView.clearData()
         widgetView?.stopListening()
         SuggestionsManager.saveToStorage(this)
@@ -267,6 +287,17 @@ class HomeScreen : Activity() {
             val events = EventsLoader.load(this)
             summaryView.updateEvents(events)
         }
+    }
+
+    private fun onPowerSaverModeChanged(isOn: Boolean) {
+        sheetBehavior.removeBottomSheetCallback(sheetCallback)
+        if (sheetBehavior.state != STATE_COLLAPSED)
+            sheetCallback.onSlide(sheet, 0f)
+        sheetCallback = if (isOn) MinimalDrawerSheetCallback()
+            else DrawerSheetCallback()
+        if (sheetBehavior.state != STATE_COLLAPSED)
+            sheetCallback.onSlide(sheet, 1f)
+        sheetBehavior.addBottomSheetCallback(sheetCallback)
     }
 
     private fun showDropTargets() {

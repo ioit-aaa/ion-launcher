@@ -19,6 +19,19 @@ object Battery : UpdatingResource<BatteryStatus>() {
         }
     }
 
+    object PowerSaver : UpdatingResource<Boolean>() {
+        private var isOn = false
+        override fun getResource() = isOn
+
+        object Receiver : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val power = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+                isOn = power.isPowerSaveMode
+                update(isOn)
+            }
+        }
+    }
+
     private var status: BatteryStatus = BatteryStatus.Charged
     override fun getResource() = status
 
@@ -32,22 +45,14 @@ object Battery : UpdatingResource<BatteryStatus>() {
 
     fun getStatus(context: Context) : BatteryStatus {
         val battery = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-        val power = context.getSystemService(Context.POWER_SERVICE) as PowerManager
 
         val level = battery.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
         if (level == 100)
             return BatteryStatus.Charged
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && isCharging(battery)) {
-            val remainingTime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                battery.computeChargeTimeRemaining()
-            else -1
-            return BatteryStatus.Charging(level, remainingTime)
-        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && isCharging(battery))
+            return BatteryStatus.Charging(level)
 
-        val remainingTime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            power.batteryDischargePrediction?.toMillis() ?: -1
-        else -1
-        return BatteryStatus.Discharging(level, remainingTime)
+        return BatteryStatus.Discharging(level)
     }
 }
