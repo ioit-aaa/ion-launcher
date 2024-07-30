@@ -27,7 +27,9 @@ object AppsProvider : BasicProvider<App> {
     override fun getBaseData() = list
 
     override fun extraFactor(query: String, item: App, label: String) = run {
+        val initialsFactor =
+            if (query.length > 1 && SearchProvider.matchInitials(query, label)) 0.9f + query.length * 0.1f else 0f
         val r = FuzzySearch.tokenSortPartialRatio(query, item.packageName) / 100f
-        r * r * r * 0.9f
+        initialsFactor + r * r * r * 0.9f
     }
 }

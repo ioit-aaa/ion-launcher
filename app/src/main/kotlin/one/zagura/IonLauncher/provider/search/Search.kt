@@ -3,6 +3,7 @@ package one.zagura.IonLauncher.provider.search
 import android.content.Context
 import android.os.Build
 import one.zagura.IonLauncher.data.items.LauncherItem
+import one.zagura.IonLauncher.provider.search.SearchProvider.Companion.removeDiacritics
 import java.util.TreeSet
 
 object Search {
@@ -35,8 +36,9 @@ object Search {
                 else -> 1
             }
         }
+        val q = query.trim().lowercase().removeDiacritics()
         for (provider in providers)
-            provider.query(query, results)
+            provider.query(q, results)
         return results.map { it.first }
     }
 }

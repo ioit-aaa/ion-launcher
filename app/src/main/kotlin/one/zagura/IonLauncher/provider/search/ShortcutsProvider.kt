@@ -20,7 +20,9 @@ object ShortcutsProvider : SearchProvider {
         AppLoader.getResource().forEach { ShortcutLoader.getStaticShortcuts(context, it, s) }
         shortcuts = Array(s.size) {
             val item = s[it]
-            Triple(item, LabelLoader.loadLabel(context, item), LabelLoader.loadLabel(context, item.packageName, item.userHandle))
+            Triple(item,
+                LabelLoader.loadLabel(context, item).lowercase(),
+                LabelLoader.loadLabel(context, item.packageName, item.userHandle))
         }
     }
 
@@ -28,7 +30,7 @@ object ShortcutsProvider : SearchProvider {
         shortcuts = emptyArray()
     }
 
-    fun extraFactor(query: String, item: StaticShortcut, label: String, appLabel: String): Float {
+    private fun extraFactor(query: String, item: StaticShortcut, label: String, appLabel: String): Float {
         val initialsFactor = if (SearchProvider.matchInitials(query.substringBefore(' '), appLabel))
             0.7f else 0f
         val labelFactor = run {
@@ -41,12 +43,8 @@ object ShortcutsProvider : SearchProvider {
     override fun query(query: String, out: MutableCollection<Pair<LauncherItem, Float>>) {
         for ((item, label, appLabel) in shortcuts) {
             val extraFactor = extraFactor(query, item, label, appLabel)
-            val initialsFactor =
-                if (query.length > 1 && SearchProvider.matchInitials(query, label)) 0.6f + query.length * 0.1f else 0f
             val labelFactor = FuzzySearch.tokenSortPartialRatio(query, label) / 100f
-            val r = labelFactor +
-                    initialsFactor +
-                    extraFactor
+            val r = labelFactor + extraFactor
             if (r > .8f)
                 out.add(item to r)
         }

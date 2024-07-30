@@ -11,7 +11,7 @@ object HiddenProvider : BasicProvider<LauncherItem> {
 
     override fun updateData(context: Context) {
         hidden = HiddenApps.getItems(context).map {
-            it to LabelLoader.loadLabel(context, it)
+            it to LabelLoader.loadLabel(context, it).lowercase()
         }
     }
 

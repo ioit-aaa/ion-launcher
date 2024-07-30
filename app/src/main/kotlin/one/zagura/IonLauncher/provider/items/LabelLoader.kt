@@ -9,10 +9,10 @@ import android.os.UserHandle
 import android.provider.ContactsContract
 import androidx.annotation.RequiresApi
 import one.zagura.IonLauncher.R
+import one.zagura.IonLauncher.data.items.ActionItem
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.ContactItem
 import one.zagura.IonLauncher.data.items.LauncherItem
-import one.zagura.IonLauncher.data.items.ActionItem
 import one.zagura.IonLauncher.data.items.OpenAlarmsItem
 import one.zagura.IonLauncher.data.items.StaticShortcut
 import one.zagura.IonLauncher.data.items.TorchToggleItem
@@ -72,12 +72,11 @@ object LabelLoader {
             if (nicknameCur != null) {
                 if (nicknameCur.moveToNext()) {
                     val nickname = nicknameCur.getString(0)
-                    if (nickname != null)
+                    if (nickname != null && nickname.isNotBlank())
                         name = nickname
                 }
                 nicknameCur.close()
             }
-
             name
         }
     }

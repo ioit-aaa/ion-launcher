@@ -32,7 +32,7 @@ object SettingsProvider : BasicProvider<ActionItem> {
     private fun action(context: Context, action: String): Pair<ActionItem, String>? {
         val item = context.packageManager.queryIntentActivities(Intent(action), 0)
             .firstOrNull() ?: return null
-        val label = item.loadLabel(context.packageManager).toString()
+        val label = item.loadLabel(context.packageManager).toString().lowercase()
         return ActionItem(action) to label
     }
 
