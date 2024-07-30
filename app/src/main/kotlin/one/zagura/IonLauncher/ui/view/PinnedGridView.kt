@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
+import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.view.DragEvent
 import android.view.GestureDetector
@@ -197,12 +198,40 @@ class PinnedGridView(
         return (sx + vx).toInt() to (yoff - vy).toInt()
     }
 
-    private fun getIconBounds(x: Int, y: Int): Rect {
-        val w = (width - paddingLeft - paddingRight) / columns
-        val h = (height - paddingTop - paddingBottom) / rows
-        val l = paddingLeft + w * x
-        val t = paddingTop + h * y
-        return Rect(l, t, w, h)
+    fun getIconBounds(x: Int, y: Int): Rect {
+        val ww = width - paddingLeft - paddingRight
+        val l = ((ww - drawCtx.iconSize * columns) / (columns + 1) / 2).toInt()
+        val w = ww - l * 2
+
+        val rh = height / rows
+        val x = l * 2 + x * w / columns
+        val y = l + y * rh
+        return Rect(x, y, drawCtx.iconSize.toInt(), drawCtx.iconSize.toInt())
+    }
+
+    fun hideIconAndGetBounds(item: LauncherItem): RectF? {
+        val i = items.indexOf(item)
+        if (i == -1)
+            return null
+
+        val gridX = i % columns
+        val gridY = i / columns
+        replacePreview = ItemPreview(NonDrawable, gridX, gridY)
+        invalidate()
+
+        val ww = width - paddingLeft - paddingRight
+        val l = (ww - drawCtx.iconSize * columns) / (columns + 1) / 2
+        val w = ww - l * 2
+
+        val rh = height / rows.toFloat()
+        val x = l * 2 + gridX * w / columns
+        val y = l + gridY * rh + IntArray(2).apply(::getLocationOnScreen)[1]
+        return RectF(x, y, x + drawCtx.iconSize, y + drawCtx.iconSize)
+    }
+
+    fun unhideIcon() {
+        replacePreview = null
+        invalidate()
     }
 
     override fun onTouchEvent(e: MotionEvent): Boolean {

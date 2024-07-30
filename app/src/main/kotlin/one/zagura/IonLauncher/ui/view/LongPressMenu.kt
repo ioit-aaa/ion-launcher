@@ -89,8 +89,15 @@ object LongPressMenu {
         current = w
     }
 
-    fun dismissCurrent() {
+    fun dismissCurrent(): Boolean {
         current?.dismiss()
+            ?: return false
+        return true
+    }
+
+    fun isInFocus(): Boolean {
+        val c = current ?: return false
+        return c.contentView.hasWindowFocus()
     }
 
     fun onDragEnded() {

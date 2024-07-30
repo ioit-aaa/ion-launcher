@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Picture
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
@@ -14,8 +15,10 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import androidx.annotation.RequiresApi
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.record
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -23,6 +26,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Widgets
@@ -34,6 +38,7 @@ import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.provider.summary.Battery
 import one.zagura.IonLauncher.provider.summary.EventsLoader
 import one.zagura.IonLauncher.ui.drawer.DrawerArea
+import one.zagura.IonLauncher.ui.view.LongPressMenu
 import one.zagura.IonLauncher.ui.view.MediaView
 import one.zagura.IonLauncher.ui.view.PinnedGridView
 import one.zagura.IonLauncher.ui.view.SharedDrawingContext
@@ -41,9 +46,12 @@ import one.zagura.IonLauncher.ui.view.SuggestionRowView
 import one.zagura.IonLauncher.ui.view.SummaryView
 import one.zagura.IonLauncher.ui.view.WidgetView
 import one.zagura.IonLauncher.util.FillDrawable
+import one.zagura.IonLauncher.util.FloatingIconView
+import one.zagura.IonLauncher.util.GestureNavContract
 import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
 import org.lsposed.hiddenapibypass.HiddenApiBypass
+
 
 class HomeScreen : Activity() {
 
@@ -168,11 +176,6 @@ class HomeScreen : Activity() {
             val events = EventsLoader.load(this)
             summaryView.updateEvents(events)
         }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        sheetBehavior.state = STATE_COLLAPSED
     }
 
     private fun applyCustomizations() {
@@ -324,5 +327,52 @@ class HomeScreen : Activity() {
     override fun onBackPressed() {
         if (sheetBehavior.state != STATE_COLLAPSED)
             sheetBehavior.state = STATE_COLLAPSED
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        val alreadyOnHome = (hasWindowFocus() || LongPressMenu.isInFocus()) && ((intent.flags and
+                Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
+
+        when (intent.action) {
+            Intent.ACTION_MAIN -> {
+                if (alreadyOnHome) {
+                    if (sheetBehavior.state == STATE_EXPANDED) {
+                        LongPressMenu.dismissCurrent()
+                        sheetBehavior.state = STATE_COLLAPSED
+                    } else if (sheetBehavior.state == STATE_COLLAPSED) {
+                        if (!LongPressMenu.dismissCurrent())
+                            sheetBehavior.state = STATE_EXPANDED
+                    }
+                }
+                else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                    handleGestureContract(intent)
+            }
+            Intent.ACTION_ALL_APPS -> sheetBehavior.state = STATE_EXPANDED
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun handleGestureContract(intent: Intent) {
+        val gnc = GestureNavContract.fromIntent(intent) ?: return
+        val app = App(gnc.componentName.packageName, gnc.componentName.className, gnc.user)
+        val bounds = pinnedGrid.hideIconAndGetBounds(app) ?: return
+
+        bounds.offset(-drawCtx.iconSize / 2, -drawCtx.iconSize / 2)
+
+        val icon = IconLoader.loadIcon(this, app)
+
+        val s = (drawCtx.iconSize * 2).toInt()
+        val picture = Picture().record(s, s) {
+            icon.setBounds(width / 4, height / 4, width / 4 * 3, height / 4 * 3)
+            icon.draw(this)
+        }
+
+        val surfaceView = FloatingIconView(this, gnc, bounds, picture) {
+            pinnedGrid.unhideIcon()
+        }
+        homeScreen.addView(surfaceView, LayoutParams(s, s))
+        surfaceView.bringToFront()
     }
 }
