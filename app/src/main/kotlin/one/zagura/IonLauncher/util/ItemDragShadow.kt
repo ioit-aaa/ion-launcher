@@ -22,8 +22,8 @@ class ItemDragShadow(context: Context, val icon: Drawable) : DragShadowBuilder()
         val iw = w * 2 / 3
         val o = (w - iw) / 2
         val s = iw / icon.intrinsicWidth
-        canvas.scale(s, s)
         canvas.translate(o, o)
+        canvas.scale(s, s)
         icon.draw(canvas)
         canvas.restore()
     }
