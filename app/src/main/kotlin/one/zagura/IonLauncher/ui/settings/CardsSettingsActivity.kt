@@ -24,7 +24,7 @@ class CardsSettingsActivity : Activity() {
                 onClick(BuildConfig.APPLICATION_ID + ".debug.suggestions.DebugSuggestionsActivity")
             }
             setting(R.string.count, isVertical = true) {
-                seekbar("suggestion:count", 3, min = 0, max = 4)
+                seekbar("suggestion:count", 4, min = 0, max = 6)
             }
             setting(R.string.show_search_in_suggestions) {
                 switch("layout:search-in-suggestions", false)

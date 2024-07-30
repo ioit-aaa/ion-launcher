@@ -256,7 +256,7 @@ class SuggestionRowView(
     }
 
     private fun takeSuggestions(allSuggestions: List<LauncherItem>): List<LauncherItem> {
-        val suggestionCount = context.ionApplication.settings["suggestion:count", 3]
+        val suggestionCount = context.ionApplication.settings["suggestion:count", 4]
         if (suggestionCount == 0)
             return emptyList()
         return allSuggestions.take(suggestionCount)
