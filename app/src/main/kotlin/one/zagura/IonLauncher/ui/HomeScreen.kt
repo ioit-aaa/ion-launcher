@@ -270,6 +270,7 @@ class HomeScreen : Activity() {
 
     override fun onStop() {
         super.onStop()
+        sheetBehavior.state = STATE_COLLAPSED
         AppLoader.release()
         NotificationService.MediaObserver.release()
         TopNotificationProvider.release()
