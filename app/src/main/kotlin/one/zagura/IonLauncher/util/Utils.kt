@@ -226,4 +226,12 @@ object Utils {
         DateFormat.getTimeFormat(context).format(Calendar.getInstance().apply {
             timeInMillis = time
         }.time)
+
+    private const val FLAG_SLIPPERY: Int = 0x20000000
+    @SuppressLint("WrongConstant")
+    fun setWindowSlippery(window: Window, enable: Boolean) {
+        val wlp = window.attributes
+        wlp.flags = if (enable) wlp.flags or FLAG_SLIPPERY else wlp.flags and FLAG_SLIPPERY.inv()
+        window.attributes = wlp
+    }
 }
