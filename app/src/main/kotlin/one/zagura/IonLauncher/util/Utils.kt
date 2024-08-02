@@ -16,6 +16,7 @@ import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.provider.Settings
 import android.text.format.DateFormat
 import android.util.DisplayMetrics
 import android.view.View
@@ -204,11 +205,19 @@ object Utils {
     }
 
     fun chooseDefaultLauncher(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val i = Intent(Settings.ACTION_HOME_SETTINGS)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            if (context.packageManager.queryIntentActivities(i, PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()) {
+                context.startActivity(i)
+                return
+            }
+        }
         val componentName = ComponentName(context, DummyActivity::class.java)
         context.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
         val selector = Intent(Intent.ACTION_MAIN)
-        selector.addCategory(Intent.CATEGORY_HOME)
-        selector.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            .addCategory(Intent.CATEGORY_HOME)
+            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(selector)
         context.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, PackageManager.DONT_KILL_APP)
     }

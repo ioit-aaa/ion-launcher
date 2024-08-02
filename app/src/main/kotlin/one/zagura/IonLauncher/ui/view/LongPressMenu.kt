@@ -78,7 +78,6 @@ object LongPressMenu {
             addOption(R.string.tweaks, bg, fg, place = Place.First) {
                 w.dismiss()
                 context.startActivity(Intent(context, SettingsActivity::class.java), LauncherItem.createOpeningAnimation(it))
-                SuggestionsManager.onItemOpened(context, App(BuildConfig.APPLICATION_ID, SettingsActivity::class.java.name, Process.myUserHandle()))
             }
             addOption(R.string.wallpaper, bg, fg, place = Place.Last) {
                 w.dismiss()

@@ -38,6 +38,11 @@ import one.zagura.IonLauncher.util.Utils
 
 class SetupActivity : Activity() {
 
+    companion object {
+        private const val SETUP_ALIAS = BuildConfig.APPLICATION_ID + ".SetupAlias"
+        private const val LAUNCHER_ALIAS = BuildConfig.APPLICATION_ID + ".LauncherAlias"
+    }
+
     private lateinit var updateContactsAccess: (Boolean) -> Unit
     private lateinit var updateCalendarAccess: (Boolean) -> Unit
     private lateinit var updateUsageAccess: (Boolean) -> Unit
@@ -63,7 +68,6 @@ class SetupActivity : Activity() {
                     updateNotificationAccess = permissionSwitch(hasNotificationAccess(), ::grantNotificationAccess)
                 }
             }
-            colorSettings("color", ColorThemer.DEFAULT_DARK, ColorThemer.DEFAULT_LIGHT, 0xdd)
             val dp = resources.displayMetrics.density
             val m = (18 * dp).toInt()
             view.addView(TextView(view.context).apply {
@@ -121,10 +125,7 @@ class SetupActivity : Activity() {
     }
 
     private fun start(v: View) {
-        packageManager.setComponentEnabledSetting(ComponentName(this, SettingsActivity::class.java), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
-        packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
-
-        if (packageManager.getComponentEnabledSetting(ComponentName(this, HomeScreen::class.java)) != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+        if (packageManager.getComponentEnabledSetting(ComponentName(this, LAUNCHER_ALIAS)) != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
             packageManager.setComponentEnabledSetting(
                 ComponentName(this, HomeScreen::class.java),
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
@@ -141,8 +142,8 @@ class SetupActivity : Activity() {
             Dock.setItem(this, 8, getCategoryItem(Intent.CATEGORY_APP_MARKET))
         }
 
-        if (Utils.getDefaultLauncher(packageManager) != BuildConfig.APPLICATION_ID)
-            Utils.chooseDefaultLauncher(this)
+        packageManager.setComponentEnabledSetting(ComponentName(this, SETUP_ALIAS), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+        packageManager.setComponentEnabledSetting(ComponentName(this, LAUNCHER_ALIAS), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
     }
 
     private fun getCategoryItem(category: String): LauncherItem? {

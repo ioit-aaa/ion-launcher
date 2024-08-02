@@ -70,6 +70,43 @@
         </activity>
 
         <activity
+            android:name=".ui.settings.SettingsActivity"
+            android:theme="@style/IonLauncher.Settings"
+            android:label="@string/tweaks"
+            android:launchMode="singleInstancePerTask"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.APPLICATION_PREFERENCES"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".ui.settings.IconsSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
+        <activity android:name=".ui.settings.CardsSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
+        <activity android:name=".ui.settings.DrawerSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
+        <activity android:name=".ui.settings.WallpaperSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
+        <activity android:name=".ui.settings.PinnedGridSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
+        <activity android:name=".ui.settings.SetupActivity" android:theme="@style/IonLauncher.Settings"/>
+
+        <activity
+            android:name="one.zagura.IonLauncher.ui.settings.iconPackPicker.IconPackPickerActivity"
+            android:theme="@style/IonLauncher.Settings"/>
+        <activity
+            android:name="one.zagura.IonLauncher.ui.widgetChooser.WidgetChooserActivity"
+            android:theme="@style/IonLauncher.Settings"/>
+
+        <activity
+            android:name=".util.DummyActivity"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.HOME"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name=".ui.WallpaperApplicationActivity"
             android:label="@string/wallpaper"
             android:theme="@style/IonLauncher.Settings"
@@ -85,57 +122,27 @@
         </activity>
 
         <activity
-            android:name=".ui.settings.SettingsActivity"
-            android:theme="@style/IonLauncher.Settings"
-            android:label="@string/tweaks"
-            android:launchMode="singleInstancePerTask"
-            android:enabled="false"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <action android:name="android.intent.action.APPLICATION_PREFERENCES"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".ui.settings.IconsSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
-        <activity android:name=".ui.settings.CardsSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
-        <activity android:name=".ui.settings.DrawerSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
-        <activity android:name=".ui.settings.WallpaperSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
-        <activity android:name=".ui.settings.PinnedGridSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
-
-        <activity
-            android:name="one.zagura.IonLauncher.ui.settings.iconPackPicker.IconPackPickerActivity"
-            android:theme="@style/IonLauncher.Settings"
-            android:exported="true"/>
-
-        <activity
-            android:name="one.zagura.IonLauncher.ui.widgetChooser.WidgetChooserActivity"
-            android:theme="@style/IonLauncher.Settings"/>
-
-        <activity
-            android:name=".ui.settings.SetupActivity"
-            android:theme="@style/IonLauncher.Settings"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".util.DummyActivity"
-            android:enabled="false"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.HOME"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </activity>
-
-        <activity
             android:name=".util.CrashActivity"
             android:theme="@style/IonLauncher.Settings"/>
+
+        <activity-alias
+            android:name=".SetupAlias"
+            android:targetActivity=".ui.settings.SetupActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".LauncherAlias"
+            android:targetActivity=".ui.HomeScreen"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
     </application>
 </manifest>
