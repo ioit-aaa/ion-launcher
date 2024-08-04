@@ -3,19 +3,25 @@ package one.zagura.IonLauncher.ui.view
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
+import android.graphics.RectF
+import android.os.Build
+import android.os.UserHandle
 import android.text.TextUtils
 import android.view.DragEvent
 import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.core.view.isVisible
 import one.zagura.IonLauncher.R
+import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.items.IconLoader
 import one.zagura.IonLauncher.provider.items.LabelLoader
 import one.zagura.IonLauncher.ui.ionApplication
+import one.zagura.IonLauncher.util.iconify.IconifyAnim
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
@@ -32,6 +38,7 @@ class SuggestionRowView(
     private var showLabels = false
     private var suggestions = emptyList<LauncherItem>()
     private var labels = emptyArray<CharSequence>()
+    private var hideI = -1
 
     private val icSearch = resources.getDrawable(R.drawable.ic_search)
 
@@ -104,6 +111,10 @@ class SuggestionRowView(
             var x = pl.toFloat()
             val singleWidth = height - iconPadding
             for (i in suggestions.indices) {
+                if (i == hideI) {
+                    x += singleWidth
+                    continue
+                }
                 val item = suggestions[i]
                 val icon = IconLoader.loadIcon(context, item)
                 icon.copyBounds(drawCtx.tmpRect)
@@ -122,6 +133,10 @@ class SuggestionRowView(
         val singleWidth = suggestionsWidth.toFloat() / suggestions.size
         var x = pl.toFloat()
         for (i in suggestions.indices) {
+            if (i == hideI) {
+                x += singleWidth
+                continue
+            }
             val item = suggestions[i]
             val icon = IconLoader.loadIcon(context, item)
             icon.copyBounds(drawCtx.tmpRect)
@@ -141,6 +156,53 @@ class SuggestionRowView(
 
     override fun onTouchEvent(e: MotionEvent) = gestureListener.onTouchEvent(e)
 
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun prepareIconifyAnim(packageName: String, user: UserHandle): IconifyAnim? {
+        val i = suggestions.indexOfFirst { it is App && it.packageName == packageName && it.userHandle == user }
+        if (i == -1)
+            return null
+
+        hideI = i
+        invalidate()
+
+        val dp = resources.displayMetrics.density
+        val iconPadding = 8 * dp
+        val x = iToX(i).toFloat()
+        val y = paddingTop + iconPadding + IntArray(2).apply(::getLocationOnScreen)[1]
+        val s = height - paddingTop - paddingBottom - iconPadding * 2
+        return IconifyAnim(suggestions[i], RectF(x, y, x + s, y + s)) {
+            hideI = -1
+            invalidate()
+        }
+    }
+
+    private fun xToI(x: Float): Int {
+        val xi = x.toInt() - paddingLeft
+        val h = height - paddingTop - paddingBottom
+        return if (showLabels) {
+            val w = width - paddingLeft - paddingRight
+            val s = if (showSearchButton) h else 0
+            xi * suggestions.size / (w - s)
+        } else {
+            val dp = resources.displayMetrics.density
+            val iconPadding = (8 * dp).toInt()
+            (xi - iconPadding / 2) / (h - iconPadding)
+        }
+    }
+
+    private fun iToX(i: Int): Int {
+        val h = height - paddingTop - paddingBottom
+        return paddingLeft + if (showLabels) {
+            val w = width - paddingLeft - paddingRight
+            val s = if (showSearchButton) h else 0
+            (w - s) * i / suggestions.size
+        } else {
+            val dp = resources.displayMetrics.density
+            val iconPadding = (8 * dp).toInt()
+            iconPadding + i * (h - iconPadding)
+        }
+    }
+
     private val gestureListener = GestureDetector(context, object : GestureDetector.OnGestureListener {
         override fun onDown(e: MotionEvent) = true
         override fun onShowPress(e: MotionEvent) {}
@@ -150,33 +212,6 @@ class SuggestionRowView(
             if (abs(vy) > abs(vx) && vy > 0)
                 Utils.pullStatusBar(context)
             return true
-        }
-
-        private fun xToI(x: Float): Int {
-            val xi = x.toInt() - paddingLeft
-            val h = height - paddingTop - paddingBottom
-            return if (showLabels) {
-                val w = width - paddingLeft - paddingRight
-                val s = if (showSearchButton) h else 0
-                xi * suggestions.size / (w - s)
-            } else {
-                val dp = resources.displayMetrics.density
-                val iconPadding = (8 * dp).toInt()
-                (xi - iconPadding / 2) / (h - iconPadding)
-            }
-        }
-
-        private fun iToX(i: Int): Int {
-            val h = height - paddingTop - paddingBottom
-            return paddingLeft + if (showLabels) {
-                val w = width - paddingLeft - paddingRight
-                val s = if (showSearchButton) h else 0
-                (w - s) * i / suggestions.size
-            } else {
-                val dp = resources.displayMetrics.density
-                val iconPadding = (8 * dp).toInt()
-                iconPadding + i * (h - iconPadding)
-            }
         }
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {

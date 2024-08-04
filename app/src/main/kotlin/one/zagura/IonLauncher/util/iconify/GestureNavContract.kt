@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.util
+package one.zagura.IonLauncher.util.iconify
 
 import android.content.ComponentName
 import android.content.Intent

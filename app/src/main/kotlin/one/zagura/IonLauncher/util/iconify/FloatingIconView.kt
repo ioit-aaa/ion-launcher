@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.util
+package one.zagura.IonLauncher.util.iconify
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -18,11 +18,11 @@ class FloatingIconView(
     val gnc: GestureNavContract,
     val bounds: RectF,
     val picture: Picture,
-    val onEnd: (FloatingIconView) -> Unit
+    val onEndAnim: () -> Unit
 ) : SurfaceView(context) {
 
     fun removeSelf() {
-        onEnd(this)
+        onEndAnim()
         (parent as? ViewGroup)?.removeView(this)
     }
 

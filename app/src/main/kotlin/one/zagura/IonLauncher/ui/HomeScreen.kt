@@ -26,7 +26,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
-import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Widgets
@@ -46,8 +45,8 @@ import one.zagura.IonLauncher.ui.view.SuggestionRowView
 import one.zagura.IonLauncher.ui.view.SummaryView
 import one.zagura.IonLauncher.ui.view.WidgetView
 import one.zagura.IonLauncher.util.drawable.FillDrawable
-import one.zagura.IonLauncher.util.FloatingIconView
-import one.zagura.IonLauncher.util.GestureNavContract
+import one.zagura.IonLauncher.util.iconify.FloatingIconView
+import one.zagura.IonLauncher.util.iconify.GestureNavContract
 import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
 import org.lsposed.hiddenapibypass.HiddenApiBypass
@@ -159,6 +158,7 @@ class HomeScreen : Activity() {
             isHideable = false
             peekHeight = fullHeight
             state = STATE_COLLAPSED
+            addBottomSheetCallback(sheetCallback)
         }
 
         return CoordinatorLayout(this).apply {
@@ -348,22 +348,23 @@ class HomeScreen : Activity() {
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun handleGestureContract(intent: Intent) {
         val gnc = GestureNavContract.fromIntent(intent) ?: return
-        val app = App(gnc.componentName.packageName, gnc.componentName.className, gnc.user)
-        val bounds = pinnedGrid.hideIconAndGetBounds(app) ?: return
+        val packageName = gnc.componentName.packageName
+        val user = gnc.user
+        val (item, bounds, onAnimEnd) = pinnedGrid.prepareIconifyAnim(packageName, user)
+            ?: suggestionsView.prepareIconifyAnim(packageName, user)
+            ?: return
 
-        bounds.offset(-drawCtx.iconSize / 2, -drawCtx.iconSize / 2)
+        bounds.offset(-bounds.width() / 2, -bounds.height() / 2)
 
-        val icon = IconLoader.loadIcon(this, app)
+        val icon = IconLoader.loadIcon(this, item)
 
-        val s = (drawCtx.iconSize * 2).toInt()
+        val s = (bounds.width() * 2).toInt()
         val picture = Picture().record(s, s) {
             icon.setBounds(width / 4, height / 4, width / 4 * 3, height / 4 * 3)
             icon.draw(this)
         }
 
-        val surfaceView = FloatingIconView(this, gnc, bounds, picture) {
-            pinnedGrid.unhideIcon()
-        }
+        val surfaceView = FloatingIconView(this, gnc, bounds, picture, onAnimEnd)
         homeScreen.addView(surfaceView, LayoutParams(s, s))
         surfaceView.bringToFront()
     }

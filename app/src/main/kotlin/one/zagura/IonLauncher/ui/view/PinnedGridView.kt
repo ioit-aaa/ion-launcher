@@ -7,17 +7,22 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.drawable.Drawable
+import android.os.Build
+import android.os.UserHandle
 import android.view.DragEvent
 import android.view.GestureDetector
 import android.view.GestureDetector.OnGestureListener
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.core.view.updateLayoutParams
+import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Dock
 import one.zagura.IonLauncher.provider.items.IconLoader
+import one.zagura.IonLauncher.util.iconify.IconifyAnim
 import one.zagura.IonLauncher.util.LiveWallpaper
 import one.zagura.IonLauncher.util.drawable.NonDrawable
 import one.zagura.IonLauncher.util.Settings
@@ -209,8 +214,9 @@ class PinnedGridView(
         return Rect(x, y, drawCtx.iconSize.toInt(), drawCtx.iconSize.toInt())
     }
 
-    fun hideIconAndGetBounds(item: LauncherItem): RectF? {
-        val i = items.indexOf(item)
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun prepareIconifyAnim(packageName: String, user: UserHandle): IconifyAnim? {
+        val i = items.indexOfFirst { it is App && it.packageName == packageName && it.userHandle == user }
         if (i == -1)
             return null
 
@@ -226,12 +232,13 @@ class PinnedGridView(
         val rh = height / rows.toFloat()
         val x = l * 2 + gridX * w / columns
         val y = l + gridY * rh + IntArray(2).apply(::getLocationOnScreen)[1]
-        return RectF(x, y, x + drawCtx.iconSize, y + drawCtx.iconSize)
-    }
-
-    fun unhideIcon() {
-        replacePreview = null
-        invalidate()
+        return IconifyAnim(
+            items[i]!!,
+            RectF(x, y, x + drawCtx.iconSize, y + drawCtx.iconSize),
+        ) {
+            replacePreview = null
+            invalidate()
+        }
     }
 
     override fun onTouchEvent(e: MotionEvent): Boolean {
