@@ -61,6 +61,9 @@
     <string name="labels">Labels</string>
     <string name="media_player">Media Player</string>
     <string name="dynamically_tint">Dynamically tint</string>
+    <string name="icon_rim">Icon Rim</string>
+    <string name="skeumorphism">Skeumorphism</string>
+    <string name="icon_gloss">Gloss</string>
     <plurals name="missed_calls">
         <item quantity="one">One missed call</item>
         <item quantity="other">%d missed calls</item>

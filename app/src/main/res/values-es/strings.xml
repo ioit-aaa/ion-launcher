@@ -59,6 +59,9 @@
     <string name="labels">Etiquetas</string>
     <string name="media_player">Reproductor de música</string>
     <string name="dynamically_tint">Teñir dinamicamente</string>
+    <string name="icon_rim">Icon Rim</string>
+    <string name="skeumorphism">Skeumorphism</string>
+    <string name="icon_gloss">Gloss</string>
     <plurals name="missed_calls">
         <item quantity="one">Una llamada perdida</item>
         <item quantity="many">%d llamadas perdidas</item>

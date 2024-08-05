@@ -6,7 +6,6 @@ import android.graphics.Paint
 import android.graphics.PixelFormat
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
-import android.os.Build
 
 internal class ContactDrawable(
     private val text: String,

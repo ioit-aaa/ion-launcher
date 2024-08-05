@@ -14,6 +14,7 @@ import one.zagura.IonLauncher.ui.view.settings.switch
 import one.zagura.IonLauncher.ui.settings.iconPackPicker.IconPackPickerActivity
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.view.settings.colorSettings
+import one.zagura.IonLauncher.ui.view.settings.title
 
 class IconsSettingsActivity : Activity() {
 
@@ -39,6 +40,13 @@ class IconsSettingsActivity : Activity() {
                 bg.isVisible = ionApplication.settings["icon:monochrome", false]
             }
             colorSettings("icon", ColorThemer.DEFAULT_LIGHT, ColorThemer.DEFAULT_DARK, 0xdd)
+            title(R.string.skeumorphism)
+            setting(R.string.icon_rim) {
+                switch("icon:rim", false)
+            }
+            setting(R.string.icon_gloss) {
+                switch("icon:gloss", false)
+            }
         }
     }
 }

@@ -59,6 +59,9 @@
     <string name="labels">Этикетки</string>
     <string name="media_player">Медиа плеер</string>
     <string name="dynamically_tint">Динамическы перекрашивать</string>
+    <string name="icon_rim">Icon Rim</string>
+    <string name="skeumorphism">Skeumorphism</string>
+    <string name="icon_gloss">Gloss</string>
     <plurals name="missed_calls">
         <item quantity="one">%d потеранный звонок</item>
         <item quantity="few">%d потеранных знонка</item>
