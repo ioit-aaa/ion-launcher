@@ -47,7 +47,7 @@ class SummaryView(
     private var onGlanceTap: (() -> Unit)? = null
 
     private val pureTitlePaint = Paint().apply {
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 24f, resources.displayMetrics)
+        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 28f, resources.displayMetrics)
         textAlign = Paint.Align.LEFT
         isAntiAlias = true
         isSubpixelText = true
@@ -211,7 +211,7 @@ class SummaryView(
         val roff = (eventHeight - eventRightHeight) / 2 - rightTextPaint.ascent()
 
         val totalHeight = eventHeight * events.size + separation * (events.size - 1) + padding * 2
-        canvas.drawRoundRect(paddingLeft.toFloat(), y, (width - paddingRight).toFloat(), y + totalHeight, drawCtx.radius, drawCtx.radius, drawCtx.cardPaint)
+        drawCtx.drawCard(context, canvas, paddingLeft.toFloat(), y, (width - paddingRight).toFloat(), y + totalHeight)
 
         var bottomTop = y + padding
         for (event in events) {
@@ -337,8 +337,10 @@ class SummaryView(
             pureTextPaint.clearShadowLayer()
         }
         else {
-            pureTitlePaint.setShadowLayer(21f, 0f, 0f, 0x1d000000)
-            pureTextPaint.setShadowLayer(14f, 0f, 0f, 0x1d000000)
+//            pureTitlePaint.setShadowLayer(21f, 0f, 0f, 0x1d000000)
+//            pureTextPaint.setShadowLayer(14f, 0f, 0f, 0x1d000000)
+            pureTitlePaint.setShadowLayer(2f, 0f, 1f, 0x55000000)
+            pureTextPaint.setShadowLayer(2f, 0f, 1f, 0x55000000)
         }
     }
 

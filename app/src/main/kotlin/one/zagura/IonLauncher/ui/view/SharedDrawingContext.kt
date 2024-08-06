@@ -1,12 +1,16 @@
 package one.zagura.IonLauncher.ui.view
 
 import android.content.Context
+import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.PorterDuff
 import android.graphics.Rect
 import android.graphics.Typeface
 import android.text.TextPaint
 import android.util.TypedValue
 import androidx.core.graphics.alpha
+import androidx.core.graphics.toXfermode
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.util.Settings
 
@@ -19,6 +23,8 @@ class SharedDrawingContext(context: Context) {
 
     var iconSize = 0f
         private set
+
+    private var doSkeumorphism = false
 
     val cardPaint = Paint()
 
@@ -47,14 +53,68 @@ class SharedDrawingContext(context: Context) {
         tmpRect.height()
     }
 
+    fun drawCard(context: Context, canvas: Canvas, x0: Float, y0: Float, x1: Float, y1: Float) {
+        if (!doSkeumorphism) {
+            canvas.drawRoundRect(x0, y0, x1, y1, radius, radius, cardPaint)
+            return
+        }
+
+        val dp = context.resources.displayMetrics.density
+
+        canvas.drawRoundRect(x0, y0, x1, y1, radius, radius, cardPaint)
+        canvas.drawRoundRect(x0 - dp / 2, y0 - dp / 2, x1 + dp / 2, y1 + dp / 2, radius + dp / 2, radius + dp / 2, Paint().apply {
+            color = 0xbb000000.toInt()
+            style = Paint.Style.STROKE
+            strokeWidth = 1 * dp
+        })
+
+        val path = Path().apply {
+            addRoundRect(x0, y0, x1, y1, radius, radius, Path.Direction.CW)
+        }
+        canvas.save()
+        canvas.clipPath(path)
+
+        val rimPaint = Paint().apply {
+            color = 0x77ffffff
+            xfermode = PorterDuff.Mode.OVERLAY.toXfermode()
+        }
+        val rimShadowPaint = Paint().apply {
+            color = 0x22ffffff
+            xfermode = PorterDuff.Mode.OVERLAY.toXfermode()
+        }
+        val rimBorderPaint = Paint().apply {
+            color = 0x11eeeeee
+            style = Paint.Style.STROKE
+            strokeWidth = 2 * dp
+        }
+
+        canvas.drawPath(path, rimBorderPaint)
+
+        path.fillType = Path.FillType.INVERSE_EVEN_ODD
+        canvas.save()
+        canvas.translate(0f, dp / 2f)
+        canvas.drawPath(path, rimPaint)
+        canvas.translate(0f, -dp)
+        canvas.drawPath(path, rimShadowPaint)
+        canvas.restore()
+        path.fillType = Path.FillType.EVEN_ODD
+
+        canvas.restore()
+    }
+
     fun applyCustomizations(context: Context, settings: Settings) {
         val dp = context.resources.displayMetrics.density
         iconSize = settings["dock:icon-size", 48] * dp
         radius = iconSize * settings["icon:radius-ratio", 50] / 100f
+        doSkeumorphism = settings["card:skeumorph", false]
         cardPaint.color = ColorThemer.cardBackground(context)
-        if (cardPaint.color.alpha == 255 && ColorThemer.lightness(cardPaint.color) - ColorThemer.lightness(ColorThemer.wallBackground(context)) > 0.1)
+        if (doSkeumorphism)
+            cardPaint.setShadowLayer(10f, 0f, 5f, 0x55000000)
+        else if (cardPaint.color.alpha != 255 || ColorThemer.lightness(cardPaint.color) - ColorThemer.lightness(ColorThemer.wallBackground(context)) <= 0.1)
+            cardPaint.clearShadowLayer()
+        else
             cardPaint.setShadowLayer(21f, 0f, 0f, 0x22000000)
-        else cardPaint.clearShadowLayer()
+
         val c = ColorThemer.cardForeground(context)
         titlePaint.color = c
         textPaint.color = c

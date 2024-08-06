@@ -19,6 +19,9 @@ class CardsSettingsActivity : Activity() {
         super.onCreate(savedInstanceState)
         setSettingsContentView(R.string.cards) {
             colorSettings("card", ColorThemer.DEFAULT_DARK, ColorThemer.DEFAULT_LIGHT, 0xdd)
+            setting(R.string.skeumorphism) {
+                switch("card:skeumorph", false)
+            }
             title(R.string.suggestions)
             if (BuildConfig.DEBUG) setting(R.string.suggestions) {
                 onClick(BuildConfig.APPLICATION_ID + ".debug.suggestions.DebugSuggestionsActivity")

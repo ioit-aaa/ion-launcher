@@ -20,7 +20,7 @@ internal class ClippedDrawable(
 ) : Drawable() {
 
     companion object {
-        fun Canvas.drawRim(path: Path) {
+        fun drawRim(canvas: Canvas, path: Path) {
             val rimPaint = Paint().apply {
                 this.color = 0x77ffffff
                 xfermode = PorterDuff.Mode.OVERLAY.toXfermode()
@@ -34,25 +34,25 @@ internal class ClippedDrawable(
             }
 
             path.fillType = Path.FillType.INVERSE_EVEN_ODD
-            save()
-            scale(0.95f, 0.95f, width / 2f, height / 2f)
-            drawPath(path, rimBorderPaint)
-            restore()
+            canvas.save()
+            canvas.scale(0.95f, 0.95f, canvas.width / 2f, canvas.height / 2f)
+            canvas.drawPath(path, rimBorderPaint)
+            canvas.restore()
 
-            save()
-            translate(0f, height * 0.025f)
-            drawPath(path, rimPaint)
-            translate(0f, -height * 0.05f)
-            drawPath(path, rimShadowShPaint)
-            restore()
+            canvas.save()
+            canvas.translate(0f, canvas.height * 0.025f)
+            canvas.drawPath(path, rimPaint)
+            canvas.translate(0f, -canvas.height * 0.05f)
+            canvas.drawPath(path, rimShadowShPaint)
+            canvas.restore()
             path.fillType = Path.FillType.EVEN_ODD
         }
 
-        fun Canvas.drawBG(path: Path, color: Int, is3D: Boolean) {
+        fun drawBG(canvas: Canvas, path: Path, color: Int, is3D: Boolean) {
             val shadowPaint = Paint().apply {
                 this.color = color
             }
-            val s = 108f / width
+            val s = 108f / canvas.width
             if (shadowPaint.color.alpha < 100)
                 shadowPaint.clearShadowLayer()
             else if (is3D)
@@ -62,22 +62,21 @@ internal class ClippedDrawable(
             if (is3D) {
                 val rimOutBorderPaint = Paint().apply {
                     this.color = 0xbb000000.toInt()
-                    xfermode = PorterDuff.Mode.OVERLAY.toXfermode()
                     style = Paint.Style.STROKE
-                    strokeWidth = height * 0.025f
+                    strokeWidth = canvas.height * 0.025f
                 }
-                drawPath(path, rimOutBorderPaint)
+                canvas.drawPath(path, rimOutBorderPaint)
             }
-            drawPath(path, shadowPaint)
+            canvas.drawPath(path, shadowPaint)
         }
     }
 
     private val pic = Picture().record(content.bounds.width(), content.bounds.height()) {
-        drawBG(path, color, is3D)
+        drawBG(this, path, color, is3D)
         clipPath(path)
         content.draw(this)
         if (is3D)
-            drawRim(path)
+            drawRim(this, path)
     }
 
     override fun draw(canvas: Canvas) {

@@ -63,7 +63,7 @@ class SuggestionRowView(
     fun applyCustomizations(settings: Settings) {
         showSearchButton = settings["layout:search-in-suggestions", false]
         showLabels = settings["suggestion:labels", false]
-        icSearch.setTint(ColorThemer.cardBackgroundOpaque(context))
+        icSearch.setTint(ColorThemer.cardForeground(context))
         if (showLabels)
             updateLabels()
         else labels = emptyArray()
@@ -79,30 +79,18 @@ class SuggestionRowView(
         val height = height - pt - pb
         val dp = resources.displayMetrics.density
 
-        canvas.drawRoundRect(
+        drawCtx.drawCard(context, canvas,
             pl.toFloat(),
             pt.toFloat(),
             pl + width.toFloat(),
-            pt + height.toFloat(),
-            drawCtx.radius,
-            drawCtx.radius,
-            drawCtx.cardPaint
-        )
+            pt + height.toFloat())
 
         val iconPadding = 8 * dp
         if (showSearchButton) {
             val r = (drawCtx.radius - iconPadding)
                 .coerceAtLeast(drawCtx.radius / drawCtx.iconSize * (height - iconPadding * 2))
             val x = pl + width - height
-            canvas.drawRoundRect(
-                x + iconPadding,
-                pt + iconPadding,
-                x + height - iconPadding,
-                pt + height - iconPadding,
-                r, r,
-                drawCtx.titlePaint
-            )
-            val p = (12 * dp).toInt()
+            val p = (10 * dp).toInt()
             icSearch.setBounds(x + p, pt + p, x + height - p, pt + height - p)
             icSearch.draw(canvas)
         }
