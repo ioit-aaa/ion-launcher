@@ -53,13 +53,11 @@ class SharedDrawingContext(context: Context) {
         tmpRect.height()
     }
 
-    fun drawCard(context: Context, canvas: Canvas, x0: Float, y0: Float, x1: Float, y1: Float) {
+    fun drawCard(dp: Float, canvas: Canvas, x0: Float, y0: Float, x1: Float, y1: Float) {
         if (!doSkeumorphism) {
             canvas.drawRoundRect(x0, y0, x1, y1, radius, radius, cardPaint)
             return
         }
-
-        val dp = context.resources.displayMetrics.density
 
         canvas.drawRoundRect(x0, y0, x1, y1, radius, radius, cardPaint)
         canvas.drawRoundRect(x0 - dp / 2, y0 - dp / 2, x1 + dp / 2, y1 + dp / 2, radius + dp / 2, radius + dp / 2, Paint().apply {

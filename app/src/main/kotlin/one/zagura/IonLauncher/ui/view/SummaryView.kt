@@ -218,7 +218,7 @@ class SummaryView(
         val roff = (eventHeight - eventRightHeight) / 2 - rightTextPaint.ascent()
 
         val totalHeight = eventHeight * events.size + separation * (events.size - 1) + padding * 2
-        drawCtx.drawCard(context, canvas, paddingLeft.toFloat(), y, (width - paddingRight).toFloat(), y + totalHeight)
+        drawCtx.drawCard(dp, canvas, paddingLeft.toFloat(), y, (width - paddingRight).toFloat(), y + totalHeight)
 
         var bottomTop = y + padding
         for (event in events) {

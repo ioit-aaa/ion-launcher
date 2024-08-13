@@ -79,7 +79,7 @@ class SuggestionRowView(
         val height = height - pt - pb
         val dp = resources.displayMetrics.density
 
-        drawCtx.drawCard(context, canvas,
+        drawCtx.drawCard(dp, canvas,
             pl.toFloat(),
             pt.toFloat(),
             pl + width.toFloat(),

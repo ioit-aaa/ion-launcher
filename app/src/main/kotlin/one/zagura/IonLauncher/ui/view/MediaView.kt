@@ -91,11 +91,11 @@ class MediaView(
             val icon = player.icon
 
             if (player.data.color == 0)
-                drawCtx.drawCard(context, canvas, pl.toFloat(), y, pl + w.toFloat(), y + drawCtx.iconSize)
+                drawCtx.drawCard(dp, canvas, pl.toFloat(), y, pl + w.toFloat(), y + drawCtx.iconSize)
             else {
                 val c = drawCtx.cardPaint.color
                 drawCtx.cardPaint.color = player.data.color
-                drawCtx.drawCard(context, canvas, pl.toFloat(), y, pl + w.toFloat(), y + drawCtx.iconSize)
+                drawCtx.drawCard(dp, canvas, pl.toFloat(), y, pl + w.toFloat(), y + drawCtx.iconSize)
                 drawCtx.cardPaint.color = c
             }
             if (icon != null) {
