@@ -70,29 +70,25 @@ object IconThemer {
             return InsetDrawable(monochrome, -w / 5)
         }
         monochrome.colorFilter = PorterDuffColorFilter(iconFG, PorterDuff.Mode.SRC_IN)
-        return makeIcon(iconBG, monochrome)
+        return makeIcon(iconBG, monochrome, false)
     }
 
-    fun transformIconFromIconPack(icon: Drawable): Drawable {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || icon !is AdaptiveIconDrawable)
-            return icon.apply { setGrayscale(doGrayscale) }
-
-        var fg = icon.foreground
-        var bg = icon.background
-        fg?.setGrayscale(doGrayscale)
-        bg?.setGrayscale(doGrayscale)
-
-        val color = when (bg) {
-            is ShapeDrawable -> bg.paint.color
-            is ColorDrawable -> bg.color
-            is GradientDrawable -> bg.color?.defaultColor
-                ?: return makeIcon(bg, fg, true)
-            else -> return makeIcon(bg, fg, true)
+    fun makeMasked(pic: Drawable): Drawable {
+        val path = Path().apply {
+            val w = pic.bounds.width().toFloat()
+            val r = w * radiusRatio
+            addRoundRect(0f, 0f, w, w,
+                floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
         }
-        return makeIcon(if (doGrayscale)
-            ColorThemer.colorize(color, iconBG)
-        else color, fg, true)
+        return ClippedDrawable(pic, path, iconBG, doIconRim)
     }
+
+    fun makeContact(name: String): Drawable = ContactDrawable(
+        name.substring(0, name.length.coerceAtMost(2)),
+        radiusRatio, iconBG, iconFG)
+
+    fun transformIconFromIconPack(icon: Drawable): Drawable =
+        transformIcon(icon, willBeThemed = false, isIconPack = true)
 
     fun applyTheming(context: Context, icon: Drawable, iconPacks: List<IconTheming.IconPackInfo>): Drawable {
         val iconThemingInfo = iconPacks.firstNotNullOfOrNull {
@@ -102,29 +98,28 @@ object IconThemer {
                     context.ionApplication.settings["dock:icon-size", 48] * dp
                 } else null
         }
-        val ti = transformIcon(icon, iconThemingInfo != null)
+        val ti = transformIcon(icon, iconThemingInfo != null, false)
         return if (iconThemingInfo == null) ti
         else applyIconPackTheming(ti, iconThemingInfo, context.resources).apply {
             setGrayscale(doGrayscale)
         }
     }
 
-    private fun transformIcon(icon: Drawable, willBeThemed: Boolean): Drawable {
+    private fun transformIcon(icon: Drawable, willBeThemed: Boolean, isIconPack: Boolean): Drawable {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || icon !is AdaptiveIconDrawable) {
             icon.setGrayscale(doGrayscale)
+            if (isIconPack)
+                return icon
             val w = icon.intrinsicWidth
             val h = icon.intrinsicHeight
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                doMonochrome && !doMonochromeBG
-            ) {
+                doMonochrome && !doMonochromeBG)
                 return InsetDrawable(icon, w / 12)
-            }
             val path = Path().apply {
                 val r = w * radiusRatio
                 addRoundRect(
                     0f, 0f, w.toFloat(), h.toFloat(),
-                    floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW
-                )
+                    floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
             }
             var icon = if (icon.toBitmap(1, 1)[0, 0].alpha == 255) icon
             else InsetDrawable(icon, w / 6)
@@ -150,12 +145,12 @@ object IconThemer {
                     }
                     monochrome.colorFilter = PorterDuffColorFilter(iconFG, PorterDuff.Mode.SRC_IN)
                     fg = monochrome
-                    return makeIcon(iconBG, fg)
+                    return makeIcon(iconBG, fg, isIconPack)
                 } else if (!doMonochromeBG) {
-                    val i = makeIcon(bg, fg)
+                    val i = makeIcon(bg, fg, isIconPack)
                     return InsetDrawable(i, fg.intrinsicWidth / 12)
                 } else if (bg == null)
-                    return makeIcon(iconBG, fg)
+                    return makeIcon(iconBG, fg, isIconPack)
                 else if (bg is ColorDrawable || bg is ShapeDrawable || bg is GradientDrawable) {
                     val pixel = bg.toBitmap(1, 1)[0, 0]
                     val lab = DoubleArray(3)
@@ -163,7 +158,7 @@ object IconThemer {
                     val bgL = lab[0]
                     ColorUtils.colorToLAB(iconBG, lab)
                     if (abs(bgL - lab[0]) < 30.0)
-                        return makeIcon(iconBG, fg)
+                        return makeIcon(iconBG, fg, isIconPack)
                 }
             }
         }
@@ -171,20 +166,20 @@ object IconThemer {
             is ShapeDrawable -> bg.paint.color
             is ColorDrawable -> bg.color
             is GradientDrawable -> bg.color?.defaultColor
-                ?: return makeIcon(bg, fg)
-            else -> return makeIcon(bg, fg)
+                ?: return makeIcon(bg, fg, isIconPack)
+            else -> return makeIcon(bg, fg, isIconPack)
         }
         return makeIcon(if (doGrayscale)
             ColorThemer.colorize(color, iconBG)
-        else color, fg)
+        else color, fg, isIconPack)
     }
 
     private fun makeIcon(
         bg: Drawable?,
         fg: Drawable?,
-        isAlreadyThemed: Boolean = false,
+        isIconPack: Boolean,
     ): ClippedDrawable {
-        val layers = LayerDrawable(arrayOf(if (doIconGloss && !isAlreadyThemed)
+        val layers = LayerDrawable(arrayOf(if (doIconGloss && !isIconPack)
             bg?.let(::IconGlossDrawable) else bg, fg))
         val w = layers.intrinsicWidth
         val h = layers.intrinsicHeight
@@ -204,10 +199,10 @@ object IconThemer {
     private fun makeIcon(
         bg: Int,
         fg: Drawable,
-        isAlreadyThemed: Boolean = false,
+        isIconPack: Boolean,
     ): ClippedDrawable {
-        if (doIconGloss && !isAlreadyThemed)
-            return makeIcon(FillDrawable(bg), fg)
+        if (doIconGloss && !isIconPack)
+            return makeIcon(FillDrawable(bg), fg, false)
 
         val w = fg.intrinsicWidth
         val h = fg.intrinsicHeight
@@ -292,18 +287,4 @@ object IconThemer {
         e.printStackTrace()
         icon
     }
-
-    fun makeMasked(pic: Drawable): Drawable {
-        val path = Path().apply {
-            val w = pic.bounds.width().toFloat()
-            val r = w * radiusRatio
-            addRoundRect(0f, 0f, w, w,
-                floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
-        }
-        return ClippedDrawable(pic, path, iconBG, doIconRim)
-    }
-
-    fun makeContact(name: String): Drawable = ContactDrawable(
-        name.substring(0, name.length.coerceAtMost(2)),
-        radiusRatio, iconBG, iconFG)
 }
