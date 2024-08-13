@@ -1,0 +1,20 @@
+Added
+- Smooth app closing animations & notification shade expansion
+- Separated the date out of the top summary card into an At a Glance type of thing, it displays battery information, the top notification, or currently playing media
+- Setting to enable/disable labels in suggestions row
+- Made grayscale icons tint the background with the icon background color sometimes
+- Dynamic tinting of media player as a setting
+- The launcher now reacts to power saver mode, by changing the app drawer opening animation
+- Skeuomorphic effects for icons and cards
+
+Tweaked
+- Pinned grid drop targets
+- Reorganized and changed settings UI
+- Higher maximum number of suggestions
+- Added subtle shadows to various elements
+- Made all icons be reshaped
+- Changed media player
+- Improved search
+- Home button now opens/closes the app drawer when on the home screen
+- Contact icons
+- Nested adaptive icons are now properly reshaped
