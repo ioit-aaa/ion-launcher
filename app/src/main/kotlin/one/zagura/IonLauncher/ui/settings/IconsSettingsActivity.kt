@@ -40,7 +40,7 @@ class IconsSettingsActivity : Activity() {
                 bg.isVisible = ionApplication.settings["icon:monochrome", false]
             }
             colorSettings("icon", ColorThemer.DEFAULT_LIGHT, ColorThemer.DEFAULT_DARK, 0xdd)
-            title(R.string.skeumorphism)
+            title(R.string.skeuomorphism)
             setting(R.string.icon_rim) {
                 switch("icon:rim", false)
             }
