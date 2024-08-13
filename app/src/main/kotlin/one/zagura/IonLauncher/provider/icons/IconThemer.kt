@@ -20,6 +20,7 @@ import android.graphics.drawable.InsetDrawable
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.alpha
 import androidx.core.graphics.drawable.toBitmap
@@ -30,10 +31,13 @@ import one.zagura.IonLauncher.util.IconTheming
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.Utils.setGrayscale
 import one.zagura.IonLauncher.util.drawable.ClippedDrawable
+import one.zagura.IonLauncher.util.drawable.ReshapedAdaptiveIcon
 import one.zagura.IonLauncher.util.drawable.ContactDrawable
 import one.zagura.IonLauncher.util.drawable.FillDrawable
 import one.zagura.IonLauncher.util.drawable.IconGlossDrawable
+import one.zagura.IonLauncher.util.drawable.NonDrawable
 import kotlin.math.abs
+import kotlin.math.max
 
 object IconThemer {
 
@@ -129,8 +133,8 @@ object IconThemer {
             return ClippedDrawable(icon, path, iconBG, doIconRim)
         }
 
-        var fg = icon.foreground
-        var bg = icon.background
+        var fg = icon.foreground?.let(::reshapeNestedAdaptiveIcons) ?: NonDrawable
+        var bg = icon.background?.let(::reshapeNestedAdaptiveIcons)
         fg?.setGrayscale(doGrayscale)
         bg?.setGrayscale(doGrayscale)
 
@@ -286,5 +290,25 @@ object IconThemer {
     } catch (e: Exception) {
         e.printStackTrace()
         icon
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun reshapeNestedAdaptiveIcons(icon: Drawable): Drawable {
+        return when (icon) {
+            is AdaptiveIconDrawable -> {
+                val w = max(icon.intrinsicWidth, icon.intrinsicWidth)
+                val path = Path().apply {
+                    val r = w * radiusRatio
+                    addRoundRect(
+                        0f, 0f, w.toFloat(), w.toFloat(),
+                        floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
+                }
+                ReshapedAdaptiveIcon(w, icon.background, icon.foreground, path)
+            }
+            is InsetDrawable -> icon.apply {
+                drawable = reshapeNestedAdaptiveIcons(icon.drawable ?: return icon)
+            }
+            else -> icon
+        }
     }
 }
