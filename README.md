@@ -12,11 +12,5 @@
 
 ## Future goals
 
-- Hiding apps
 - More stuff in search
 - Under 2MB APK size
-
-### Paid extension app
-I plan on making a paid extension app to monetize this somehow,
-it would have integrations with specific (and maybe proprietary)
-things, like google, telegram, microsoft...
