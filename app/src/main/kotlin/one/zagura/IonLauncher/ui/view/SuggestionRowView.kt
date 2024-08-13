@@ -64,7 +64,7 @@ class SuggestionRowView(
         showSearchButton = settings["layout:search-in-suggestions", false]
         showLabels = settings["suggestion:labels", false]
         icSearch.setTint(ColorThemer.cardForeground(context))
-        if (showLabels)
+        if (showLabels && suggestions.isNotEmpty())
             updateLabels()
         else labels = emptyArray()
         invalidate()
