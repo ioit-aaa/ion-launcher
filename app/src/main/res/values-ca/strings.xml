@@ -62,6 +62,7 @@
     <string name="skeuomorphism">Esqueuformisme</string>
     <string name="icon_rim">Efecte 3D</string>
     <string name="icon_gloss">Brillantor</string>
+    <string name="all_apps">Aplicacions</string>
     <plurals name="missed_calls">
         <item quantity="one">Una trucada perduda</item>
         <item quantity="many">%d trucades perdudes</item>

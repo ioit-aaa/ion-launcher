@@ -85,7 +85,6 @@
         <activity android:name=".ui.settings.CardsSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
         <activity android:name=".ui.settings.DrawerSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
         <activity android:name=".ui.settings.WallpaperSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
-        <activity android:name=".ui.settings.PinnedGridSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
         <activity android:name=".ui.settings.SetupActivity" android:theme="@style/IonLauncher.Settings"/>
 
         <activity

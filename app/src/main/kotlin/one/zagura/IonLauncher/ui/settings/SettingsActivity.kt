@@ -26,11 +26,20 @@ class SettingsActivity : Activity() {
         setSettingsContentView(R.string.tweaks) {
             setting(R.string.icons) { onClick(IconsSettingsActivity::class.java) }
             setting(R.string.cards) { onClick(CardsSettingsActivity::class.java) }
-            setting(R.string.pinned_grid) { onClick(PinnedGridSettingsActivity::class.java) }
             setting(R.string.drawer) { onClick(DrawerSettingsActivity::class.java) }
             setting(R.string.wallpaper) { onClick(WallpaperSettingsActivity::class.java) }
+            setting(R.string.icon_size, isVertical = true) {
+                seekbar("dock:icon-size", 48, min = 24, max = 72, multiplier = 8)
+            }
             setting(R.string.radius_percent, isVertical = true) {
                 seekbar("icon:radius-ratio", 50, min = 0, max = 50, multiplier = 5)
+            }
+            setting(R.string.columns, isVertical = true) {
+                seekbar("dock:columns", 5, min = 2, max = 7)
+            }
+            title(R.string.pinned_grid)
+            setting(R.string.rows, isVertical = true) {
+                seekbar("dock:rows", 2, min = 1, max = 5)
             }
             title(R.string.widgets)
             setting(R.string.choose_widget) {

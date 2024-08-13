@@ -378,16 +378,17 @@ class HomeScreen : Activity() {
         Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.wallForeground(this)) < 0.5f)
         drawCtx.applyCustomizations(this, settings)
         pinnedGrid.applyCustomizations(settings)
-        drawerArea.applyCustomizations()
+        val m = pinnedGrid.calculateSideMargin()
+        drawerArea.applyCustomizations(settings, m)
         mediaView.applyCustomizations(settings)
         summaryView.applyCustomizations(settings)
         suggestionsView.applyCustomizations(settings)
-        val m = pinnedGrid.calculateSideMargin()
         summaryView.setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 2), m, m)
         mediaView.setPadding(m, m / 2, m, m / 2)
         suggestionsView.setPadding(m, m / 2, m, m / 2)
+        val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
         suggestionsView.updateLayoutParams {
-            height = (settings["dock:icon-size", 48] * dp).toInt() + m
+            height = iconSize + m
         }
         val b = (Utils.getNavigationBarHeight(this@HomeScreen) - m / 2)
             .coerceAtLeast(m / 2)

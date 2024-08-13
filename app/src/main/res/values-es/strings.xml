@@ -62,6 +62,7 @@
     <string name="skeuomorphism">Esqueumorfismo</string>
     <string name="icon_rim">Efecto de borde</string>
     <string name="icon_gloss">Lustre</string>
+    <string name="all_apps">Aplicaciones</string>
     <plurals name="missed_calls">
         <item quantity="one">Una llamada perdida</item>
         <item quantity="many">%d llamadas perdidas</item>
