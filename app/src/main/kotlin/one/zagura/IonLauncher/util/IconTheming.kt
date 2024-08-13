@@ -60,9 +60,6 @@ object IconTheming {
     class IconGenerationInfo(
         val res: Resources,
     ) {
-        var size = 0
-            internal set
-
         var scaleFactor = 1f
             internal set
 

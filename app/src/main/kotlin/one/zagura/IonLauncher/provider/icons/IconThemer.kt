@@ -54,6 +54,8 @@ object IconThemer {
     private var iconFG = 0
     private var iconBG = 0
 
+    private var iconSize = 0
+
     fun updateSettings(context: Context, settings: Settings) {
         doGrayscale = settings["icon:grayscale", true]
         doMonochrome = settings["icon:monochrome", false]
@@ -63,6 +65,8 @@ object IconThemer {
         radiusRatio = settings["icon:radius-ratio", 50] / 100f
         iconFG = ColorThemer.iconForeground(context)
         iconBG = ColorThemer.iconBackground(context)
+        val dp = context.resources.displayMetrics.density
+        iconSize = (settings["dock:icon-size", 48] * dp).toInt()
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
@@ -97,10 +101,7 @@ object IconThemer {
     fun applyTheming(context: Context, icon: Drawable, iconPacks: List<IconTheming.IconPackInfo>): Drawable {
         val iconThemingInfo = iconPacks.firstNotNullOfOrNull {
             if (it.iconModificationInfo.areUnthemedIconsChanged)
-                it.iconModificationInfo.also {
-                    val dp = context.resources.displayMetrics.density
-                    context.ionApplication.settings["dock:icon-size", 48] * dp
-                } else null
+                it.iconModificationInfo else null
         }
         val ti = transformIcon(icon, iconThemingInfo != null, false)
         return if (iconThemingInfo == null) ti
@@ -242,19 +243,19 @@ object IconThemer {
         icon.setBounds(0, 0, icon.intrinsicWidth, icon.intrinsicHeight)
         icon.draw(Canvas(orig))
         val scaledBitmap =
-            Bitmap.createBitmap(iconPackInfo.size, iconPackInfo.size, Bitmap.Config.ARGB_8888)
+            Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888)
         with(Canvas(scaledBitmap)) {
             val back = iconPackInfo.back
             if (back != null)
                 drawBitmap(
                     back,
                     Rect(0, 0, back.width, back.height),
-                    Rect(0, 0, iconPackInfo.size, iconPackInfo.size),
+                    Rect(0, 0, iconSize, iconSize),
                     p)
             val scaledOrig =
-                Bitmap.createBitmap(iconPackInfo.size, iconPackInfo.size, Bitmap.Config.ARGB_8888)
+                Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888)
             with(Canvas(scaledOrig)) {
-                val s = (iconPackInfo.size * iconPackInfo.scaleFactor).toInt()
+                val s = (iconSize * iconPackInfo.scaleFactor).toInt()
                 val oldOrig = orig
                 orig = Bitmap.createScaledBitmap(orig, s, s, true)
                 oldOrig.recycle()
@@ -268,11 +269,11 @@ object IconThemer {
                     drawBitmap(
                         mask,
                         Rect(0, 0, mask.width, mask.height),
-                        Rect(0, 0, iconPackInfo.size, iconPackInfo.size),
+                        Rect(0, 0, iconSize, iconSize),
                         maskP)
             }
             drawBitmap(
-                Bitmap.createScaledBitmap(scaledOrig, iconPackInfo.size, iconPackInfo.size, true),
+                Bitmap.createScaledBitmap(scaledOrig, iconSize, iconSize, true),
                 0f,
                 0f,
                 p)
@@ -281,7 +282,7 @@ object IconThemer {
                 drawBitmap(
                     front,
                     Rect(0, 0, front.width, front.height),
-                    Rect(0, 0, iconPackInfo.size, iconPackInfo.size),
+                    Rect(0, 0, iconSize, iconSize),
                     p)
             orig.recycle()
             scaledOrig.recycle()
