@@ -30,7 +30,7 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Widgets
 import one.zagura.IonLauncher.provider.items.AppLoader
-import one.zagura.IonLauncher.provider.items.IconLoader
+import one.zagura.IonLauncher.provider.icons.IconLoader
 import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.notification.TopNotificationProvider
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager

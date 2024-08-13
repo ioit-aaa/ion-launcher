@@ -18,7 +18,7 @@ import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
-import one.zagura.IonLauncher.provider.items.IconLoader
+import one.zagura.IonLauncher.provider.icons.IconLoader
 import one.zagura.IonLauncher.provider.items.LabelLoader
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.iconify.IconifyAnim

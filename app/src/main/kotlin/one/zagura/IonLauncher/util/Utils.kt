@@ -8,7 +8,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Point
+import android.graphics.drawable.Drawable
 import android.media.AudioAttributes
 import android.os.Build
 import android.os.CombinedVibration
@@ -26,7 +29,7 @@ import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.annotation.RequiresPermission
 import one.zagura.IonLauncher.data.items.LauncherItem
-import one.zagura.IonLauncher.provider.items.IconLoader
+import one.zagura.IonLauncher.provider.icons.IconLoader
 import java.util.Calendar
 
 
@@ -222,15 +225,6 @@ object Utils {
         context.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, PackageManager.DONT_KILL_APP)
     }
 
-    fun getDefaultLauncher(packageManager: PackageManager): String? {
-        val intent = Intent(Intent.ACTION_MAIN)
-        intent.addCategory(Intent.CATEGORY_HOME)
-        return packageManager.resolveActivity(
-            intent,
-            PackageManager.MATCH_DEFAULT_ONLY
-        )?.resolvePackageName
-    }
-
     fun format(context: Context, time: Long): String =
         DateFormat.getTimeFormat(context).format(Calendar.getInstance().apply {
             timeInMillis = time
@@ -242,5 +236,11 @@ object Utils {
         val wlp = window.attributes
         wlp.flags = if (enable) wlp.flags or FLAG_SLIPPERY else wlp.flags and FLAG_SLIPPERY.inv()
         window.attributes = wlp
+    }
+
+    fun Drawable.setGrayscale(value: Boolean) {
+        colorFilter = if (value) ColorMatrixColorFilter(ColorMatrix().apply {
+            setSaturation(0f)
+        }) else null
     }
 }
