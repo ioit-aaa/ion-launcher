@@ -41,13 +41,13 @@ class SummaryView(
     private val drawCtx: SharedDrawingContext,
 ) : View(context) {
 
-    private var topString = ""
+    private var topString: CharSequence = ""
     private var bottomString: CharSequence? = ""
     private var events = emptyArray<CompiledEvent>()
     private var isGlanceMultiline = false
     private var onGlanceTap: (() -> Unit)? = null
 
-    private val pureTitlePaint = Paint().apply {
+    private val pureTitlePaint = TextPaint().apply {
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 28f, resources.displayMetrics)
         textAlign = Paint.Align.LEFT
         isAntiAlias = true
@@ -140,8 +140,14 @@ class SummaryView(
             else "$topString\n$bottomString"
         post {
             contentDescription = cd
+            val ax = drawCtx.radius / 3
+            topString = TextUtils.ellipsize(
+                topString,
+                pureTitlePaint,
+                width - paddingLeft - paddingRight - ax * 2,
+                TextUtils.TruncateAt.END,
+            )
             if (bottomString != null) {
-                val ax = drawCtx.radius / 3
                 bottomString = TextUtils.ellipsize(
                     bottomString,
                     pureTextPaint,
@@ -194,7 +200,7 @@ class SummaryView(
 
         var y = paddingTop - pureTitlePaint.ascent()
         val ax = drawCtx.radius / 3
-        canvas.drawText(topString, paddingLeft + ax, y, pureTitlePaint)
+        canvas.drawText(topString, 0, topString.length, paddingLeft + ax, y, pureTitlePaint)
         bottomString?.let {
             y += pureTitlePaint.descent() + separation - pureTextPaint.ascent()
             canvas.drawText(it, 0, it.length, paddingLeft + ax, y, pureTextPaint)
