@@ -26,6 +26,7 @@ import one.zagura.IonLauncher.util.iconify.IconifyAnim
 import one.zagura.IonLauncher.util.LiveWallpaper
 import one.zagura.IonLauncher.util.drawable.NonDrawable
 import one.zagura.IonLauncher.util.Settings
+import one.zagura.IonLauncher.util.StatusBarExpandHelper
 import one.zagura.IonLauncher.util.Utils
 import kotlin.math.abs
 
@@ -242,6 +243,7 @@ class PinnedGridView(
     }
 
     override fun onTouchEvent(e: MotionEvent): Boolean {
+        StatusBarExpandHelper.onTouchEvent(context, e)
         if (e.action == MotionEvent.ACTION_UP || e.action == MotionEvent.ACTION_CANCEL) {
             highlight = null
             invalidate()
@@ -257,7 +259,8 @@ class PinnedGridView(
             invalidate()
         }
 
-        override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float) = false
+        override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float) =
+            StatusBarExpandHelper.onScroll(context, e1, e2)
 
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
             if (abs(vy) > abs(vx) && vy > 0)

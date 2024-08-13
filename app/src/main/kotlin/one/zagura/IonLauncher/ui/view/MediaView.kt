@@ -13,6 +13,7 @@ import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.media.MediaPlayerData
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.util.Settings
+import one.zagura.IonLauncher.util.StatusBarExpandHelper
 import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
 import kotlin.math.abs
@@ -154,12 +155,16 @@ class MediaView(
         icon.draw(canvas)
     }
 
-    override fun onTouchEvent(e: MotionEvent) = gestureListener.onTouchEvent(e)
+    override fun onTouchEvent(e: MotionEvent): Boolean {
+        StatusBarExpandHelper.onTouchEvent(context, e)
+        return gestureListener.onTouchEvent(e)
+    }
 
     private val gestureListener = GestureDetector(context, object : GestureDetector.OnGestureListener {
         override fun onDown(e: MotionEvent) = true
         override fun onShowPress(e: MotionEvent) {}
-        override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float) = false
+        override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float) =
+            StatusBarExpandHelper.onScroll(context, e1, e2)
         override fun onLongPress(e: MotionEvent) {}
 
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {

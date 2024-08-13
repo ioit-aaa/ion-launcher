@@ -27,6 +27,7 @@ import one.zagura.IonLauncher.provider.summary.Alarm
 import one.zagura.IonLauncher.provider.summary.Battery
 import one.zagura.IonLauncher.util.LiveWallpaper
 import one.zagura.IonLauncher.util.Settings
+import one.zagura.IonLauncher.util.StatusBarExpandHelper
 import one.zagura.IonLauncher.util.Utils
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -230,13 +231,8 @@ class SummaryView(
         }
     }
 
-    private var expanded = false
-
     override fun onTouchEvent(e: MotionEvent): Boolean {
-        if (expanded && (e.action == MotionEvent.ACTION_UP || e.action == MotionEvent.ACTION_CANCEL))
-            Utils.setWindowSlippery((context as Activity).window, false)
-        if (e.action != MotionEvent.ACTION_MOVE)
-            expanded = false
+        StatusBarExpandHelper.onTouchEvent(context, e)
         return gestureDetector.onTouchEvent(e)
     }
 
@@ -249,18 +245,8 @@ class SummaryView(
             LongPressMenu.popupLauncher(this@SummaryView, Gravity.CENTER, e.x.toInt() - w / 2, e.y.toInt() - h / 2)
             Utils.click(context)
         }
-        override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float): Boolean {
-            if (e1 == null || expanded)
-                return false
-            val dy = e2.y - e1.y
-            val dx = e2.x - e1.x
-            if (abs(dy) > abs(dx) && dy > 0) {
-                expanded = true
-                Utils.setWindowSlippery((context as Activity).window, true)
-                Utils.pullStatusBar(context)
-            }
-            return true
-        }
+        override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float) =
+            StatusBarExpandHelper.onScroll(context, e1, e2)
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             if (tryConsumeTap(e)) return true
