@@ -26,8 +26,6 @@ import androidx.core.graphics.alpha
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.get
 import one.zagura.IonLauncher.provider.ColorThemer
-import one.zagura.IonLauncher.ui.ionApplication
-import one.zagura.IonLauncher.util.IconTheming
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.Utils.setGrayscale
 import one.zagura.IonLauncher.util.drawable.ClippedDrawable
@@ -98,10 +96,9 @@ object IconThemer {
     fun transformIconFromIconPack(icon: Drawable): Drawable =
         transformIcon(icon, willBeThemed = false, isIconPack = true)
 
-    fun applyTheming(context: Context, icon: Drawable, iconPacks: List<IconTheming.IconPackInfo>): Drawable {
+    fun applyTheming(context: Context, icon: Drawable, iconPacks: List<IconPackInfo>): Drawable {
         val iconThemingInfo = iconPacks.firstNotNullOfOrNull {
-            if (it.iconModificationInfo.areUnthemedIconsChanged)
-                it.iconModificationInfo else null
+            it.iconModificationInfo
         }
         val ti = transformIcon(icon, iconThemingInfo != null, false)
         return if (iconThemingInfo == null) ti
@@ -232,7 +229,7 @@ object IconThemer {
     }
     private fun applyIconPackTheming(
         icon: Drawable,
-        iconPackInfo: IconTheming.IconGenerationInfo,
+        iconPackInfo: IconPackInfo.IconGenInfo,
         resources: Resources
     ): Drawable = try {
         var orig = Bitmap.createBitmap(

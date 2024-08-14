@@ -2,6 +2,9 @@ package one.zagura.IonLauncher.ui.settings.iconPackPicker
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -13,11 +16,15 @@ import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.view.settings.setupWindow
 import one.zagura.IonLauncher.ui.settings.iconPackPicker.viewHolder.IconPackViewHolder
-import one.zagura.IonLauncher.util.IconTheming
 import one.zagura.IonLauncher.util.Utils
 import java.util.*
 
 class IconPackPickerActivity : Activity() {
+
+    companion object {
+        private const val ICON_PACK_CATEGORY = "com.anddoes.launcher.THEME"
+    }
+
     @SuppressLint("UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +43,7 @@ class IconPackPickerActivity : Activity() {
 
         Utils.setDarkStatusFG(window, resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_NO)
 
-        val iconPacks = IconTheming.getAvailableIconPacks(packageManager).mapTo(LinkedList()) {
+        val iconPacks = getAvailableIconPacks(packageManager).mapTo(LinkedList()) {
             IconPack(
                 it.loadIcon(packageManager),
                 it.loadLabel(packageManager).toString(),
@@ -82,6 +89,14 @@ class IconPackPickerActivity : Activity() {
         val th = ItemTouchHelper(TouchCallback(adapter))
         adapter.itemTouchHelper = th
         th.attachToRecyclerView(recycler)
+    }
+
+    private fun getAvailableIconPacks(packageManager: PackageManager): MutableList<ResolveInfo> {
+        return packageManager.queryIntentActivities(
+            Intent(Intent.ACTION_MAIN)
+                .addCategory(ICON_PACK_CATEGORY),
+            0
+        )
     }
 
     class TouchCallback(private val adapter: IconPackPickerAdapter) : ItemTouchHelper.Callback() {

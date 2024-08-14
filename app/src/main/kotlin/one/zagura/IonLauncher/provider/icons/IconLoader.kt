@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
-import android.graphics.Path
 import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -17,9 +16,6 @@ import one.zagura.IonLauncher.data.items.OpenAlarmsItem
 import one.zagura.IonLauncher.data.items.StaticShortcut
 import one.zagura.IonLauncher.data.items.TorchToggleItem
 import one.zagura.IonLauncher.provider.items.LabelLoader
-import one.zagura.IonLauncher.util.drawable.ClippedDrawable
-import one.zagura.IonLauncher.util.drawable.ContactDrawable
-import one.zagura.IonLauncher.util.IconTheming
 import one.zagura.IonLauncher.util.drawable.NonDrawable
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.TaskRunner
@@ -32,7 +28,7 @@ object IconLoader {
     private val cacheApps = HashMap<App, Drawable>()
     private val cacheContacts = HashMap<String, Drawable>() // only use lookup key
     private val cacheShortcuts = HashMap<StaticShortcut, Drawable>()
-    private var iconPacks = emptyList<IconTheming.IconPackInfo>()
+    private var iconPacks = emptyList<IconPackInfo>()
 
     private val iconPacksLock = ReentrantLock()
 
@@ -43,7 +39,7 @@ object IconLoader {
                 internalClearCache()
                 iconPacks = settings.getStrings("icon_packs").orEmpty().mapNotNull { p ->
                     try {
-                        IconTheming.getIconPackInfo(context.packageManager, p)
+                        IconPackInfo.get(context.packageManager, p)
                     } catch (e: Exception) {
                         e.printStackTrace()
                         null
