@@ -56,11 +56,13 @@ class SearchAdapter(
         text: TextView,
     ) : RecyclerView.ViewHolder(text)
 
-    override fun getItemId(i: Int) = getItem(i).hashCode().toLong() // sus
+    override fun getItemId(i: Int) =
+        if (!isSearch && i == 0) 0
+        else getItem(i).hashCode().toLong() // sus
 
     override fun getItemCount() = items.size
 
-    private fun getItem(i: Int) = items[i]
+    private fun getItem(i: Int) = items[if (isSearch) i else i - 1]
 
     override fun getItemViewType(i: Int) = when {
         isSearch -> 0
@@ -160,11 +162,8 @@ class SearchAdapter(
         }
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, ii: Int) {
-        val i = if (!isSearch) {
-            if (ii == 0) return
-            ii - 1
-        } else ii
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, i: Int) {
+        if (!isSearch && i == 0) return
         holder as ViewHolder
         val context = holder.itemView.context
         val item = getItem(i)
