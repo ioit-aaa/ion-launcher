@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Picture
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.drawable.Drawable
@@ -16,6 +17,7 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.RequiresApi
+import androidx.core.graphics.record
 import androidx.core.view.updateLayoutParams
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
@@ -38,29 +40,26 @@ class PinnedGridView(
 
     class ItemPreview(val icon: Drawable, val x: Int, val y: Int)
 
-    var showDropTargets = false
+    var showDropTargets
+        get() = gridPic != null
         set(value) {
-            field = value
+            gridPic = if (value)
+                Picture().record(width, height) {
+                    drawGrid()
+                }
+            else null
             invalidate()
         }
+    private var gridPic: Picture? = null
+
+    // also used with a NonDrawable for iconify animation
     private var replacePreview: ItemPreview? = null
     private var dropPreview: ItemPreview? = null
-    private var highlight: Pair<Int, Int>? = null
+    private var showPress: Pair<Int, Int>? = null
 
     private var items = ArrayList<LauncherItem?>()
     private var columns = 0
     private var rows = 0
-
-    private val gridPaint = Paint().apply {
-        isAntiAlias = true
-    }
-
-    private val targetPaint = Paint().apply {
-        val dp = resources.displayMetrics.density
-        strokeWidth = 2 * dp
-        style = Paint.Style.STROKE
-        isAntiAlias = true
-    }
 
     private fun getItem(x: Int, y: Int): LauncherItem? {
         val i = y * columns + x
@@ -83,10 +82,6 @@ class PinnedGridView(
         updateLayoutParams {
             height = calculateGridHeight()
         }
-
-        val fg = ColorThemer.wallForeground(context)
-        gridPaint.color = fg and 0xffffff or 0xdd000000.toInt()
-        targetPaint.color = fg and 0xffffff or 0x88000000.toInt()
 
         updateGridApps()
     }
@@ -112,33 +107,7 @@ class PinnedGridView(
 
     override fun onDraw(canvas: Canvas) {
         drawItems(canvas)
-        if (!showDropTargets)
-            return
-        val dp = resources.displayMetrics.density
-        val r = drawCtx.iconSize / 2f + dp
-
-        val ww = width - paddingLeft - paddingRight
-        val l = paddingLeft + (ww - drawCtx.iconSize * columns) / (columns + 1) / 2
-        val w = width - l * 2
-        val h = height
-
-        for (x in 0 ..< columns)
-            for (y in 0 ..< rows) {
-                val x = l + w / columns * (0.5f + x) - r
-                val y = h / rows * (0.5f + y) - r
-                canvas.drawRoundRect(
-                    x, y, x + r * 2, y + r * 2,
-                    drawCtx.radius + dp * 2, drawCtx.radius + dp * 2,
-                    targetPaint
-                )
-            }
-        for (x in 0 .. columns)
-            for (y in 0 .. rows) {
-                canvas.drawCircle(
-                    l + w / columns * x.toFloat(),
-                    h / rows * y.toFloat(),
-                    dp, gridPaint)
-            }
+        gridPic?.draw(canvas)
     }
 
     private fun drawItems(canvas: Canvas) {
@@ -153,7 +122,7 @@ class PinnedGridView(
         val h = height
         for (x in 0 until columns)
             for (y in 0 until rows) {
-                val r = if (highlight?.let { it.first == x && it.second == y } == true)
+                val r = if (showPress?.let { it.first == x && it.second == y } == true)
                     br else if (showDropTargets) sr else r
                 val icon = if (d?.let { it.x == x && it.y == y } == true) d.icon
                     else if (i?.let { it.x == x && it.y == y } == true) i.icon
@@ -170,6 +139,49 @@ class PinnedGridView(
                 } else
                     icon.draw(canvas)
                 icon.bounds = drawCtx.tmpRect
+            }
+    }
+
+    private fun Canvas.drawGrid() {
+        val fg = ColorThemer.wallForeground(context)
+
+        val gridPaint = Paint().apply {
+            isAntiAlias = true
+            color = fg and 0xffffff or 0xdd000000.toInt()
+        }
+
+        val targetPaint = Paint().apply {
+            val dp = resources.displayMetrics.density
+            strokeWidth = 2 * dp
+            style = Paint.Style.STROKE
+            isAntiAlias = true
+            color = fg and 0xffffff or 0x88000000.toInt()
+        }
+
+        val dp = resources.displayMetrics.density
+        val r = drawCtx.iconSize / 2f + dp
+
+        val ww = width - paddingLeft - paddingRight
+        val l = paddingLeft + (ww - drawCtx.iconSize * columns) / (columns + 1) / 2
+        val w = width - l * 2
+        val h = height
+
+        for (x in 0 ..< columns)
+            for (y in 0 ..< rows) {
+                val x = l + w / columns * (0.5f + x) - r
+                val y = h / rows * (0.5f + y) - r
+                drawRoundRect(
+                    x, y, x + r * 2, y + r * 2,
+                    drawCtx.radius + dp * 2, drawCtx.radius + dp * 2,
+                    targetPaint
+                )
+            }
+        for (x in 0 .. columns)
+            for (y in 0 .. rows) {
+                drawCircle(
+                    l + w / columns * x.toFloat(),
+                    h / rows * y.toFloat(),
+                    dp, gridPaint)
             }
     }
 
@@ -245,7 +257,7 @@ class PinnedGridView(
     override fun onTouchEvent(e: MotionEvent): Boolean {
         StatusBarExpandHelper.onTouchEvent(context, e)
         if (e.action == MotionEvent.ACTION_UP || e.action == MotionEvent.ACTION_CANCEL) {
-            highlight = null
+            showPress = null
             invalidate()
         }
         return gestureListener.onTouchEvent(e)
@@ -255,7 +267,7 @@ class PinnedGridView(
         override fun onDown(e: MotionEvent) = true
 
         override fun onShowPress(e: MotionEvent) {
-            highlight = viewToGridCoords(e.x.toInt(), e.y.toInt())
+            showPress = viewToGridCoords(e.x.toInt(), e.y.toInt())
             invalidate()
         }
 
