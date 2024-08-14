@@ -1,1 +1,1 @@
-Un lanzador minimalista, bonito y funcional
+Un lanzador simple, bonito y funcional

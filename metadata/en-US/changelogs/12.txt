@@ -1,0 +1,3 @@
+Revamped app drawer, made it follow the grid column & icon size settings, added setting for app drawer labels, reorganized settings.
+
+Slightly improved icon pack support (added support for category icon keywords)

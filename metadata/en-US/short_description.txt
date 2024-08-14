@@ -1,1 +1,1 @@
-A minimalist, pretty & functional launcher
+A beautiful, functional and customizable launcher
