@@ -131,17 +131,18 @@ class SearchAdapter(
                 val item = getItem(bindingAdapterPosition)
                 val sh = it.resources.displayMetrics.heightPixels
                 val (lx, ly) = IntArray(2).apply(icon::getLocationInWindow)
-                val h = (-2 * dp).toInt()
+                val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
+                val h = lx + (-2 * dp).toInt() + (it.width - iconSize) / 2
                 val v = (8 * dp).toInt()
                 if (ly > sh / 2) LongPressMenu.popup(
                     it, item,
                     Gravity.BOTTOM or Gravity.START,
-                    lx + h, Utils.getDisplayHeight(activity) - ly + v,
+                    h, Utils.getDisplayHeight(activity) - ly + v,
                     true,
                 ) else LongPressMenu.popup(
                     it, item,
                     Gravity.TOP or Gravity.START,
-                    lx + h, ly + icon.height + v,
+                    h, ly + icon.height + v,
                     true,
                 )
                 Utils.startDrag(it, item, it to bindingAdapterPosition)
