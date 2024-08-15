@@ -87,6 +87,11 @@ class Settings(
         }
 
         @JvmName("set1")
+        infix fun String.set(n: Nothing?) {
+            settings.singles.keys.remove(this)
+        }
+
+        @JvmName("set1")
         inline infix fun String.set(value: Int) = set(this, value)
 
         @JvmName("set1")

@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.widgetChooser
+package one.zagura.IonLauncher.ui.settings.widgetChooser
 
 import android.appwidget.AppWidgetProviderInfo
 import android.graphics.drawable.Drawable

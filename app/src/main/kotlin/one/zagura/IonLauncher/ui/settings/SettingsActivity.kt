@@ -16,7 +16,7 @@ import one.zagura.IonLauncher.ui.view.settings.seekbar
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
 import one.zagura.IonLauncher.ui.view.settings.setting
 import one.zagura.IonLauncher.ui.view.settings.title
-import one.zagura.IonLauncher.ui.widgetChooser.WidgetChooserActivity
+import one.zagura.IonLauncher.ui.settings.widgetChooser.WidgetChooserActivity
 import one.zagura.IonLauncher.util.Utils
 
 class SettingsActivity : Activity() {

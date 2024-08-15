@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.provider.items
+package one.zagura.IonLauncher.provider.icons
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -16,6 +16,7 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.data.items.OpenAlarmsItem
 import one.zagura.IonLauncher.data.items.StaticShortcut
 import one.zagura.IonLauncher.data.items.TorchToggleItem
+import one.zagura.IonLauncher.provider.EditedItems
 
 object LabelLoader {
     private val cacheApps = HashMap<App, String>()
@@ -32,13 +33,16 @@ object LabelLoader {
         is OpenAlarmsItem -> context.getString(R.string.alarms)
     }
 
-    fun loadLabel(context: Context, item: ActionItem): String {
+    private fun loadLabel(context: Context, item: ActionItem): String {
         val i = context.packageManager.queryIntentActivities(Intent(item.action), 0)
             .firstOrNull() ?: return ""
         return i.loadLabel(context.packageManager).toString()
     }
 
     fun loadLabel(context: Context, app: App): String {
+        val custom = EditedItems.getLabel(context, app)
+        if (custom != null)
+            return custom
         return cacheApps.getOrPut(app) {
             val launcherApps =
                 context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
@@ -83,6 +87,9 @@ object LabelLoader {
 
     @RequiresApi(Build.VERSION_CODES.N_MR1)
     fun loadLabel(context: Context, shortcut: StaticShortcut): String {
+        val custom = EditedItems.getLabel(context, shortcut)
+        if (custom != null)
+            return custom
         return cacheShortcuts.getOrPut(shortcut) {
             shortcut.getShortcutInfo(context)?.shortLabel?.toString() ?: ""
         }

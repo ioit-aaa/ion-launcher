@@ -16,7 +16,7 @@ import android.os.PowerManager
 import androidx.annotation.RequiresApi
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.icons.IconLoader
-import one.zagura.IonLauncher.provider.items.LabelLoader
+import one.zagura.IonLauncher.provider.icons.LabelLoader
 import one.zagura.IonLauncher.provider.search.Search
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.provider.summary.Battery

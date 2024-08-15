@@ -7,7 +7,7 @@ import com.willowtreeapps.fuzzywuzzy.diffutils.FuzzySearch
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.data.items.StaticShortcut
 import one.zagura.IonLauncher.provider.items.AppLoader
-import one.zagura.IonLauncher.provider.items.LabelLoader
+import one.zagura.IonLauncher.provider.icons.LabelLoader
 import one.zagura.IonLauncher.provider.items.ShortcutLoader
 import one.zagura.IonLauncher.util.Cancellable
 

@@ -63,6 +63,8 @@
     <string name="icon_rim">3D эффект</string>
     <string name="icon_gloss">Лакировка</string>
     <string name="all_apps">Приложения</string>
+    <string name="edit">Изменить</string>
+    <string name="reset">Восстановить</string>
     <plurals name="missed_calls">
         <item quantity="one">%d потеранный звонок</item>
         <item quantity="few">%d потеранных знонка</item>

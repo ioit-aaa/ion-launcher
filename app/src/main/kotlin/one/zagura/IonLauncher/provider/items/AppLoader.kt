@@ -8,6 +8,7 @@ import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.provider.HiddenApps
 import one.zagura.IonLauncher.provider.UpdatingResource
 import one.zagura.IonLauncher.provider.icons.IconLoader
+import one.zagura.IonLauncher.provider.icons.LabelLoader
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.ui.IonLauncherApp
 import one.zagura.IonLauncher.util.TaskRunner

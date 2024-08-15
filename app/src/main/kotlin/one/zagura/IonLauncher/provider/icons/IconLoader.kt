@@ -15,7 +15,7 @@ import one.zagura.IonLauncher.data.items.ActionItem
 import one.zagura.IonLauncher.data.items.OpenAlarmsItem
 import one.zagura.IonLauncher.data.items.StaticShortcut
 import one.zagura.IonLauncher.data.items.TorchToggleItem
-import one.zagura.IonLauncher.provider.items.LabelLoader
+import one.zagura.IonLauncher.provider.EditedItems
 import one.zagura.IonLauncher.util.drawable.NonDrawable
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.TaskRunner
@@ -66,6 +66,15 @@ object IconLoader {
                 iterator.remove()
     }
 
+    fun invalidateItem(item: LauncherItem) {
+        when (item) {
+            is App -> cacheApps.remove(item)
+            is ContactItem -> cacheContacts.remove(item.lookupKey)
+            is StaticShortcut -> cacheShortcuts.remove(item)
+            else -> {}
+        }
+    }
+
     @SuppressLint("NewApi")
     fun loadIcon(context: Context, item: LauncherItem): Drawable = when (item) {
         is App -> loadIcon(context, item)
@@ -76,7 +85,7 @@ object IconLoader {
         is OpenAlarmsItem -> IconThemer.loadSymbolicIcon(context, R.drawable.ic_alarm)
     }
 
-    fun loadIcon(context: Context, item: ActionItem): Drawable {
+    private fun loadIcon(context: Context, item: ActionItem): Drawable {
         val initIcon = context.packageManager.queryIntentActivities(Intent(item.action), 0)
             .firstOrNull()?.loadIcon(context.packageManager) ?: return NonDrawable
         return iconPacksLock.withLock {
@@ -84,9 +93,12 @@ object IconLoader {
         }
     }
 
-    fun loadIcon(context: Context, app: App): Drawable {
+    private fun loadIcon(context: Context, app: App): Drawable {
         return cacheApps.getOrPut(app) {
             iconPacksLock.withLock {
+                val custom = EditedItems.getIcon(context, app)
+                if (custom != null)
+                    return@getOrPut IconThemer.transformIconFromIconPack(custom)
                 val externalIcon = getIconPackIcon(context, app.packageName, app.name)
                 if (externalIcon != null)
                     return@getOrPut IconThemer.transformIconFromIconPack(externalIcon)
@@ -101,7 +113,7 @@ object IconLoader {
         }
     }
 
-    fun loadIcon(context: Context, contact: ContactItem): Drawable {
+    private fun loadIcon(context: Context, contact: ContactItem): Drawable {
         return cacheContacts.getOrPut(contact.lookupKey) {
             if (contact.iconUri != null) try {
                 val inputStream = context.contentResolver.openInputStream(contact.iconUri)
@@ -118,8 +130,11 @@ object IconLoader {
     }
 
     @RequiresApi(Build.VERSION_CODES.N_MR1)
-    fun loadIcon(context: Context, shortcut: StaticShortcut): Drawable {
+    private fun loadIcon(context: Context, shortcut: StaticShortcut): Drawable {
         return cacheShortcuts.getOrPut(shortcut) {
+            val custom = EditedItems.getIcon(context, shortcut)
+            if (custom != null)
+                return@getOrPut IconThemer.transformIconFromIconPack(custom)
             val launcherApps =
                 context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
             if (!launcherApps.hasShortcutHostPermission())

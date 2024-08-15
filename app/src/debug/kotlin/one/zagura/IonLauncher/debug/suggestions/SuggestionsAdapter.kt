@@ -16,7 +16,7 @@ import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.data.items.StaticShortcut
 import one.zagura.IonLauncher.provider.icons.IconLoader
-import one.zagura.IonLauncher.provider.items.LabelLoader
+import one.zagura.IonLauncher.provider.icons.LabelLoader
 
 class SuggestionsAdapter : RecyclerView.Adapter<SuggestionsAdapter.ViewHolder>() {
 

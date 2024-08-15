@@ -174,10 +174,10 @@ class IconPackInfo(
         }
 
         @SuppressLint("DiscouragedApi")
-        fun getResourceNames(res: Resources, iconPack: String?): ArrayList<String> {
+        fun getResourceNames(res: Resources, packageName: String): List<String> {
             val strings = ArrayList<String>()
             try {
-                val n = res.getIdentifier("drawable", "xml", iconPack)
+                val n = res.getIdentifier("drawable", "xml", packageName)
                 if (n != 0) {
                     val xrp = res.getXml(n)
                     while (xrp.eventType != XmlResourceParser.END_DOCUMENT) {
@@ -205,6 +205,22 @@ class IconPackInfo(
                 }
             } catch (_: Exception) {}
             return strings
+        }
+
+        fun fromResourceName(res: Resources, packageName: String, resourceName: String, density: Int): Drawable? {
+            val id = res.getIdentifier(resourceName, "drawable", packageName)
+            if (id == 0) return null
+            return res.getDrawableForDensity(id, density, null)
+        }
+
+        private const val ICON_PACK_CATEGORY = "com.anddoes.launcher.THEME"
+
+        fun getAvailableIconPacks(packageManager: PackageManager): MutableList<ResolveInfo> {
+            return packageManager.queryIntentActivities(
+                Intent(Intent.ACTION_MAIN)
+                    .addCategory(ICON_PACK_CATEGORY),
+                0
+            )
         }
     }
 }

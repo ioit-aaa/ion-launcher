@@ -3,7 +3,7 @@ package one.zagura.IonLauncher.provider.search
 import android.content.Context
 import one.zagura.IonLauncher.data.items.ContactItem
 import one.zagura.IonLauncher.provider.items.ContactsLoader
-import one.zagura.IonLauncher.provider.items.LabelLoader
+import one.zagura.IonLauncher.provider.icons.LabelLoader
 import one.zagura.IonLauncher.provider.search.SearchProvider.Companion.removeDiacritics
 
 object ContactsProvider : BasicProvider<ContactItem> {

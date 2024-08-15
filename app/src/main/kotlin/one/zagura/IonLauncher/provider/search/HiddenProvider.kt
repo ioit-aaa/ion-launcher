@@ -3,7 +3,7 @@ package one.zagura.IonLauncher.provider.search
 import android.content.Context
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.HiddenApps
-import one.zagura.IonLauncher.provider.items.LabelLoader
+import one.zagura.IonLauncher.provider.icons.LabelLoader
 
 object HiddenProvider : BasicProvider<LauncherItem> {
 
