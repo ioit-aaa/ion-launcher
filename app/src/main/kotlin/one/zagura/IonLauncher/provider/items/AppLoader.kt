@@ -27,7 +27,7 @@ object AppLoader : UpdatingResource<List<App>>() {
             val collection = TreeSet<App> { a, b ->
                 val la = LabelLoader.loadLabel(ionApplication, a)
                 val lb = LabelLoader.loadLabel(ionApplication, b)
-                val c = la.compareTo(lb)
+                val c = la.compareTo(lb, ignoreCase = true)
                 if (c == 0) -1 else c
             }
 
