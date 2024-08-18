@@ -29,22 +29,19 @@ class IconPackInfo(
     var iconModificationInfo: IconGenInfo? = null
 
     @SuppressLint("DiscouragedApi")
-    fun getDrawableResource(packageName: String, name: String): Int {
-        val key = "ComponentInfo{$packageName/$name}"
-        val iconResource = calendarPrefixes[key]
-            ?.let { it + Calendar.getInstance()[Calendar.DAY_OF_MONTH] }
-            ?: iconResourceNames[key]
-            ?: return 0
-        return res.getIdentifier(
-            iconResource,
-            "drawable",
-            iconPackPackageName
-        )
-    }
+    private fun getDrawable(iconResource: String) = res.getIdentifier(
+        iconResource,
+        "drawable",
+        iconPackPackageName
+    ).takeIf { it != 0 }
 
     fun getDrawable(packageName: String, name: String, density: Int): Drawable? {
-        val drawableRes = getDrawableResource(packageName, name)
-        if (drawableRes == 0) return null
+        val key = "$packageName/$name"
+        val drawableRes = calendarPrefixes[key]
+            ?.let { it + Calendar.getInstance()[Calendar.DAY_OF_MONTH] }
+            ?.let(::getDrawable)
+            ?: iconResourceNames[key]?.let(::getDrawable)
+            ?: return null
         return try {
             res.getDrawableForDensity(drawableRes, density, null)
         } catch (_: Resources.NotFoundException) {
@@ -77,12 +74,16 @@ class IconPackInfo(
                         else -> return
                     }
                     val activities = packageManager.queryIntentActivities(
-                        Intent(Intent.ACTION_MAIN).addCategory(category), 0)
+                        Intent(Intent.ACTION_MAIN).addCategory(category).addCategory(Intent.CATEGORY_LAUNCHER), 0)
                     for (a in activities) {
                         val activity = a.activityInfo
-                        map["ComponentInfo{${activity.packageName}/${activity.name}}"] = value
+                        val k = "${activity.packageName}/${activity.name}"
+                        if (!map.containsKey(k))
+                            map[k] = value
                     }
                 }
+                key.startsWith("ComponentInfo{") ->
+                    map[key.substring("ComponentInfo{".length, key.length - 1)] = value
                 else -> map[key] = value
             }
         }
