@@ -60,7 +60,7 @@ class SearchAdapter(
         if (!isSearch && i == 0) 0
         else getItem(i).hashCode().toLong() // sus
 
-    override fun getItemCount() = items.size
+    override fun getItemCount() = if (isSearch) items.size else items.size + 1
 
     private fun getItem(i: Int) = items[if (isSearch) i else i - 1]
 

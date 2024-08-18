@@ -29,7 +29,7 @@ object AppLoader : UpdatingResource<List<App>>() {
                 val la = LabelLoader.loadLabel(ionApplication, a)
                 val lb = LabelLoader.loadLabel(ionApplication, b)
                 val c = la.compareTo(lb, ignoreCase = true)
-                if (c == 0) -1 else c
+                if (c == 0) a.compareTo(b) else c
             }
 
             for (user in userManager.userProfiles) {
@@ -69,7 +69,7 @@ object AppLoader : UpdatingResource<List<App>>() {
     }
 
     fun onShow(context: Context, app: App) {
-        val i = apps.binarySearchBy(LabelLoader.loadLabel(context, app)) { LabelLoader.loadLabel(context, it) }
+        val i = apps.binarySearchBy(LabelLoader.loadLabel(context, app).lowercase()) { LabelLoader.loadLabel(context, it).lowercase() }
         if (i < 0)
             apps.add(-i - 1, app)
         update(apps)

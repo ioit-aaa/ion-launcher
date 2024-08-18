@@ -11,7 +11,7 @@ class App(
     val packageName: String,
     val name: String,
     val userHandle: UserHandle,
-) : LauncherItem() {
+) : LauncherItem(), Comparable<App> {
 
     override fun open(view: View, bounds: Rect) {
         super.open(view, bounds)
@@ -47,5 +47,15 @@ class App(
         result = 31 * result + name.hashCode()
         result = 31 * result + userHandle.hashCode()
         return result
+    }
+
+    override fun compareTo(other: App): Int {
+        val a = packageName.compareTo(other.packageName)
+        if (a != 0)
+            return a
+        val b = name.compareTo(other.name)
+        if (b != 0)
+            return b
+        return userHandle.hashCode().compareTo(other.userHandle.hashCode())
     }
 }

@@ -9,20 +9,24 @@ import one.zagura.IonLauncher.util.Settings
 
 object HiddenApps {
 
+    private const val KEY = "hidden"
+
     fun getItems(context: Context): List<LauncherItem> {
-        val hidden = context.ionApplication.settings.getStrings("hidden") ?: return emptyList()
+        val hidden = context.ionApplication.settings.getStrings(KEY)
+            ?: return emptyList()
         return hidden.mapNotNull { LauncherItem.decode(context, it) }
     }
 
     fun hide(context: Context, item: LauncherItem) {
         val settings = context.ionApplication.settings
-        var hidden = settings.getStrings("hidden")
+        var hidden = settings.getStrings(KEY)
+        val i = item.toString()
         if (hidden == null)
-            hidden = arrayOf(item.toString())
-        else
-            hidden += item.toString()
+            hidden = arrayOf(i)
+        else if (hidden.contains(i)) return
+        else hidden += i
         settings.edit(context) {
-            "hidden" set hidden
+            KEY set hidden
         }
         if (item is App)
             AppLoader.onHide(item)
@@ -30,20 +34,21 @@ object HiddenApps {
 
     fun show(context: Context, item: LauncherItem) {
         val settings = context.ionApplication.settings
-        val hidden = settings.getStrings("hidden") ?: return
+        val hidden = settings.getStrings(KEY) ?: return
         val index = hidden.indexOf(item.toString())
         if (index == -1)
             return
         val new = hidden.toMutableList().apply { removeAt(index) }.toTypedArray()
         settings.edit(context) {
-            "hidden" set new
+            KEY set new
         }
         if (item is App)
             AppLoader.onShow(context, item)
     }
 
     fun isHidden(settings: Settings, app: App): Boolean {
-        val hidden = settings.getStrings("hidden") ?: return false
+        println("KEY: " + settings.getStrings(KEY)?.joinToString())
+        val hidden = settings.getStrings(KEY) ?: return false
         return hidden.contains(app.toString())
     }
 }
