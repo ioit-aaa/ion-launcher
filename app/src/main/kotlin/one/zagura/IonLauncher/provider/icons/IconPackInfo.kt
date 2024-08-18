@@ -175,34 +175,25 @@ class IconPackInfo(
         }
 
         @SuppressLint("DiscouragedApi")
-        fun getResourceNames(res: Resources, packageName: String): List<String> {
-            val strings = ArrayList<String>()
+        fun getResourceNames(res: Resources, packageName: String): List<IconPackResourceItem> {
+            val strings = ArrayList<IconPackResourceItem>()
             try {
                 val n = res.getIdentifier("drawable", "xml", packageName)
-                if (n != 0) {
-                    val xrp = res.getXml(n)
-                    while (xrp.eventType != XmlResourceParser.END_DOCUMENT) {
-                        try {
-                            if (xrp.eventType == 2 && !strings.contains(xrp.getAttributeValue(0)))
-                                if (xrp.name == "item")
-                                    strings.add(xrp.getAttributeValue(0))
-                        } catch (_: Exception) {}
-                        xrp.next()
+                val xpp = if (n != 0) res.getXml(n) else {
+                    XmlPullParserFactory.newInstance().apply {
+                        isValidating = false
+                    }.newPullParser().apply {
+                        setInput(res.assets.open("drawable.xml"), null)
                     }
-                } else {
-                    val factory = XmlPullParserFactory.newInstance()
-                    factory.isValidating = false
-                    val xpp = factory.newPullParser()
-                    val raw = res.assets.open("drawable.xml")
-                    xpp.setInput(raw, null)
-                    while (xpp!!.eventType != XmlPullParser.END_DOCUMENT) {
-                        try {
-                            if (xpp.eventType == 2 && !strings.contains(xpp.getAttributeValue(0)))
-                                if (xpp.name == "item")
-                                    strings.add(xpp.getAttributeValue(0))
-                        } catch (_: Exception) {}
-                        xpp.next()
-                    }
+                }
+                while (xpp.eventType != XmlPullParser.END_DOCUMENT) {
+                    try {
+                        if (xpp.eventType == 2) when (xpp.name) {
+                            "item" -> strings.add(IconPackResourceItem.Icon(xpp.getAttributeValue(0)))
+                            "category" -> strings.add(IconPackResourceItem.Title(xpp.getAttributeValue(0)))
+                        }
+                    } catch (_: Exception) {}
+                    xpp.next()
                 }
             } catch (_: Exception) {}
             return strings
@@ -223,5 +214,10 @@ class IconPackInfo(
                 0
             )
         }
+    }
+
+    sealed class IconPackResourceItem(val string: String) {
+        class Icon(string: String) : IconPackResourceItem(string)
+        class Title(string: String) : IconPackResourceItem(string)
     }
 }

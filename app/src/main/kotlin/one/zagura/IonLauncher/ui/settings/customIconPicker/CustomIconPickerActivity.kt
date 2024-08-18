@@ -31,7 +31,7 @@ class CustomIconPickerActivity : Activity() {
 
         val packageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME) ?: return finish()
         val res = packageManager.getResourcesForApplication(packageName)
-        val icons = IconPackInfo.getResourceNames(res, packageName)
+        val items = IconPackInfo.getResourceNames(res, packageName)
 
         val dp = resources.displayMetrics.density
         val sideMargin = calculateSideMargin(this)
@@ -42,7 +42,7 @@ class CustomIconPickerActivity : Activity() {
             val columns = ionApplication.settings["dock:columns", 5]
             layoutManager = GridLayoutManager(context, columns, RecyclerView.VERTICAL, false).apply {
                 spanSizeLookup = object : SpanSizeLookup() {
-                    override fun getSpanSize(i: Int) = if (i == 0) columns else 1
+                    override fun getSpanSize(i: Int) = if (i == 0 || items[i - 1] is IconPackInfo.IconPackResourceItem.Title) columns else 1
                 }
             }
         }
@@ -50,7 +50,7 @@ class CustomIconPickerActivity : Activity() {
 
         Utils.setDarkStatusFG(window, resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_NO)
 
-        recycler.adapter = IconPackIconsAdapter(res, packageName, icons, sideMargin) {
+        recycler.adapter = IconPackIconsAdapter(res, packageName, items, sideMargin) {
             setResult(RESULT_OK, Intent()
                 .putExtra(Intent.EXTRA_PACKAGE_NAME, packageName)
                 .putExtra("icon", it))
