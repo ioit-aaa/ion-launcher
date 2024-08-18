@@ -294,17 +294,25 @@ object IconThemer {
     private fun reshapeNestedAdaptiveIcons(icon: Drawable): Drawable {
         return when (icon) {
             is AdaptiveIconDrawable -> {
-                val w = max(icon.intrinsicWidth, icon.intrinsicWidth)
+                val w = max(icon.intrinsicWidth, icon.intrinsicHeight).coerceAtLeast(1)
                 val path = Path().apply {
                     val r = w * radiusRatio
                     addRoundRect(
                         0f, 0f, w.toFloat(), w.toFloat(),
                         floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
                 }
-                ReshapedAdaptiveIcon(w, icon.background, icon.foreground, path)
+                ReshapedAdaptiveIcon(w,
+                    icon.background?.let(::reshapeNestedAdaptiveIcons) ?: NonDrawable,
+                    icon.foreground?.let(::reshapeNestedAdaptiveIcons) ?: NonDrawable, path)
             }
             is InsetDrawable -> icon.apply {
                 drawable = reshapeNestedAdaptiveIcons(icon.drawable ?: return icon)
+            }
+            is LayerDrawable -> icon.apply {
+                for (i in 0 until icon.numberOfLayers) {
+                    val l = getDrawable(i) ?: continue
+                    setDrawable(i, reshapeNestedAdaptiveIcons(l))
+                }
             }
             else -> icon
         }
