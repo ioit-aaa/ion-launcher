@@ -21,6 +21,7 @@ class CustomIconActivity : Activity() {
         @SuppressLint("InlinedApi")
         fun start(context: Context, item: LauncherItem) {
             context.startActivity(Intent(context, CustomIconActivity::class.java)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 .putExtra("item", item.toString()))
         }
     }

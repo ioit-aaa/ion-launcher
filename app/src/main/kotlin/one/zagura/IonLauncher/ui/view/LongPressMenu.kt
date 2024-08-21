@@ -99,7 +99,8 @@ object LongPressMenu {
             orientation = LinearLayout.VERTICAL
             addOption(R.string.tweaks, bg, fg, place = Place.First) {
                 w.dismiss()
-                context.startActivity(Intent(context, SettingsActivity::class.java), LauncherItem.createOpeningAnimation(it))
+                context.startActivity(Intent(context, SettingsActivity::class.java)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK), LauncherItem.createOpeningAnimation(it))
             }
             addOption(R.string.wallpaper, bg, fg, place = Place.Last) {
                 w.dismiss()

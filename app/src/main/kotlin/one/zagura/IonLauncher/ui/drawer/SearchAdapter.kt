@@ -110,15 +110,16 @@ class SearchAdapter(
         } else LinearLayout(parent.context).apply {
             orientation = LinearLayout.VERTICAL
             val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
-            val p = (12 * dp).toInt()
             icon.setPadding(0, (12 * dp).toInt(), 0, (10 * dp).toInt())
             addView(icon, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, iconSize + (22 * dp).toInt()))
+            val p = (12 * dp).toInt()
             if (showLabels) addView(label.apply {
                 gravity = Gravity.CENTER_HORIZONTAL
                 textSize = 12f
                 includeFontPadding = false
-                setPadding(p, 0, p, p)
+                setPadding(p, 0, p, 0)
             })
+            setPadding(0, 0, 0, p)
         }
         return ViewHolder(view, icon, label).apply {
             itemView.setOnClickListener {
