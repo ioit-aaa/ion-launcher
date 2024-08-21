@@ -357,12 +357,13 @@ class HomeScreen : Activity() {
         bounds.offset(-bounds.width() / 2, -bounds.height() / 2)
 
         val icon = IconLoader.loadIcon(this, item)
-
+        icon.copyBounds(drawCtx.tmpRect)
         val s = (bounds.width() * 2).toInt()
         val picture = Picture().record(s, s) {
             icon.setBounds(width / 4, height / 4, width / 4 * 3, height / 4 * 3)
             icon.draw(this)
         }
+        icon.bounds = drawCtx.tmpRect
 
         val surfaceView = FloatingIconView(this, gnc, bounds, picture, onAnimEnd)
         homeScreen.addView(surfaceView, LayoutParams(s, s))
