@@ -7,7 +7,6 @@ import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.shapes.RoundRectShape
 import android.os.Build
 import android.view.Gravity
 import android.view.View
@@ -26,6 +25,8 @@ import androidx.core.graphics.toColorInt
 import androidx.core.widget.doOnTextChanged
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.provider.ColorThemer
+import one.zagura.IonLauncher.util.drawable.SquircleRectShape
+import one.zagura.IonLauncher.util.drawable.UniformSquircleRectShape
 import java.util.TreeSet
 
 object ColorPicker {
@@ -77,7 +78,7 @@ object ColorPicker {
             setSingleLine()
             val lra = 4 * dp
             val bra = 10 * dp
-            background = ShapeDrawable(RoundRectShape(floatArrayOf(lra, lra, lra, lra, bra, bra, bra, bra), null, null))
+            background = ShapeDrawable(SquircleRectShape(floatArrayOf(lra, lra, bra, bra)))
             doOnTextChanged { text, _, _, _ ->
                 val c = parseColorString(text.toString())
                 backgroundTintList = ColorStateList.valueOf(c)
@@ -133,7 +134,7 @@ object ColorPicker {
         val w = Dialog(context).apply {
             setContentView(content, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
             val r = 26 * dp
-            window!!.setBackgroundDrawable(ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null)).apply {
+            window!!.setBackgroundDrawable(ShapeDrawable(UniformSquircleRectShape(r)).apply {
                 paint.color = context.resources.getColor(R.color.color_bg)
             })
         }
@@ -237,7 +238,7 @@ object ColorPicker {
                 setTextColor(resources.getColor(R.color.color_button_text))
                 background = RippleDrawable(
                     ColorStateList.valueOf(resources.getColor(R.color.color_hint)),
-                    ShapeDrawable(RoundRectShape(floatArrayOf(br, br, 0f, 0f, 0f, 0f, br, br), null, null)).apply {
+                    ShapeDrawable(SquircleRectShape(floatArrayOf(br, 0f, 0f, br))).apply {
                         paint.color = resources.getColor(R.color.color_button)
                     }, null)
                 setPadding(h, v, h, v)
@@ -257,7 +258,7 @@ object ColorPicker {
                 setTextColor(resources.getColor(R.color.color_button_text))
                 background = RippleDrawable(
                     ColorStateList.valueOf(resources.getColor(R.color.color_hint)),
-                    ShapeDrawable(RoundRectShape(floatArrayOf(0f, 0f, br, br, br, br, 0f, 0f), null, null)).apply {
+                    ShapeDrawable(SquircleRectShape(floatArrayOf(0f, br, br, 0f))).apply {
                         paint.color = resources.getColor(R.color.color_button)
                     }, null)
                 setPadding(h, v, h, v)
@@ -300,7 +301,7 @@ object ColorPicker {
                 .let { ColorUtils.LABToColor(it[0], it[1], it[2]) }
             background = RippleDrawable(
                 ColorStateList.valueOf(highlight),
-                ShapeDrawable(RoundRectShape(floatArrayOf(tl, tl, tr, tr, lra, lra, lra, lra), null, null)), null)
+                ShapeDrawable(SquircleRectShape(floatArrayOf(tl, tr, lra, lra))), null)
             backgroundTintList = ColorStateList.valueOf(color or 0xff000000.toInt())
             setOnClickListener {
                 target.setText(formatColorString(color))

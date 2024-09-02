@@ -4,10 +4,8 @@ import android.app.Dialog
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Typeface
-import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.shapes.RoundRectShape
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -24,7 +22,6 @@ import android.widget.TextView
 import androidx.annotation.StringRes
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.App
-import one.zagura.IonLauncher.data.items.ContactItem
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.data.items.StaticShortcut
 import one.zagura.IonLauncher.provider.ColorThemer
@@ -35,6 +32,8 @@ import one.zagura.IonLauncher.provider.icons.LabelLoader
 import one.zagura.IonLauncher.ui.settings.SettingsActivity
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.settings.customIconPicker.CustomIconActivity
+import one.zagura.IonLauncher.util.drawable.SquircleRectShape
+import one.zagura.IonLauncher.util.drawable.UniformSquircleRectShape
 
 object LongPressMenu {
 
@@ -118,14 +117,15 @@ object LongPressMenu {
         val w = Dialog(parent.context).apply {
             setContentView(content)
             val r = 26 * dp
-            window!!.setBackgroundDrawable(ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null)).apply {
+            window!!.setBackgroundDrawable(ShapeDrawable(UniformSquircleRectShape(r)).apply {
                 paint.color = context.resources.getColor(R.color.color_bg)
             })
         }
         with(content) {
-            val p = (12 * dp).toInt()
+            val p = (16 * dp).toInt()
             setPadding(p, p, p, p)
             orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
 
             val settings = parent.context.ionApplication.settings
             val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
@@ -141,8 +141,19 @@ object LongPressMenu {
                 setText(LabelLoader.loadLabel(context, item))
                 setTextColor(resources.getColor(R.color.color_text))
             }
-            addView(icon, LayoutParams(iconSize, iconSize))
-            addView(label)
+            addView(icon, MarginLayoutParams(iconSize, iconSize).apply {
+                val m = (24 * dp).toInt()
+                leftMargin = m
+                rightMargin = m
+                topMargin = m
+                bottomMargin = m
+            })
+            addView(label, MarginLayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply {
+                val m = (16 * dp).toInt()
+                leftMargin = m
+                rightMargin = m
+                bottomMargin = m
+            })
             addView(TextView(context).apply {
                 val br = 10 * dp
                 val h = (32 * dp).toInt()
@@ -151,7 +162,7 @@ object LongPressMenu {
                 setTextColor(resources.getColor(R.color.color_button_text))
                 background = RippleDrawable(
                     ColorStateList.valueOf(resources.getColor(R.color.color_hint)),
-                    ShapeDrawable(RoundRectShape(floatArrayOf(br, br, br, br, br, br, br, br), null, null)).apply {
+                    ShapeDrawable(UniformSquircleRectShape(br)).apply {
                         paint.color = resources.getColor(R.color.color_button)
                     }, null)
                 setPadding(h, v, h, v)
@@ -194,18 +205,15 @@ object LongPressMenu {
     private fun ViewGroup.addOption(@StringRes label: Int, bg: Int, fg: Int, place: Place = Place.Other, onClick: (View) -> Unit) {
         val dp = resources.displayMetrics.density
         addView(TextView(context).apply {
+            val bigR = 21 * dp
+            val smallR = 8 * dp
             background = RippleDrawable(
                 ColorStateList.valueOf(fg and 0xffffff or 0x55000000),
-                GradientDrawable().apply {
-                    color = ColorStateList.valueOf(bg)
-                    val bigR = 21 * dp
-                    val smallR = 8 * dp
-                    cornerRadii = when (place) {
-                        Place.First -> floatArrayOf(bigR, bigR, bigR, bigR, smallR, smallR, smallR, smallR)
-                        Place.Other -> floatArrayOf(smallR, smallR, smallR, smallR, smallR, smallR, smallR, smallR)
-                        Place.Last -> floatArrayOf(smallR, smallR, smallR, smallR, bigR, bigR, bigR, bigR)
-                    }
-                }, null)
+                ShapeDrawable(SquircleRectShape(when (place) {
+                    Place.First -> floatArrayOf(bigR, bigR, smallR, smallR)
+                    Place.Other -> floatArrayOf(smallR, smallR, smallR, smallR)
+                    Place.Last -> floatArrayOf(smallR, smallR, bigR, bigR)
+                })).apply { paint.color = bg }, null)
             elevation = 4 * dp
             setText(label)
             setTextColor(fg)
