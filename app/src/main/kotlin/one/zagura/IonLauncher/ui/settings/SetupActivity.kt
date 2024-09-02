@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.shapes.RoundRectShape
 import android.os.Build
 import android.os.Bundle
 import android.os.Process
@@ -21,7 +20,6 @@ import androidx.annotation.RequiresApi
 import one.zagura.IonLauncher.BuildConfig
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.LauncherItem
-import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Dock
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.items.ContactsLoader
@@ -29,12 +27,11 @@ import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.provider.summary.EventsLoader
 import one.zagura.IonLauncher.ui.HomeScreen
-import one.zagura.IonLauncher.ui.view.settings.colorSettings
 import one.zagura.IonLauncher.ui.view.settings.permissionSwitch
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
 import one.zagura.IonLauncher.ui.view.settings.setting
 import one.zagura.IonLauncher.ui.view.settings.title
-import one.zagura.IonLauncher.util.Utils
+import one.zagura.IonLauncher.util.drawable.UniformSquircleRectShape
 
 class SetupActivity : Activity() {
 
@@ -76,7 +73,7 @@ class SetupActivity : Activity() {
                 typeface = Typeface.DEFAULT_BOLD
                 gravity = Gravity.CENTER
                 val r = 12 * dp
-                background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
+                background = ShapeDrawable(UniformSquircleRectShape(r))
                 backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.color_text))
                 setTextColor(resources.getColor(R.color.color_bg))
                 setOnClickListener(::start)
@@ -89,7 +86,7 @@ class SetupActivity : Activity() {
                 typeface = Typeface.DEFAULT_BOLD
                 gravity = Gravity.CENTER
                 val r = 12 * dp
-                background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
+                background = ShapeDrawable(UniformSquircleRectShape(r))
                 backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.color_text))
                 setTextColor(resources.getColor(R.color.color_bg))
                 setOnClickListener {
