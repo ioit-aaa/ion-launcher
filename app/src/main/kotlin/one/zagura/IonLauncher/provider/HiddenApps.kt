@@ -46,8 +46,7 @@ object HiddenApps {
             AppLoader.onShow(context, item)
     }
 
-    fun isHidden(settings: Settings, app: App): Boolean {
-        println("KEY: " + settings.getStrings(KEY)?.joinToString())
+    fun isHidden(settings: Settings, app: LauncherItem): Boolean {
         val hidden = settings.getStrings(KEY) ?: return false
         return hidden.contains(app.toString())
     }

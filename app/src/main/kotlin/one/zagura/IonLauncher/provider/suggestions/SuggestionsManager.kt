@@ -19,10 +19,12 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.data.items.OpenAlarmsItem
 import one.zagura.IonLauncher.data.items.TorchToggleItem
 import one.zagura.IonLauncher.provider.Dock
+import one.zagura.IonLauncher.provider.HiddenApps
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.UpdatingResource
 import one.zagura.IonLauncher.provider.summary.Battery
 import one.zagura.IonLauncher.provider.summary.EventsLoader
+import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.TaskRunner
 import java.util.*
@@ -100,8 +102,11 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
         }
         val dockItems = Dock.getItems(context)
         contextLock.withLock {
+            val settings = context.ionApplication.settings
             for ((item, data) in contextMap.entries) {
                 if (dockItems.contains(item))
+                    continue
+                if (HiddenApps.isHidden(settings, item))
                     continue
                 val d = contextMap.calculateDistance(currentData, data)
                 if (d < 0.0004f)
