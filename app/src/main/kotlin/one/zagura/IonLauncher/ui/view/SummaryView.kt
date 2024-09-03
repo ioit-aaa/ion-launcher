@@ -123,7 +123,7 @@ class SummaryView(
             if (item != null) {
                 topString = getDateString()
                 bottomString = "${item.title} • ${item.subtitle}"
-                onGlanceTap = { item.onTap(context) }
+                onGlanceTap = { item.onTap(this) }
                 return
             }
         }
@@ -308,14 +308,14 @@ class SummaryView(
 
     private fun openBatterySettings() {
         context.startActivity(Intent(Intent.ACTION_POWER_USAGE_SUMMARY)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), LauncherItem.createOpeningAnimation(this))
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), LauncherItem.createOpeningAnimation(this).toBundle())
     }
 
     override fun performClick(): Boolean {
         super.performClick()
         context.startActivity(Intent(Intent.ACTION_MAIN)
             .addCategory(Intent.CATEGORY_APP_CALENDAR)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), LauncherItem.createOpeningAnimation(this))
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), LauncherItem.createOpeningAnimation(this).toBundle())
         return true
     }
 
@@ -329,8 +329,6 @@ class SummaryView(
             pureTextPaint.clearShadowLayer()
         }
         else {
-//            pureTitlePaint.setShadowLayer(21f, 0f, 0f, 0x1d000000)
-//            pureTextPaint.setShadowLayer(14f, 0f, 0f, 0x1d000000)
             pureTitlePaint.setShadowLayer(2f, 0f, 1f, 0x55000000)
             pureTextPaint.setShadowLayer(2f, 0f, 1f, 0x55000000)
         }
@@ -359,7 +357,7 @@ class SummaryView(
             override fun open(view: View) {
                 view.context.startActivity(Intent(Intent.ACTION_MAIN)
                     .addCategory(Intent.CATEGORY_APP_CALENDAR)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), LauncherItem.createOpeningAnimation(view))
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), LauncherItem.createOpeningAnimation(view).toBundle())
             }
         }
     }

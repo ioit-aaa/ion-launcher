@@ -15,7 +15,7 @@ class App(
 
     override fun open(view: View, bounds: Rect) {
         super.open(view, bounds)
-        val anim = createOpeningAnimation(view, bounds.left, bounds.top, bounds.right, bounds.bottom)
+        val anim = createOpeningAnimation(view, bounds.left, bounds.top, bounds.right, bounds.bottom).toBundle()
         try {
             val launcherApps = view.context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
             launcherApps.startMainActivity(ComponentName(packageName, name), userHandle, bounds, anim)
@@ -24,7 +24,7 @@ class App(
 
     override fun open(view: View) {
         super.open(view)
-        val anim = createOpeningAnimation(view)
+        val anim = createOpeningAnimation(view).toBundle()
         try {
             val launcherApps = view.context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
             launcherApps.startMainActivity(ComponentName(packageName, name), userHandle, null, anim)

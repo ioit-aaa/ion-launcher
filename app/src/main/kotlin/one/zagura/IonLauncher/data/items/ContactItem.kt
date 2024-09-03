@@ -15,7 +15,7 @@ class ContactItem(
 
     override fun open(view: View, bounds: Rect) {
         super.open(view, bounds)
-        val anim = createOpeningAnimation(view, bounds.left, bounds.top, bounds.right, bounds.bottom)
+        val anim = createOpeningAnimation(view, bounds.left, bounds.top, bounds.right, bounds.bottom).toBundle()
         val viewContact = Intent(Intent.ACTION_VIEW)
         viewContact.data = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookupKey)
         viewContact.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -25,7 +25,7 @@ class ContactItem(
 
     override fun open(view: View) {
         super.open(view)
-        val anim = createOpeningAnimation(view)
+        val anim = createOpeningAnimation(view).toBundle()
         val viewContact = Intent(Intent.ACTION_VIEW)
         viewContact.data = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookupKey)
         viewContact.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

@@ -8,7 +8,7 @@ class ActionItem(val action: String) : LauncherItem() {
 
     override fun open(view: View, bounds: Rect) {
         super.open(view, bounds)
-        val anim = createOpeningAnimation(view, bounds.left, bounds.top, bounds.right, bounds.bottom)
+        val anim = createOpeningAnimation(view, bounds.left, bounds.top, bounds.right, bounds.bottom).toBundle()
         try {
             val intent = Intent(action)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -18,7 +18,7 @@ class ActionItem(val action: String) : LauncherItem() {
 
     override fun open(view: View) {
         super.open(view)
-        val anim = createOpeningAnimation(view)
+        val anim = createOpeningAnimation(view).toBundle()
         try {
             val intent = Intent(action)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

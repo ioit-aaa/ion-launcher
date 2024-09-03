@@ -198,7 +198,7 @@ class MediaView(
                 }
                 invalidate()
             }
-            else player.data.onTap(context)
+            else player.data.onTap(this@MediaView)
             return true
         }
     })

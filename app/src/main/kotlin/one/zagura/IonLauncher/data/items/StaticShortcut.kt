@@ -18,7 +18,7 @@ class StaticShortcut(
 
     override fun open(view: View, bounds: Rect) {
         super.open(view, bounds)
-        val anim = createOpeningAnimation(view, bounds.left, bounds.top, bounds.right, bounds.bottom)
+        val anim = createOpeningAnimation(view, bounds.left, bounds.top, bounds.right, bounds.bottom).toBundle()
         val info = getShortcutInfo(view.context) ?: return
         val launcherApps = view.context.getSystemService(LauncherApps::class.java)
         launcherApps.startShortcut(info, null, anim)
@@ -26,7 +26,7 @@ class StaticShortcut(
 
     override fun open(view: View) {
         super.open(view)
-        val anim = createOpeningAnimation(view)
+        val anim = createOpeningAnimation(view).toBundle()
         val info = getShortcutInfo(view.context) ?: return
         val launcherApps = view.context.getSystemService(LauncherApps::class.java)
         launcherApps.startShortcut(info, null, anim)

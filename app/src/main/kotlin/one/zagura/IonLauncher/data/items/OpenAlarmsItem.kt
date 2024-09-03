@@ -17,6 +17,6 @@ object OpenAlarmsItem : LauncherItem() {
     override fun open(view: View) {
         view.context.startActivity(
             Intent(AlarmClock.ACTION_SHOW_ALARMS)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), createOpeningAnimation(view))
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), createOpeningAnimation(view).toBundle())
     }
 }

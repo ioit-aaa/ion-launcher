@@ -8,6 +8,8 @@ import android.graphics.Bitmap
 import android.media.session.MediaController
 import android.media.session.PlaybackState
 import android.os.Build
+import android.view.View
+import one.zagura.IonLauncher.data.items.LauncherItem
 
 data class MediaPlayerData(
     val controller: MediaController,
@@ -19,25 +21,28 @@ data class MediaPlayerData(
 ) {
     lateinit var callback: MediaController.Callback
 
-    fun onTap(context: Context) {
+    fun onTap(view: View) {
         val session = controller.sessionActivity
+        val options = LauncherItem.createOpeningAnimation(view)
         if (session != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                val options = ActivityOptions.makeBasic()
-                    .setPendingIntentBackgroundActivityStartMode(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+                session.send(view.context, 0, null, null, null, null,
+                    options.setPendingIntentBackgroundActivityStartMode(
                         ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
-                    .toBundle()
-                session.send(context, 0, null, null, null, null, options)
-            } else session.send(context, 0, null)
+                        .toBundle())
+            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                session.send(view.context, 0, null, null, null, null, options.toBundle())
+            else session.send(view.context, 0, null)
+
         }
 
         val intent = controller.packageName?.let {
-            context.packageManager.getLaunchIntentForPackage(it)?.apply {
+            view.context.packageManager.getLaunchIntentForPackage(it)?.apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
         } ?: return
 
-        context.startActivity(intent)
+        view.context.startActivity(intent, options.toBundle())
     }
 
     val isPlaying: Boolean

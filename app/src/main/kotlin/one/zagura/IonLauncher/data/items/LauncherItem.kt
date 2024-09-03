@@ -48,13 +48,13 @@ sealed class LauncherItem {
         const val CONTACT = 2
         const val ACTION = 3
 
-        fun createOpeningAnimation(view: View): Bundle =
+        fun createOpeningAnimation(view: View): ActivityOptions =
             createOpeningAnimation(view, 0, 0, view.measuredWidth, view.measuredHeight)
 
-        fun createOpeningAnimation(view: View, startX: Int, startY: Int, width: Int, height: Int): Bundle {
+        fun createOpeningAnimation(view: View, startX: Int, startY: Int, width: Int, height: Int): ActivityOptions {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                ActivityOptions.makeClipRevealAnimation(view, startX, startY, width, height).toBundle()
-            else ActivityOptions.makeScaleUpAnimation(view, startX, startY, width, height).toBundle()
+                ActivityOptions.makeClipRevealAnimation(view, startX, startY, width, height)
+            else ActivityOptions.makeScaleUpAnimation(view, startX, startY, width, height)
         }
 
         fun decode(context: Context, data: String): LauncherItem? {
