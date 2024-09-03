@@ -38,7 +38,9 @@ class StaticShortcut(
             .setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_MANIFEST)
             .setPackage(packageName)
             .setShortcutIds(listOf(id))
-        return launcherApps.getShortcuts(query, userHandle)?.firstOrNull()
+        return try {
+            launcherApps.getShortcuts(query, userHandle)?.firstOrNull()
+        } catch (_: Exception) { null }
     }
 
     override fun toString() = "${SHORTCUT.toString(16)}$packageName/$id/${userHandle.hashCode().toString(16)}"

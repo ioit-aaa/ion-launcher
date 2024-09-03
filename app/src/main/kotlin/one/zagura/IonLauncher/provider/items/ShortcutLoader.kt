@@ -18,9 +18,11 @@ object ShortcutLoader {
             .setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_MANIFEST)
             .setPackage(packageName)
             .setShortcutIds(listOf(id))
-        return launcherApps.getShortcuts(query, userHandle)?.firstOrNull()?.let {
-            StaticShortcut(packageName, id, userHandle)
-        }
+        return try {
+            launcherApps.getShortcuts(query, userHandle)?.firstOrNull()?.let {
+                StaticShortcut(packageName, id, userHandle)
+            }
+        } catch (_: Exception) { null }
     }
 
     fun getStaticShortcuts(context: Context, app: App, out: MutableCollection<in StaticShortcut>) {
