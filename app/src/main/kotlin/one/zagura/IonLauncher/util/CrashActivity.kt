@@ -15,6 +15,7 @@ import one.zagura.IonLauncher.BuildConfig
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.drawable.FillDrawable
+import java.lang.reflect.InvocationTargetException
 import kotlin.system.exitProcess
 
 class CrashActivity : Activity() {
@@ -51,9 +52,12 @@ class CrashActivity : Activity() {
                     for (throwable in t.suppressed)
                         for (tr in throwable.stackTrace)
                             appendLine().append(format(tr)).appendLine()
-                    t.cause?.let {
-                        for (tr in it.stackTrace)
+                    var cause = t.cause
+                    while (cause != null) {
+                        appendLine("Caused by: $cause\n")
+                        for (tr in cause.stackTrace)
                             appendLine().append(format(tr)).appendLine()
+                        cause = cause.cause
                     }
                 }
             }
