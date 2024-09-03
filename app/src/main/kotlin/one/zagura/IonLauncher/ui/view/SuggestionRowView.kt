@@ -232,7 +232,7 @@ class SuggestionRowView(
                 this@SuggestionRowView, item,
                 Gravity.BOTTOM or Gravity.START,
                 xOff,
-                height + Utils.getNavigationBarHeight(context).coerceAtLeast(paddingLeft) + (8 * dp).toInt(),
+                (height - paddingTop),// + Utils.getNavigationBarHeight(context).coerceAtLeast(paddingLeft) + (8 * dp).toInt(),
                 LongPressMenu.Where.SUGGESTION,
             )
             Utils.click(context)

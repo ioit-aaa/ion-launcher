@@ -52,7 +52,7 @@ class MediaView(
                         setBounds(0, 0, it.width, it.height)
                     }
                 }
-                PreparedMediaData(drawable, "", "", player.isPlaying?.invoke() == true, player)
+                PreparedMediaData(drawable, "", "", player.isPlaying, player)
             }
             post {
                 requestLayout()
@@ -130,7 +130,7 @@ class MediaView(
 
             val c = if (player.data.color != 0) player.data.textColor else fgColor
             playIcon.setTint(c)
-            if (player.data.next == null) {
+            if (!player.data.hasNext()) {
                 val controlX = width - paddingRight - drawCtx.iconSize.toInt() - lastIconOff
                 drawIcon(canvas, playIcon, controlX, y.toInt(), controlPadding)
             } else {
@@ -179,17 +179,17 @@ class MediaView(
                 return false
             val player = players[i]
             var x = drawCtx.iconSize
-            player.data.next?.let {
+            if (player.data.hasNext()) {
                 if (e.x >= width - paddingRight - x) {
                     Utils.click(context)
-                    it()
+                    player.data.next()
                     return true
                 }
                 x += drawCtx.iconSize
             }
             if (e.x >= width - paddingRight - x) {
                 Utils.click(context)
-                if (player.data.isPlaying?.invoke() == true) {
+                if (player.data.isPlaying) {
                     player.data.pause()
                     player.isPlaying = false
                 } else {
@@ -198,14 +198,14 @@ class MediaView(
                 }
                 invalidate()
             }
-            else player.data.onTap?.send()
+            else player.data.onTap(context)
             return true
         }
     })
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         for (player in players) {
-            val avail = (width - paddingLeft - paddingRight) - drawCtx.iconSize * if (player.data.next == null) 2 else 3
+            val avail = (width - paddingLeft - paddingRight) - drawCtx.iconSize * if (player.data.hasNext()) 3 else 2
             val title = TextUtils.ellipsize(player.data.title, drawCtx.titlePaint, avail, TextUtils.TruncateAt.END)
             val subtitle = TextUtils.ellipsize(player.data.subtitle, drawCtx.subtitlePaint, avail, TextUtils.TruncateAt.END)
             player.title = title

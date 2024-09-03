@@ -80,6 +80,8 @@ class NotificationService : NotificationListenerService() {
 
         fun onMediaControllersUpdated(context: Context, controllers: MutableList<MediaController>?) {
             val old = mediaItems
+            for (item in old)
+                item.controller.unregisterCallback(item.callback)
             if (controllers.isNullOrEmpty()) {
                 mediaItems = emptyArray()
                 if (old.isNotEmpty())
@@ -90,17 +92,21 @@ class NotificationService : NotificationListenerService() {
             for (controller in controllers) {
                 val metadata = controller.metadata ?: continue
                 val item = MediaItemCreator.create(context, controller, metadata)
-                list.add(item)
-                controller.registerCallback(object : MediaController.Callback() {
+                item.callback = object : MediaController.Callback() {
                     var oldItem = item
                     override fun onMetadataChanged(metadata: MediaMetadata?) {
                         if (metadata == null)
                             list.remove(oldItem)
                         else {
                             val newItem = MediaItemCreator.create(context, controller, metadata)
+                            newItem.callback = this
                             if (newItem == oldItem)
                                 return
-                            list[list.indexOf(oldItem)] = newItem
+                            val i = list.indexOf(oldItem)
+                            if (i == -1)
+                                list.add(newItem)
+                            else
+                                list[i] = newItem
                             oldItem = newItem
                         }
                         mediaItems = list.toTypedArray()
@@ -109,7 +115,9 @@ class NotificationService : NotificationListenerService() {
                     override fun onPlaybackStateChanged(state: PlaybackState?) {
                         update(mediaItems)
                     }
-                })
+                }
+                list.add(item)
+                controller.registerCallback(item.callback)
             }
             mediaItems = list.toTypedArray()
             if (!old.contentEquals(mediaItems))

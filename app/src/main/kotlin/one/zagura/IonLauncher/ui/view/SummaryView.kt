@@ -119,11 +119,11 @@ class SummaryView(
 
         val media = NotificationService.MediaObserver.getResource()
         if (media.isNotEmpty()) {
-            val item = media.firstOrNull { it.isPlaying?.invoke() == true }
+            val item = media.firstOrNull { it.isPlaying }
             if (item != null) {
                 topString = getDateString()
                 bottomString = "${item.title} • ${item.subtitle}"
-                onGlanceTap = item.onTap?.let {{ it.send() }}
+                onGlanceTap = { item.onTap(context) }
                 return
             }
         }

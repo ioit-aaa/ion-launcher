@@ -55,16 +55,12 @@ object MediaItemCreator {
         }
 
         return MediaPlayerData(
+            controller = controller,
             title = title.toString(),
             subtitle = subtitle,
             cover = cover,
             color = color,
             textColor = textColor,
-            onTap = controller.sessionActivity,
-            isPlaying = { controller.playbackState?.state == PlaybackState.STATE_PLAYING },
-            play = controller.transportControls::play,
-            pause = controller.transportControls::pause,
-            next = controller.transportControls::skipToNext.takeIf { controller.queue != null },
         )
     }
 }
