@@ -65,6 +65,7 @@
     <string name="all_apps">Aplicaciones</string>
     <string name="edit">Editar</string>
     <string name="reset">Restablecer</string>
+    <string name="hidden_apps">Apps escondidas</string>
     <plurals name="missed_calls">
         <item quantity="one">Una llamada perdida</item>
         <item quantity="many">%d llamadas perdidas</item>

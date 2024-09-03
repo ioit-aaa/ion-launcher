@@ -67,6 +67,7 @@
     <string name="all_apps">All Apps</string>
     <string name="edit">Edit</string>
     <string name="reset">Reset</string>
+    <string name="hidden_apps">Hidden Apps</string>
     <plurals name="missed_calls">
         <item quantity="one">One missed call</item>
         <item quantity="other">%d missed calls</item>

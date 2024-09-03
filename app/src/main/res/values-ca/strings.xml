@@ -65,6 +65,7 @@
     <string name="all_apps">Aplicacions</string>
     <string name="edit">Editar</string>
     <string name="reset">Restablir</string>
+    <string name="hidden_apps">Apps amagades</string>
     <plurals name="missed_calls">
         <item quantity="one">Una trucada perduda</item>
         <item quantity="many">%d trucades perdudes</item>

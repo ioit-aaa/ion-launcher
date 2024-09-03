@@ -39,7 +39,11 @@ object LongPressMenu {
 
     private var current: PopupWindow? = null
 
-    fun popup(parent: View, item: LauncherItem, gravity: Int, xoff: Int, yoff: Int, inDrawer: Boolean) {
+    enum class Where {
+        DRAWER, SUGGESTION, DOCK
+    }
+
+    fun popup(parent: View, item: LauncherItem, gravity: Int, xoff: Int, yoff: Int, where: Where) {
         val dp = parent.resources.displayMetrics.density
         dismissCurrent()
         val content = LinearLayout(parent.context)
@@ -50,9 +54,9 @@ object LongPressMenu {
             setPadding(p, p, p, p)
             clipToPadding = false
             orientation = LinearLayout.VERTICAL
-            val bg = if (inDrawer) ColorThemer.drawerForeground(context)
+            val bg = if (where == Where.DRAWER) ColorThemer.drawerForeground(context)
                 else ColorThemer.cardBackgroundOpaque(context)
-            val fg = if (inDrawer) ColorThemer.drawerBackgroundOpaque(context)
+            val fg = if (where == Where.DRAWER) ColorThemer.drawerBackgroundOpaque(context)
                 else ColorThemer.cardForeground(context)
             if (item is App) {
                 addOption(R.string.app_info, bg, fg, place = Place.First) {
@@ -63,13 +67,16 @@ object LongPressMenu {
                             .setData(Uri.parse("package:${item.packageName}"))
                     )
                 }
-                if (HiddenApps.isHidden(context.ionApplication.settings, item)) addOption(R.string.unhide, bg, fg, place = Place.Other) {
-                    w.dismiss()
-                    HiddenApps.show(it.context, item)
-                }
-                else addOption(R.string.hide, bg, fg, place = Place.Other) {
-                    w.dismiss()
-                    HiddenApps.hide(it.context, item)
+                if (where != Where.DOCK) {
+                    if (HiddenApps.isHidden(context.ionApplication.settings, item))
+                        addOption(R.string.unhide, bg, fg, place = Place.Other) {
+                            w.dismiss()
+                            HiddenApps.show(it.context, item)
+                        }
+                    else addOption(R.string.hide, bg, fg, place = Place.Other) {
+                        w.dismiss()
+                        HiddenApps.hide(it.context, item)
+                    }
                 }
             }
             if (item is App || item is StaticShortcut) {

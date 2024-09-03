@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.provider.icons.IconPackInfo
 import one.zagura.IonLauncher.ui.ionApplication
+import one.zagura.IonLauncher.ui.view.PinnedGridView
 import one.zagura.IonLauncher.ui.view.settings.setupWindow
 import one.zagura.IonLauncher.util.Utils
 
@@ -34,7 +35,7 @@ class CustomIconPickerActivity : Activity() {
         val items = IconPackInfo.getResourceNames(res, packageName)
 
         val dp = resources.displayMetrics.density
-        val sideMargin = calculateSideMargin(this)
+        val sideMargin = PinnedGridView.calculateSideMargin(this)
 
         val recycler = RecyclerView(this).apply {
             val p = (16 * dp).toInt()
@@ -56,14 +57,5 @@ class CustomIconPickerActivity : Activity() {
                 .putExtra("icon", it))
             finish()
         }
-    }
-
-    fun calculateSideMargin(context: Context): Int {
-        val w = context.resources.displayMetrics.widthPixels
-        val dp = context.resources.displayMetrics.density
-        val settings = context.ionApplication.settings
-        val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
-        val columns = settings["dock:columns", 5]
-        return (w - iconSize * columns) / (columns + 1)
     }
 }

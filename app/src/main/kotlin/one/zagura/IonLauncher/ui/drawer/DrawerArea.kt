@@ -139,7 +139,7 @@ class DrawerArea(
             Search.updateData(context)
             search(entry.text.toString())
         } else post {
-            searchAdapter.notifyDataSetChanged()
+            searchAdapter.update(AppLoader.getResource(), false)
         }
     }
 

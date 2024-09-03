@@ -24,6 +24,7 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Dock
 import one.zagura.IonLauncher.provider.icons.IconLoader
+import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.iconify.IconifyAnim
 import one.zagura.IonLauncher.util.LiveWallpaper
 import one.zagura.IonLauncher.util.drawable.NonDrawable
@@ -92,6 +93,17 @@ class PinnedGridView(
     fun calculateSideMargin(): Int {
         val w = resources.displayMetrics.widthPixels - paddingLeft - paddingRight
         return (paddingLeft + (w - drawCtx.iconSize * columns) / (columns + 1)).toInt()
+    }
+
+    companion object {
+        fun calculateSideMargin(context: Context): Int {
+            val w = context.resources.displayMetrics.widthPixels
+            val dp = context.resources.displayMetrics.density
+            val settings = context.ionApplication.settings
+            val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
+            val columns = settings["dock:columns", 5]
+            return (w - iconSize * columns) / (columns + 1)
+        }
     }
 
     fun calculateGridHeight(): Int {
@@ -291,7 +303,7 @@ class PinnedGridView(
             val (x, y) = viewToGridCoords(e.x.toInt(), e.y.toInt())
             val item = getItem(x, y) ?: return
             val (vx, vy) = gridToPopupCoords(x, y)
-            LongPressMenu.popup(this@PinnedGridView, item, Gravity.BOTTOM or Gravity.START, vx, vy, false)
+            LongPressMenu.popup(this@PinnedGridView, item, Gravity.BOTTOM or Gravity.START, vx, vy, LongPressMenu.Where.DOCK)
             Utils.click(context)
             replacePreview = ItemPreview(NonDrawable, x, y)
             dropPreview = ItemPreview(NonDrawable, x, y)

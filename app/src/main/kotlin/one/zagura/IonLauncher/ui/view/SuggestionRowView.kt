@@ -233,7 +233,7 @@ class SuggestionRowView(
                 Gravity.BOTTOM or Gravity.START,
                 xOff,
                 height + Utils.getNavigationBarHeight(context).coerceAtLeast(paddingLeft) + (8 * dp).toInt(),
-                false,
+                LongPressMenu.Where.SUGGESTION,
             )
             Utils.click(context)
             Utils.startDrag(this@SuggestionRowView, item, this@SuggestionRowView)

@@ -11,6 +11,7 @@ import one.zagura.IonLauncher.provider.items.ContactsLoader
 import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.provider.summary.EventsLoader
+import one.zagura.IonLauncher.ui.drawer.HiddenAppsActivity
 import one.zagura.IonLauncher.ui.view.settings.onClick
 import one.zagura.IonLauncher.ui.view.settings.seekbar
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
@@ -86,6 +87,7 @@ class SettingsActivity : Activity() {
                 }
             }
             title(R.string.other)
+            setting(R.string.hidden_apps) { onClick(HiddenAppsActivity::class.java) }
             setting(R.string.choose_launcher) {
                 onClick {
                     Utils.chooseDefaultLauncher(it.context)

@@ -65,6 +65,7 @@
     <string name="all_apps">Приложения</string>
     <string name="edit">Изменить</string>
     <string name="reset">Восстановить</string>
+    <string name="hidden_apps">Спрятанные приложения</string>
     <plurals name="missed_calls">
         <item quantity="one">%d потеранный звонок</item>
         <item quantity="few">%d потеранных знонка</item>

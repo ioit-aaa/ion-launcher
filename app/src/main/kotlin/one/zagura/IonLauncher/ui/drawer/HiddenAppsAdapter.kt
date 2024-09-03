@@ -30,21 +30,16 @@ import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.view.LongPressMenu
 import one.zagura.IonLauncher.util.Utils
 
-class SearchAdapter(
-    val showDropTargets: () -> Unit,
-    val onItemOpened: (LauncherItem) -> Unit,
-    val activity: Activity,
+class HiddenAppsAdapter(
+    private val showLabels: Boolean,
+    private val activity: Activity,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     init {
         setHasStableIds(true)
     }
 
-    var showLabels = false
     private var items = emptyList<LauncherItem>()
-    private val transparent = ColorStateList.valueOf(0)
-    var isSearch = false
-        private set
 
     class ViewHolder(
         view: View,
@@ -57,15 +52,14 @@ class SearchAdapter(
     ) : RecyclerView.ViewHolder(text)
 
     override fun getItemId(i: Int) =
-        if (!isSearch && i == 0) Long.MAX_VALUE
+        if (i == 0) Long.MAX_VALUE
         else getItem(i).hashCode().toLong()
 
-    override fun getItemCount() = if (isSearch) items.size else items.size + 1
+    override fun getItemCount() = items.size + 1
 
-    private fun getItem(i: Int) = items[if (isSearch) i else i - 1]
+    private fun getItem(i: Int) = items[i - 1]
 
     override fun getItemViewType(i: Int) = when {
-        isSearch -> 0
         i == 0 -> 2
         else -> 1
     }
@@ -76,7 +70,7 @@ class SearchAdapter(
             return TitleViewHolder(TextView(parent.context).apply {
                 textSize = 52f
                 gravity = Gravity.CENTER
-                setText(R.string.all_apps)
+                setText(R.string.hidden_apps)
                 setTextColor(ColorThemer.drawerForeground(context))
                 val h = (256 * dp).toInt().coerceAtMost(Utils.getDisplayHeight(activity) / 3)
                 layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, h)
@@ -91,23 +85,7 @@ class SearchAdapter(
             ellipsize = TextUtils.TruncateAt.END
             setTextColor(ColorThemer.drawerForeground(context))
         }
-        val view = if (type == 0) LinearLayout(parent.context).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            val iconSize = (40 * dp).toInt()
-            val p = (12 * dp).toInt()
-            icon.setPadding(p)
-            addView(icon, LinearLayout.LayoutParams(iconSize + p * 2, iconSize + p * 2))
-            addView(label.apply {
-                textSize = 16f
-                layoutParams = MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
-                    marginEnd = (12 * dp).toInt()
-                }
-            })
-            val iconRadius = iconSize * settings["icon:radius-ratio", 50] / 100f
-            val r = if (iconRadius == 0f) 0f else iconRadius + 12f * dp
-            background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
-        } else LinearLayout(parent.context).apply {
+        val view = LinearLayout(parent.context).apply {
             orientation = LinearLayout.VERTICAL
             val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
             icon.setPadding(0, (12 * dp).toInt(), 0, (10 * dp).toInt())
@@ -125,7 +103,6 @@ class SearchAdapter(
             itemView.setOnClickListener {
                 val item = getItem(bindingAdapterPosition)
                 item.open(it)
-                onItemOpened(item)
             }
             itemView.setOnLongClickListener {
                 val dp = it.resources.displayMetrics.density
@@ -146,48 +123,23 @@ class SearchAdapter(
                     h, ly + icon.height + v,
                     LongPressMenu.Where.DRAWER,
                 )
-                Utils.startDrag(it, item, it to bindingAdapterPosition)
-                true
-            }
-            itemView.setOnDragListener { v, e ->
-                if (e.action == DragEvent.ACTION_DRAG_EXITED) {
-                    if (e.localState == v to bindingAdapterPosition) {
-                        LongPressMenu.dismissCurrent()
-                        showDropTargets()
-                    }
-                } else if (e.action == DragEvent.ACTION_DRAG_ENDED) {
-                    if (e.localState == v to bindingAdapterPosition)
-                        LongPressMenu.onDragEnded()
-                }
+                LongPressMenu.onDragEnded()
                 true
             }
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, i: Int) {
-        if (!isSearch && i == 0) return
+        if (i == 0) return
         holder as ViewHolder
         val context = holder.itemView.context
         val item = getItem(i)
-        val label = LabelLoader.loadLabel(context, item)
-        if (isSearch) {
-            holder.itemView.backgroundTintList = if (i == 0)
-                ColorStateList.valueOf(ColorThemer.drawerHighlight(context))
-            else transparent
-            holder.label.text = if (isSearch && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && item is StaticShortcut)
-                buildSpannedString {
-                    append(LabelLoader.loadLabel(context, item.packageName, item.userHandle) + ": ", ForegroundColorSpan(ColorThemer.drawerHint(context)), 0)
-                    append(label)
-                }
-            else label
-        } else
-            holder.label.text = label
+        holder.label.text = LabelLoader.loadLabel(context, item)
         holder.icon.setImageDrawable(IconLoader.loadIcon(context, item))
     }
 
-    fun update(items: List<LauncherItem>, isSearch: Boolean) {
+    fun update(items: List<LauncherItem>) {
         this.items = items
-        this.isSearch = isSearch
         notifyDataSetChanged()
     }
 }
