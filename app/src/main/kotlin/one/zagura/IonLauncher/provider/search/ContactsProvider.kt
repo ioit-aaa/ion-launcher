@@ -6,7 +6,7 @@ import one.zagura.IonLauncher.provider.items.ContactsLoader
 import one.zagura.IonLauncher.provider.icons.LabelLoader
 import one.zagura.IonLauncher.provider.search.SearchProvider.Companion.removeDiacritics
 
-object ContactsProvider : BasicProvider<ContactItem> {
+data object ContactsProvider : BasicProvider<ContactItem> {
 
     private var contacts = emptyList<Pair<ContactItem, String>>()
 

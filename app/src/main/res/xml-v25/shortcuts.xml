@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="hidden-apps"
+        android:enabled="true"
+        android:icon="@mipmap/ic_ion"
+        android:shortcutShortLabel="@string/hidden_apps"
+        android:shortcutLongLabel="@string/hidden_apps">
+        <intent
+            android:action="android.intent.action.MAIN"
+            android:targetPackage="one.zagura.IonLauncher"
+            android:targetClass="one.zagura.IonLauncher.ui.drawer.HiddenAppsActivity"/>
+    </shortcut>
+</shortcuts>

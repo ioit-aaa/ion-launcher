@@ -4,21 +4,27 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.willowtreeapps.fuzzywuzzy.diffutils.FuzzySearch
+import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.data.items.StaticShortcut
+import one.zagura.IonLauncher.provider.HiddenApps
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.icons.LabelLoader
 import one.zagura.IonLauncher.provider.items.ShortcutLoader
 import one.zagura.IonLauncher.util.Cancellable
 
 @RequiresApi(Build.VERSION_CODES.N_MR1)
-object ShortcutsProvider : SearchProvider {
+data object ShortcutsProvider : SearchProvider {
 
     private var shortcuts = emptyArray<Triple<StaticShortcut, String, String>>()
 
     override fun updateData(context: Context) {
         val s = ArrayList<StaticShortcut>()
         AppLoader.getResource().forEach { ShortcutLoader.getStaticShortcuts(context, it, s) }
+        HiddenApps.getItems(context).forEach {
+            if (it is App)
+                ShortcutLoader.getStaticShortcuts(context, it, s)
+        }
         shortcuts = Array(s.size) {
             val item = s[it]
             Triple(item,

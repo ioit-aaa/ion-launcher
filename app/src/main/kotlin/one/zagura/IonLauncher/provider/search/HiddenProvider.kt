@@ -5,7 +5,7 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.HiddenApps
 import one.zagura.IonLauncher.provider.icons.LabelLoader
 
-object HiddenProvider : BasicProvider<LauncherItem> {
+data object HiddenProvider : BasicProvider<LauncherItem> {
 
     private var hidden = emptyList<Pair<LauncherItem, String>>()
 

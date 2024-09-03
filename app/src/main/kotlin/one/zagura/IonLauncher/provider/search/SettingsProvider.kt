@@ -5,7 +5,7 @@ import android.content.Intent
 import android.provider.Settings
 import one.zagura.IonLauncher.data.items.ActionItem
 
-object SettingsProvider : BasicProvider<ActionItem> {
+data object SettingsProvider : BasicProvider<ActionItem> {
 
     private var list = emptyList<Pair<ActionItem, String>>()
 
