@@ -30,14 +30,14 @@ class CardsSettingsActivity : Activity() {
                 seekbar("suggestion:count", 4, min = 0, max = 6)
             }
             setting(R.string.show_search_in_suggestions) {
-                switch("layout:search-in-suggestions", false)
+                switch("layout:search-in-suggestions", true)
             }
             setting(R.string.labels) {
                 switch("suggestion:labels", false)
             }
             title(R.string.media_player)
             setting(R.string.dynamically_tint) {
-                switch("media:tint", true)
+                switch("media:tint", false)
             }
         }
     }

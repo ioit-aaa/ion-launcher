@@ -37,7 +37,7 @@ object MediaItemCreator {
 
         var color = 0
         var textColor = 0
-        if (cover != null && context.ionApplication.settings["media:tint", true]) {
+        if (cover != null && context.ionApplication.settings["media:tint", false]) {
             cover = when {
                 cover.width > cover.height -> Bitmap.createBitmap(cover, (cover.width - cover.height) / 2, 0, cover.height, cover.height)
                 cover.width < cover.height -> Bitmap.createBitmap(cover, 0, (cover.height - cover.width) / 2, cover.width, cover.width)

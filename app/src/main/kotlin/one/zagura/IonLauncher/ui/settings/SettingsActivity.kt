@@ -33,7 +33,7 @@ class SettingsActivity : Activity() {
                 seekbar("dock:icon-size", 48, min = 24, max = 72, multiplier = 8)
             }
             setting(R.string.radius_percent, isVertical = true) {
-                seekbar("icon:radius-ratio", 50, min = 0, max = 50, multiplier = 5)
+                seekbar("icon:radius-ratio", 25, min = 0, max = 50, multiplier = 5)
             }
             setting(R.string.columns, isVertical = true) {
                 seekbar("dock:columns", 5, min = 2, max = 7)

@@ -1,6 +1,7 @@
 package one.zagura.IonLauncher.ui.settings
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
@@ -31,6 +32,7 @@ import one.zagura.IonLauncher.ui.view.settings.permissionSwitch
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
 import one.zagura.IonLauncher.ui.view.settings.setting
 import one.zagura.IonLauncher.ui.view.settings.title
+import one.zagura.IonLauncher.util.Utils
 import one.zagura.IonLauncher.util.drawable.UniformSquircleRectShape
 
 class SetupActivity : Activity() {
@@ -128,25 +130,38 @@ class SetupActivity : Activity() {
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                 PackageManager.DONT_KILL_APP
             )
-            Dock.setItem(this, 0, getCategoryItem(Intent.CATEGORY_APP_CONTACTS))
-            Dock.setItem(this, 1, getCategoryItem(Intent.CATEGORY_APP_CALCULATOR))
-            Dock.setItem(this, 2, getCategoryItem(Intent.CATEGORY_APP_BROWSER))
-            Dock.setItem(this, 3, getCategoryItem(Intent.CATEGORY_APP_CALENDAR))
-            Dock.setItem(this, 4, getCategoryItem(Intent.CATEGORY_APP_GALLERY))
-            Dock.setItem(this, 5, getCategoryItem(Intent.CATEGORY_APP_MAPS))
-            Dock.setItem(this, 6, getCategoryItem(Intent.CATEGORY_APP_MUSIC))
-            Dock.setItem(this, 7, getCategoryItem(Intent.CATEGORY_APP_EMAIL))
-            Dock.setItem(this, 8, getCategoryItem(Intent.CATEGORY_APP_MARKET))
+            @SuppressLint("InlinedApi")
+            val items = listOfNotNull(
+                getCategoryItem(Intent.CATEGORY_APP_BROWSER),
+                getCategoryItem(Intent.CATEGORY_APP_CALCULATOR),
+                getCategoryItem(Intent.CATEGORY_APP_CALENDAR),
+                getCategoryItem(Intent.CATEGORY_APP_CONTACTS),
+                getCategoryItem(Intent.CATEGORY_APP_EMAIL),
+                getCategoryItem(Intent.CATEGORY_APP_FILES),
+                getCategoryItem(Intent.CATEGORY_APP_FITNESS),
+                getCategoryItem(Intent.CATEGORY_APP_GALLERY),
+                getCategoryItem(Intent.CATEGORY_APP_MAPS),
+                getCategoryItem(Intent.CATEGORY_APP_MARKET),
+                getCategoryItem(Intent.CATEGORY_APP_MESSAGING),
+                getCategoryItem(Intent.CATEGORY_APP_MUSIC),
+                getCategoryItem(Intent.CATEGORY_APP_WEATHER),
+            )
+            for ((i, item) in items.withIndex()) {
+                Dock.setItem(this, i, item)
+            }
         }
 
         packageManager.setComponentEnabledSetting(ComponentName(this, SETUP_ALIAS), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
         packageManager.setComponentEnabledSetting(ComponentName(this, LAUNCHER_ALIAS), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
+
+        Utils.chooseDefaultLauncher(this)
     }
 
     private fun getCategoryItem(category: String): LauncherItem? {
         return packageManager.queryIntentActivities(
             Intent(Intent.ACTION_MAIN)
-                .addCategory(category),
+                .addCategory(category)
+                .addCategory(Intent.CATEGORY_LAUNCHER),
             PackageManager.MATCH_DEFAULT_ONLY).firstOrNull()?.activityInfo?.let {
             AppLoader.loadApp(this, it.packageName, it.name, Process.myUserHandle())
         }

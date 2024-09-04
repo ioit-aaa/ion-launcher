@@ -25,7 +25,7 @@ class IconsSettingsActivity : Activity() {
                 onClick(IconPackPickerActivity::class.java)
             }
             setting(R.string.grayscale_icons) {
-                switch("icon:grayscale", true)
+                switch("icon:grayscale", false)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 var bg: View? = null

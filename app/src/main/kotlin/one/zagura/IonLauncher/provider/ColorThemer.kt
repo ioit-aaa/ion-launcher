@@ -31,7 +31,7 @@ object ColorThemer {
 
     fun wallBackground(context: Context): Int {
         val s = context.ionApplication.settings
-        return s["wall:bg", DEFAULT_DARK] and 0xffffff or (s["wall:bg:alpha", 0xdd] shl 24)
+        return s["wall:bg", DEFAULT_DARK] and 0xffffff or (s["wall:bg:alpha", 0x33] shl 24)
     }
     fun wallForeground(context: Context): Int =
         context.ionApplication.settings["wall:fg", DEFAULT_LIGHT] or 0xff000000.toInt()

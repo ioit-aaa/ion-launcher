@@ -104,7 +104,7 @@ class SearchAdapter(
                     marginEnd = (12 * dp).toInt()
                 }
             })
-            val iconRadius = iconSize * settings["icon:radius-ratio", 50] / 100f
+            val iconRadius = iconSize * settings["icon:radius-ratio", 25] / 100f
             val r = if (iconRadius == 0f) 0f else iconRadius + 12f * dp
             background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
         } else LinearLayout(parent.context).apply {

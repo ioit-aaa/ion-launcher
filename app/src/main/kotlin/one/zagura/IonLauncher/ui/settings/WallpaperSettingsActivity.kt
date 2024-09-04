@@ -12,7 +12,7 @@ class WallpaperSettingsActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setSettingsContentView(R.string.wallpaper) {
-            colorSettings("wall", ColorThemer.DEFAULT_DARK, ColorThemer.DEFAULT_LIGHT, 0xdd)
+            colorSettings("wall", ColorThemer.DEFAULT_DARK, ColorThemer.DEFAULT_LIGHT, 0x33)
         }
     }
 }

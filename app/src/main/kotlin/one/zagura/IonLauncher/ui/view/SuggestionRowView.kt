@@ -61,7 +61,7 @@ class SuggestionRowView(
     }
 
     fun applyCustomizations(settings: Settings) {
-        showSearchButton = settings["layout:search-in-suggestions", false]
+        showSearchButton = settings["layout:search-in-suggestions", true]
         showLabels = settings["suggestion:labels", false]
         icSearch.setTint(ColorThemer.cardForeground(context))
         if (showLabels && suggestions.isNotEmpty())

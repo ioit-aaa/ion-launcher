@@ -103,7 +103,7 @@ class SharedDrawingContext(context: Context) {
     fun applyCustomizations(context: Context, settings: Settings) {
         val dp = context.resources.displayMetrics.density
         iconSize = settings["dock:icon-size", 48] * dp
-        radius = iconSize * settings["icon:radius-ratio", 50] / 100f
+        radius = iconSize * settings["icon:radius-ratio", 25] / 100f
         doSkeumorphism = settings["card:skeumorph", false]
         cardPaint.color = ColorThemer.cardBackground(context)
         if (doSkeumorphism)

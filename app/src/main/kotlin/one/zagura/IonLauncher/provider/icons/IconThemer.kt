@@ -55,12 +55,12 @@ object IconThemer {
     private var iconSize = 0
 
     fun updateSettings(context: Context, settings: Settings) {
-        doGrayscale = settings["icon:grayscale", true]
+        doGrayscale = settings["icon:grayscale", false]
         doMonochrome = settings["icon:monochrome", false]
         doMonochromeBG = settings["icon:monochrome-bg", true]
         doIconRim = settings["icon:rim", false]
         doIconGloss = settings["icon:gloss", false]
-        radiusRatio = settings["icon:radius-ratio", 50] / 100f
+        radiusRatio = settings["icon:radius-ratio", 25] / 100f
         iconFG = ColorThemer.iconForeground(context)
         iconBG = ColorThemer.iconBackground(context)
         val dp = context.resources.displayMetrics.density
