@@ -1,0 +1,14 @@
+Implemented individual icon & label customization for each icon
+Changed long press popups
+Added a hidden apps screen, that can be opened through launcher settings or search
+
+Made some rounded rectangles in the UI smoother
+Made wallpaper setting screen prettier
+
+Improved nested adaptive icon reshaping
+Improved icon pack compatibility
+
+Made hidden apps not show up in suggestions
+Fixed incorrect sorting in app drawer
+Fixed media player not opening its app when clicked
+Fixed some crashes
