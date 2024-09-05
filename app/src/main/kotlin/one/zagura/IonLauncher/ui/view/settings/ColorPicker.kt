@@ -78,7 +78,7 @@ object ColorPicker {
             setSingleLine()
             val lra = 4 * dp
             val bra = 10 * dp
-            background = ShapeDrawable(SquircleRectShape(floatArrayOf(lra, lra, bra, bra)))
+            background = ShapeDrawable(SquircleRectShape(lra, lra, bra, bra))
             doOnTextChanged { text, _, _, _ ->
                 val c = parseColorString(text.toString())
                 backgroundTintList = ColorStateList.valueOf(c)
@@ -238,7 +238,7 @@ object ColorPicker {
                 setTextColor(resources.getColor(R.color.color_button_text))
                 background = RippleDrawable(
                     ColorStateList.valueOf(resources.getColor(R.color.color_hint)),
-                    ShapeDrawable(SquircleRectShape(floatArrayOf(br, 0f, 0f, br))).apply {
+                    ShapeDrawable(SquircleRectShape(br, 0f, 0f, br)).apply {
                         paint.color = resources.getColor(R.color.color_button)
                     }, null)
                 setPadding(h, v, h, v)
@@ -258,7 +258,7 @@ object ColorPicker {
                 setTextColor(resources.getColor(R.color.color_button_text))
                 background = RippleDrawable(
                     ColorStateList.valueOf(resources.getColor(R.color.color_hint)),
-                    ShapeDrawable(SquircleRectShape(floatArrayOf(0f, br, br, 0f))).apply {
+                    ShapeDrawable(SquircleRectShape(0f, br, br, 0f)).apply {
                         paint.color = resources.getColor(R.color.color_button)
                     }, null)
                 setPadding(h, v, h, v)
@@ -301,7 +301,7 @@ object ColorPicker {
                 .let { ColorUtils.LABToColor(it[0], it[1], it[2]) }
             background = RippleDrawable(
                 ColorStateList.valueOf(highlight),
-                ShapeDrawable(SquircleRectShape(floatArrayOf(tl, tr, lra, lra))), null)
+                ShapeDrawable(SquircleRectShape(tl, tr, lra, lra)), null)
             backgroundTintList = ColorStateList.valueOf(color or 0xff000000.toInt())
             setOnClickListener {
                 target.setText(formatColorString(color))

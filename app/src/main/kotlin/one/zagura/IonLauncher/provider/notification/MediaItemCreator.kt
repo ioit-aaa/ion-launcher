@@ -8,6 +8,7 @@ import android.media.session.PlaybackState
 import androidx.palette.graphics.Palette
 import one.zagura.IonLauncher.data.media.MediaPlayerData
 import one.zagura.IonLauncher.provider.ColorThemer
+import one.zagura.IonLauncher.provider.summary.Battery
 import one.zagura.IonLauncher.ui.ionApplication
 
 object MediaItemCreator {
@@ -37,7 +38,7 @@ object MediaItemCreator {
 
         var color = 0
         var textColor = 0
-        if (cover != null && context.ionApplication.settings["media:tint", false]) {
+        if (cover != null && !Battery.PowerSaver.getResource() && context.ionApplication.settings["media:tint", false]) {
             cover = when {
                 cover.width > cover.height -> Bitmap.createBitmap(cover, (cover.width - cover.height) / 2, 0, cover.height, cover.height)
                 cover.width < cover.height -> Bitmap.createBitmap(cover, 0, (cover.height - cover.width) / 2, cover.width, cover.width)

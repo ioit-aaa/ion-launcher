@@ -16,6 +16,7 @@ import androidx.core.app.NotificationManagerCompat
 import one.zagura.IonLauncher.BuildConfig
 import one.zagura.IonLauncher.data.media.MediaPlayerData
 import one.zagura.IonLauncher.provider.UpdatingResource
+import one.zagura.IonLauncher.ui.ionApplication
 
 class NotificationService : NotificationListenerService() {
 
@@ -74,11 +75,19 @@ class NotificationService : NotificationListenerService() {
         fun updateMediaItem(context: Context) {
             if (!hasPermission(context))
                 return
+            if (!context.ionApplication.settings["media:show-card", true]) {
+                mediaItems = emptyArray()
+                return
+            }
             val msm = context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
             onMediaControllersUpdated(context, msm.getActiveSessions(ComponentName(BuildConfig.APPLICATION_ID, NotificationService::class.java.name)))
         }
 
         fun onMediaControllersUpdated(context: Context, controllers: MutableList<MediaController>?) {
+            if (!context.ionApplication.settings["media:show-card", true]) {
+                mediaItems = emptyArray()
+                return
+            }
             val old = mediaItems
             for (item in old)
                 item.controller.unregisterCallback(item.callback)
