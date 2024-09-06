@@ -9,6 +9,7 @@ import android.text.TextUtils
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.view.isVisible
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.media.MediaPlayerData
 import one.zagura.IonLauncher.provider.ColorThemer
@@ -44,6 +45,12 @@ class MediaView(
     private var fgColor = 0
 
     fun update(players: Array<MediaPlayerData>) {
+        if (players.isEmpty()) {
+            this.players = emptyArray()
+            isVisible = false
+            return
+        }
+        isVisible = true
         TaskRunner.submit {
             this.players = Array(players.size) {
                 val player = players[it]
@@ -174,6 +181,8 @@ class MediaView(
         }
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
+            if (players.isEmpty())
+                return false
             val i = (e.y.toInt() - paddingTop) * players.size / (height - paddingTop - paddingBottom)
             if (i < 0 || i >= players.size)
                 return false

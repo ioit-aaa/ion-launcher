@@ -191,7 +191,9 @@ class HomeScreen : Activity() {
             val scale = 1f - a * 0.05f
             desktop.scaleX = scale
             desktop.scaleY = scale
-            setWallpaperZoomOut?.invoke(wallpaperManager, homeScreen.windowToken, slideOffset)
+            val token = homeScreen.windowToken
+            if (token != null)
+                setWallpaperZoomOut?.invoke(wallpaperManager, token, slideOffset)
         }
     }
 
