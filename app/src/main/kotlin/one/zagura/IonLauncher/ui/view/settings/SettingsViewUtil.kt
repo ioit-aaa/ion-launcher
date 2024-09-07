@@ -328,6 +328,8 @@ fun SettingViewScope.seekbar(
         })
     }
     with(number) {
+        minWidth = (48 * dp).toInt()
+        gravity = Gravity.CENTER
         val r = 99 * dp
         background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null)).apply {
             paint.color = resources.getColor(R.color.color_bg_sunk) and 0xffffff or 0x66000000
