@@ -3,10 +3,12 @@ package one.zagura.IonLauncher.ui.drawer
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.os.Build
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
@@ -14,6 +16,7 @@ import android.view.WindowInsets
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.GridLayoutManager
@@ -23,6 +26,7 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.search.Search
+import one.zagura.IonLauncher.ui.view.LongPressMenu
 import one.zagura.IonLauncher.util.Cancellable
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.TaskRunner
@@ -38,9 +42,11 @@ class DrawerArea(
 
     val recyclerView: RecyclerView
     private val searchAdapter = SearchAdapter(showDropTargets, onItemOpened, context)
-    private val entry: EditText
+    val entry: EditText
+    private val extraButton: ImageView
+    private val bottomBar: LinearLayout
     private val separator: View
-    private val icSearch = context.getDrawable(R.drawable.ic_search)!!
+    private val icSearch = context.getDrawable(R.drawable.search)!!
 
     private var results = emptyList<LauncherItem>()
 
@@ -78,7 +84,18 @@ class DrawerArea(
                 } else false
             }
             imeOptions = EditorInfo.IME_ACTION_GO
-            setOnApplyWindowInsetsListener(::onApplySearchBarInsets)
+        }
+        extraButton = ImageView(context).apply {
+            setImageResource(R.drawable.cross)
+            setOnClickListener {
+                if (searchAdapter.isSearch)
+                    clearSearchField()
+                else {
+                    LongPressMenu.popupLauncher(it,
+                        Gravity.BOTTOM or Gravity.END, 0,
+                        it.height + Utils.getNavigationBarHeight(context))
+                }
+            }
         }
         separator = View(context)
         recyclerView = RecyclerView(context).apply {
@@ -97,24 +114,26 @@ class DrawerArea(
                 }
             })
         }
-        run {
-            orientation = VERTICAL
-            isInvisible = true
-            alpha = 0f
-            addView(recyclerView, LayoutParams(MATCH_PARENT, 0, 1f))
-            addView(separator, LayoutParams(MATCH_PARENT, dp.toInt()))
-            addView(entry, MarginLayoutParams(MATCH_PARENT, WRAP_CONTENT))
-        }
-    }
-
-    private fun onApplySearchBarInsets(v: View, insets: WindowInsets): WindowInsets {
-        val dp = v.resources.displayMetrics.density
-        val b = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-            insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
-        else
-            insets.systemWindowInsetBottom
-        v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, (12 * dp).toInt() + b)
-        return insets
+        orientation = VERTICAL
+        isInvisible = true
+        alpha = 0f
+        addView(recyclerView, LayoutParams(MATCH_PARENT, 0, 1f))
+        addView(separator, LayoutParams(MATCH_PARENT, dp.toInt()))
+        addView(LinearLayout(context).apply {
+            bottomBar = this
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            addView(entry, LayoutParams(0, WRAP_CONTENT, 1f))
+            addView(extraButton, LayoutParams((40 * dp).toInt(), MATCH_PARENT))
+            setOnApplyWindowInsetsListener { v, insets ->
+                val b = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                    insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
+                else
+                    insets.systemWindowInsetBottom
+                v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, b)
+                insets
+            }
+        })
     }
 
     fun focusSearch() {
@@ -123,12 +142,9 @@ class DrawerArea(
         imm.showSoftInput(entry, 0)
     }
 
-    fun clearSearch() {
-        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(windowToken, 0)
+    fun clearSearchField() {
         entry.text.clear()
         unsearch()
-        entry.clearFocus()
         recyclerView.stopScroll()
         recyclerView.scrollToPosition(0)
     }
@@ -147,6 +163,7 @@ class DrawerArea(
         results = emptyList()
         val apps = AppLoader.getResource()
         searchAdapter.update(apps, false)
+        extraButton.setImageResource(R.drawable.options)
         notSearchedYet = true
     }
 
@@ -166,6 +183,7 @@ class DrawerArea(
         results = Search.query(query, searchCancellable)
         post {
             searchAdapter.update(results, true)
+            extraButton.setImageResource(R.drawable.cross)
         }
     }
 
@@ -184,17 +202,19 @@ class DrawerArea(
         val hintColor = ColorThemer.drawerHint(context)
         val separatorColor = hintColor and 0xffffff or 0x44000000
         val dp = context.resources.displayMetrics.density
+        val h = (sideMargin - (8 * dp).toInt()).coerceAtLeast(0)
         with(entry) {
-            val h = (sideMargin - (8 * dp).toInt()).coerceAtLeast(0)
             val v = (12 * dp).toInt()
-            setPadding(h, v, h, v + Utils.getNavigationBarHeight(context)
-                .coerceAtLeast(sideMargin))
+            setPadding(h, v, h / 2, v)
             setTextColor(fgColor)
             setHintTextColor(hintColor)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                 textCursorDrawable?.setTint(fgColor)
             highlightColor = fgColor and 0xffffff or 0x33000000
         }
+        bottomBar.setPadding(0, 0, h, Utils.getNavigationBarHeight(context)
+            .coerceAtLeast(sideMargin))
+        extraButton.imageTintList = ColorStateList.valueOf(fgColor)
         separator.background = FillDrawable(separatorColor)
         icSearch.setTint(hintColor)
     }

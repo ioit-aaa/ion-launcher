@@ -12,7 +12,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.LauncherItem
-import one.zagura.IonLauncher.provider.icons.IconLoader
 import one.zagura.IonLauncher.ui.view.settings.TitleViewHolder
 
 class IconPackSourcesAdapter(
@@ -61,7 +60,7 @@ class IconPackSourcesAdapter(
                 leftMargin = (12 * dp).toInt()
             })
             addView(ImageView(context).apply {
-                setImageResource(R.drawable.ic_arrow_right)
+                setImageResource(R.drawable.arrow_right)
                 imageTintList = ColorStateList.valueOf(resources.getColor(R.color.color_hint))
             }, LayoutParams(s, LayoutParams.MATCH_PARENT))
         }, icon, text).apply {

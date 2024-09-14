@@ -40,7 +40,7 @@ class SuggestionRowView(
     private var labels = emptyArray<CharSequence>()
     private var hideI = -1
 
-    private val icSearch = resources.getDrawable(R.drawable.ic_search)
+    private val icSearch = resources.getDrawable(R.drawable.search)
 
     fun update(allSuggestions: List<LauncherItem>) {
         TaskRunner.submit {

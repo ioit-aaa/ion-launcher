@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.annotation.RequiresApi
@@ -212,8 +213,12 @@ class HomeScreen : Activity() {
     fun onDrawerStateChanged(view: View, newState: Int) {
         if (newState == STATE_EXPANDED)
             Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.drawerForeground(this@HomeScreen)) < 0.5f)
-        else
-            drawerArea.clearSearch()
+        else {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(drawerArea.windowToken, 0)
+            drawerArea.clearSearchField()
+            drawerArea.entry.clearFocus()
+        }
         desktop.isVisible = newState != STATE_EXPANDED
         if (newState == STATE_COLLAPSED) {
             drawerArea.isInvisible = true

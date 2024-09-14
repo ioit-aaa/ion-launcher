@@ -81,8 +81,8 @@ object IconLoader {
         is ContactItem -> loadIcon(context, item)
         is ActionItem -> loadIcon(context, item)
         is StaticShortcut -> loadIcon(context, item)
-        is TorchToggleItem -> IconThemer.loadSymbolicIcon(context, R.drawable.ic_torch)
-        is OpenAlarmsItem -> IconThemer.loadSymbolicIcon(context, R.drawable.ic_alarm)
+        is TorchToggleItem -> IconThemer.loadSymbolicIcon(context, R.drawable.torch)
+        is OpenAlarmsItem -> IconThemer.loadSymbolicIcon(context, R.drawable.alarm)
     }
 
     private fun loadIcon(context: Context, item: ActionItem): Drawable {

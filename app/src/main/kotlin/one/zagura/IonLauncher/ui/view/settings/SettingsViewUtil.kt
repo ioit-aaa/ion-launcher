@@ -255,7 +255,7 @@ fun SettingViewScope.onClick(listener: (View) -> Unit) {
     val s = (32 * dp).toInt()
     val p = (4 * dp).toInt()
     view.addView(ImageView(view.context).apply {
-        setImageResource(R.drawable.ic_arrow_right)
+        setImageResource(R.drawable.arrow_right)
         imageTintList = ColorStateList.valueOf(resources.getColor(R.color.color_hint))
         setPadding(p, p, p, p)
     }, LayoutParams(s, s))

@@ -38,9 +38,9 @@ class MediaView(
 
     private var iconPath: Path? = null
 
-    private val icPlay = resources.getDrawable(R.drawable.ic_play)
-    private val icPause = resources.getDrawable(R.drawable.ic_pause)
-    private val icTrackNext = resources.getDrawable(R.drawable.ic_track_next)
+    private val icPlay = resources.getDrawable(R.drawable.play)
+    private val icPause = resources.getDrawable(R.drawable.pause)
+    private val icTrackNext = resources.getDrawable(R.drawable.track_next)
 
     private var fgColor = 0
 
