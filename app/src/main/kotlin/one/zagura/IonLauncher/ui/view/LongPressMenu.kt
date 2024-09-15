@@ -6,6 +6,8 @@ import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.OvalShape
+import android.graphics.drawable.shapes.RoundRectShape
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -15,6 +17,7 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupWindow
@@ -117,7 +120,7 @@ object LongPressMenu {
         current = w
     }
 
-    fun popupEdit(parent: View, item: LauncherItem) {
+    private fun popupEdit(parent: View, item: LauncherItem) {
         val dp = parent.resources.displayMetrics.density
         dismissCurrent()
         val content = LinearLayout(parent.context)
@@ -134,21 +137,32 @@ object LongPressMenu {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
 
-            val settings = parent.context.ionApplication.settings
+            val settings = context.ionApplication.settings
             val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
 
-            val icon = ImageView(parent.context).apply {
-                setImageDrawable(IconLoader.loadIcon(context, item))
-                setOnClickListener {
-                    w.dismiss()
-                    CustomIconActivity.start(parent.context, item)
-                }
+            val icon = FrameLayout(context).apply {
+                addView(ImageView(context).apply {
+                    setImageDrawable(IconLoader.loadIcon(context, item))
+                    setOnClickListener {
+                        w.dismiss()
+                        CustomIconActivity.start(parent.context, item)
+                    }
+                }, FrameLayout.LayoutParams(iconSize, iconSize, Gravity.CENTER))
+                addView(ImageView(context).apply {
+                    setImageResource(R.drawable.edit)
+                    imageTintList = ColorStateList.valueOf(resources.getColor(R.color.color_bg))
+                    background = ShapeDrawable(OvalShape()).apply {
+                        paint.color = resources.getColor(R.color.color_text)
+                    }
+                    val p = iconSize / 18
+                    setPadding(p, p, p, p)
+                }, FrameLayout.LayoutParams(iconSize / 2, iconSize / 2, Gravity.BOTTOM or Gravity.END))
             }
             val label = EditText(parent.context).apply {
                 setText(LabelLoader.loadLabel(context, item))
                 setTextColor(resources.getColor(R.color.color_text))
             }
-            addView(icon, MarginLayoutParams(iconSize, iconSize).apply {
+            addView(icon, MarginLayoutParams(iconSize * 6 / 5, iconSize * 6 / 5).apply {
                 val m = (24 * dp).toInt()
                 leftMargin = m
                 rightMargin = m
