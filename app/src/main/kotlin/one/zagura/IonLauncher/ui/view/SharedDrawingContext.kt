@@ -27,6 +27,9 @@ class SharedDrawingContext(context: Context) {
     private var doSkeumorphism = false
 
     val cardPaint = Paint()
+    val cardBorderPaint = Paint().apply {
+        style = Paint.Style.STROKE
+    }
 
     val titlePaint = TextPaint().apply {
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, context.resources.displayMetrics)
@@ -60,11 +63,7 @@ class SharedDrawingContext(context: Context) {
         }
 
         canvas.drawRoundRect(x0, y0, x1, y1, r, r, cardPaint)
-        canvas.drawRoundRect(x0 - dp / 2, y0 - dp / 2, x1 + dp / 2, y1 + dp / 2, r + dp / 2, r + dp / 2, Paint().apply {
-            color = 0xbb000000.toInt()
-            style = Paint.Style.STROKE
-            strokeWidth = 1 * dp
-        })
+        canvas.drawRoundRect(x0 - dp / 2, y0 - dp / 2, x1 + dp / 2, y1 + dp / 2, r + dp / 2, r + dp / 2, cardBorderPaint)
 
         val path = Path().apply {
             addRoundRect(x0, y0, x1, y1, r, r, Path.Direction.CW)
@@ -106,9 +105,16 @@ class SharedDrawingContext(context: Context) {
         radius = iconSize * settings["icon:radius-ratio", 25] / 100f
         doSkeumorphism = settings["card:skeumorph", false]
         cardPaint.color = ColorThemer.cardBackground(context)
-        if (doSkeumorphism)
-            cardPaint.setShadowLayer(10f, 0f, 5f, 0x55000000)
-        else if (cardPaint.color.alpha != 255 || ColorThemer.lightness(cardPaint.color) - ColorThemer.lightness(ColorThemer.wallBackground(context)) <= 0.1)
+        if (doSkeumorphism) {
+            cardBorderPaint.color = (0x66 + 0x44 * (cardPaint.color.alpha / 255f)).toInt() shl 24
+            cardBorderPaint.strokeWidth = 1 * dp
+            cardPaint.setShadowLayer(
+                10f,
+                0f,
+                5f,
+                (0x11 + 0x44 * (cardPaint.color.alpha / 255f)).toInt() shl 24
+            )
+        } else if (cardPaint.color.alpha != 255 || ColorThemer.lightness(cardPaint.color) - ColorThemer.lightness(ColorThemer.wallBackground(context)) <= 0.1)
             cardPaint.clearShadowLayer()
         else
             cardPaint.setShadowLayer(21f, 0f, 0f, 0x22000000)
