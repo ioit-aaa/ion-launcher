@@ -46,6 +46,7 @@ object IconThemer {
 
     private var doIconRim = false
     private var doIconGloss = false
+    private var doIconGlossOnThemed = false
 
     private var radiusRatio = 0f
 
@@ -60,6 +61,7 @@ object IconThemer {
         doMonochromeBG = settings["icon:monochrome-bg", true]
         doIconRim = settings["icon:rim", false]
         doIconGloss = settings["icon:gloss", false]
+        doIconGlossOnThemed = settings["icon:gloss-themed", false]
         radiusRatio = settings["icon:radius-ratio", 25] / 100f
         iconFG = ColorThemer.iconForeground(context)
         iconBG = ColorThemer.iconBackground(context)
@@ -181,7 +183,7 @@ object IconThemer {
         fg: Drawable?,
         isIconPack: Boolean,
     ): ClippedDrawable {
-        val layers = LayerDrawable(arrayOf(if (doIconGloss && !isIconPack)
+        val layers = LayerDrawable(arrayOf(if (doIconGloss && (doIconGlossOnThemed || !isIconPack))
             bg?.let(::IconGlossDrawable) else bg, fg))
         val w = layers.intrinsicWidth
         val h = layers.intrinsicHeight
@@ -203,7 +205,7 @@ object IconThemer {
         fg: Drawable,
         isIconPack: Boolean,
     ): ClippedDrawable {
-        if (doIconGloss && !isIconPack)
+        if (doIconGloss && (doIconGlossOnThemed || !isIconPack))
             return makeIcon(FillDrawable(bg), fg, false)
 
         val w = fg.intrinsicWidth

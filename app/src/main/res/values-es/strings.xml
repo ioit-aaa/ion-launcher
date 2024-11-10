@@ -62,6 +62,7 @@
     <string name="skeuomorphism">Esqueumorfismo</string>
     <string name="icon_rim">Efecto de borde</string>
     <string name="icon_gloss">Lustre</string>
+    <string name="icon_gloss_themed">Lustre sobre paquetes de iconos</string>
     <string name="edit">Editar</string>
     <string name="reset">Restablecer</string>
     <string name="hidden_apps">Apps escondidas</string>

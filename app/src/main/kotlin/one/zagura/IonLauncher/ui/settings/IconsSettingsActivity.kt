@@ -44,9 +44,16 @@ class IconsSettingsActivity : Activity() {
             setting(R.string.icon_rim) {
                 switch("icon:rim", false)
             }
+            var themed: View? = null
             setting(R.string.icon_gloss) {
-                switch("icon:gloss", false)
+                switch("icon:gloss", false) { _, isChecked ->
+                    themed?.isVisible = isChecked
+                }
             }
+            themed = setting(R.string.icon_gloss_themed) {
+                switch("icon:gloss-themed", false)
+            }
+            themed.isVisible = ionApplication.settings["icon:gloss", false]
         }
     }
 }

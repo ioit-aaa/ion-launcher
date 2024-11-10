@@ -62,6 +62,7 @@
     <string name="skeuomorphism">Скевоморфизм</string>
     <string name="icon_rim">3D эффект</string>
     <string name="icon_gloss">Лакировка</string>
+    <string name="icon_gloss_themed">Лакировка на пакетах иконок</string>
     <string name="edit">Изменить</string>
     <string name="reset">Восстановить</string>
     <string name="hidden_apps">Спрятанные приложения</string>
