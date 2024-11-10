@@ -53,21 +53,21 @@ class SharedDrawingContext(context: Context) {
         tmpRect.height()
     }
 
-    fun drawCard(dp: Float, canvas: Canvas, x0: Float, y0: Float, x1: Float, y1: Float) {
+    fun drawCard(dp: Float, canvas: Canvas, x0: Float, y0: Float, x1: Float, y1: Float, r: Float = radius) {
         if (!doSkeumorphism) {
-            canvas.drawRoundRect(x0, y0, x1, y1, radius, radius, cardPaint)
+            canvas.drawRoundRect(x0, y0, x1, y1, r, r, cardPaint)
             return
         }
 
-        canvas.drawRoundRect(x0, y0, x1, y1, radius, radius, cardPaint)
-        canvas.drawRoundRect(x0 - dp / 2, y0 - dp / 2, x1 + dp / 2, y1 + dp / 2, radius + dp / 2, radius + dp / 2, Paint().apply {
+        canvas.drawRoundRect(x0, y0, x1, y1, r, r, cardPaint)
+        canvas.drawRoundRect(x0 - dp / 2, y0 - dp / 2, x1 + dp / 2, y1 + dp / 2, r + dp / 2, r + dp / 2, Paint().apply {
             color = 0xbb000000.toInt()
             style = Paint.Style.STROKE
             strokeWidth = 1 * dp
         })
 
         val path = Path().apply {
-            addRoundRect(x0, y0, x1, y1, radius, radius, Path.Direction.CW)
+            addRoundRect(x0, y0, x1, y1, r, r, Path.Direction.CW)
         }
         canvas.save()
         canvas.clipPath(path)

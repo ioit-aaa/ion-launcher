@@ -62,13 +62,17 @@
     <string name="skeuomorphism">Скевоморфизм</string>
     <string name="icon_rim">3D эффект</string>
     <string name="icon_gloss">Лакировка</string>
-    <string name="all_apps">Приложения</string>
     <string name="edit">Изменить</string>
     <string name="reset">Восстановить</string>
     <string name="hidden_apps">Спрятанные приложения</string>
-    <plurals name="missed_calls">
-        <item quantity="one">%d потеранный звонок</item>
-        <item quantity="few">%d потеранных знонка</item>
-        <item quantity="many">%d потеранных звонков</item>
-    </plurals>
+    <string name="all_apps">Все Приложения</string>
+    <string name="system">Система</string>
+    <string name="customization">Персонализация</string>
+    <string name="utilities">Utilities</string>
+    <string name="media">Мультимедиа</string>
+    <string name="communication">Коммуникация</string>
+    <string name="productivity">Продуктивность</string>
+    <string name="wellbeing">Здоровье</string>
+    <string name="commute">Движение</string>
+    <string name="games">Игры</string>
 </resources>

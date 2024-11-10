@@ -70,7 +70,7 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
         updateSuggestions(context)
     }
 
-    fun onAppUninstalled(context: Context, packageName: String, user: UserHandle) {
+    fun onAppUninstalled(packageName: String, user: UserHandle) {
         if (this.suggestions.removeAll { it is App && it.packageName == packageName && it.userHandle == user })
             update(suggestions)
     }

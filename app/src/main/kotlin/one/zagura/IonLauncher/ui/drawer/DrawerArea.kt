@@ -22,11 +22,14 @@ import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.R
+import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.ColorThemer
+import one.zagura.IonLauncher.provider.items.AppCategorizer
 import one.zagura.IonLauncher.provider.search.Search
 import one.zagura.IonLauncher.ui.view.LongPressMenu
+import one.zagura.IonLauncher.ui.view.SharedDrawingContext
 import one.zagura.IonLauncher.util.Cancellable
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.TaskRunner
@@ -36,26 +39,50 @@ import one.zagura.IonLauncher.util.Utils
 @SuppressLint("UseCompatLoadingForDrawables", "ViewConstructor")
 class DrawerArea(
     context: Activity,
+    drawCtx: SharedDrawingContext,
     showDropTargets: () -> Unit,
     onItemOpened: (LauncherItem) -> Unit,
 ) : LinearLayout(context) {
 
+    val libraryView: RecyclerView
     val recyclerView: RecyclerView
+    private val libraryAdapter = LibraryAdapter(showDropTargets, onItemOpened, context, drawCtx, ::openCategory)
+    private val categoryAdapter = CategoryAdapter(showDropTargets, onItemOpened, context)
     private val searchAdapter = SearchAdapter(showDropTargets, onItemOpened, context)
     val entry: EditText
     private val extraButton: ImageView
     private val bottomBar: LinearLayout
-    private val separator: View
+    private val separator = View(context)
     private val icSearch = context.getDrawable(R.drawable.search)!!
 
     private var results = emptyList<LauncherItem>()
 
-    private val layout = GridLayoutManager(context, 1, RecyclerView.VERTICAL, false).apply {
-        spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-            override fun getSpanSize(i: Int) =
-                if (searchAdapter.isSearch || i == 0) spanCount else 1
-        }
+    enum class Screen {
+        Library, Category, Search
     }
+    var screen: Screen = Screen.Library
+        set(s) {
+            field = s
+            when (s) {
+                Screen.Library -> {
+                    libraryView.visibility = View.VISIBLE
+                    recyclerView.visibility = View.GONE
+                    extraButton.setImageResource(R.drawable.options)
+                }
+                Screen.Category -> {
+                    recyclerView.visibility = View.VISIBLE
+                    libraryView.visibility = View.GONE
+                    extraButton.setImageResource(R.drawable.options)
+                    recyclerView.adapter = categoryAdapter
+                }
+                Screen.Search -> {
+                    recyclerView.visibility = View.VISIBLE
+                    libraryView.visibility = View.GONE
+                    extraButton.setImageResource(R.drawable.cross)
+                    recyclerView.adapter = searchAdapter
+                }
+            }
+        }
 
     init {
         val dp = resources.displayMetrics.density
@@ -85,25 +112,12 @@ class DrawerArea(
             }
             imeOptions = EditorInfo.IME_ACTION_GO
         }
-        extraButton = ImageView(context).apply {
-            setImageResource(R.drawable.cross)
-            setOnClickListener {
-                if (searchAdapter.isSearch)
-                    clearSearchField()
-                else {
-                    LongPressMenu.popupLauncher(it,
-                        Gravity.BOTTOM or Gravity.END, 0,
-                        it.height + Utils.getNavigationBarHeight(context))
-                }
-            }
-        }
-        separator = View(context)
-        recyclerView = RecyclerView(context).apply {
-            adapter = searchAdapter
+        libraryView = RecyclerView(context).apply {
+            adapter = libraryAdapter
             clipToPadding = false
             setHasFixedSize(true)
             itemAnimator = null
-            layoutManager = layout
+            layoutManager = GridLayoutManager(context, 2, RecyclerView.VERTICAL, false)
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(v: RecyclerView, newState: Int) {
                     if (newState == RecyclerView.SCROLL_STATE_DRAGGING && entry.isFocused) {
@@ -114,11 +128,46 @@ class DrawerArea(
                 }
             })
         }
+        recyclerView = RecyclerView(context).apply {
+            visibility = View.GONE
+            adapter = searchAdapter
+            clipToPadding = false
+            setHasFixedSize(true)
+            itemAnimator = null
+            layoutManager = GridLayoutManager(context, 1, RecyclerView.VERTICAL, false).apply {
+                spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                    override fun getSpanSize(i: Int) =
+                        if (screen == Screen.Search || i == 0) spanCount else 1
+                }
+            }
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(v: RecyclerView, newState: Int) {
+                    if (newState == RecyclerView.SCROLL_STATE_DRAGGING && entry.isFocused) {
+                        entry.clearFocus()
+                        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        imm.hideSoftInputFromWindow(v.windowToken, 0)
+                    }
+                }
+            })
+        }
+        extraButton = ImageView(context).apply {
+            setImageResource(R.drawable.cross)
+            setOnClickListener {
+                if (screen == Screen.Search)
+                    clearSearchField()
+                else {
+                    LongPressMenu.popupLauncher(it,
+                        Gravity.BOTTOM or Gravity.END, 0,
+                        it.height + Utils.getNavigationBarHeight(context))
+                }
+            }
+        }
         orientation = VERTICAL
         isInvisible = true
         alpha = 0f
+        addView(libraryView, LayoutParams(MATCH_PARENT, 0, 1f))
         addView(recyclerView, LayoutParams(MATCH_PARENT, 0, 1f))
-        addView(separator, LayoutParams(MATCH_PARENT, dp.toInt()))
+        addView(separator, MATCH_PARENT, dp.toInt())
         addView(LinearLayout(context).apply {
             bottomBar = this
             orientation = HORIZONTAL
@@ -149,21 +198,29 @@ class DrawerArea(
         recyclerView.scrollToPosition(0)
     }
 
-    fun onAppsChanged() {
-        if (searchAdapter.isSearch) {
-            searchCancellable.cancel()
-            Search.updateData(context)
-            search(entry.text.toString())
-        } else post {
-            searchAdapter.update(AppLoader.getResource(), false)
+    fun onAppsChanged(categories: Map<AppCategorizer.AppCategory, List<App>>) {
+        when (screen) {
+            Screen.Search -> {
+                searchCancellable.cancel()
+                Search.updateData(context)
+                search(entry.text.toString())
+            }
+            Screen.Library -> post {
+                libraryAdapter.update(
+                    listOf(AppCategorizer.AppCategory.AllApps to AppLoader.getResource()) + categories.toList())
+            }
+            Screen.Category -> post {
+                categoryAdapter.update(
+                    categoryAdapter.category,
+                    categories[categoryAdapter.category] ?: emptyList()
+                )
+            }
         }
     }
 
     private fun unsearch() {
         results = emptyList()
-        val apps = AppLoader.getResource()
-        searchAdapter.update(apps, false)
-        extraButton.setImageResource(R.drawable.options)
+        screen = Screen.Library
         notSearchedYet = true
     }
 
@@ -176,25 +233,37 @@ class DrawerArea(
             return
         }
         if (notSearchedYet) {
+            post {
+                screen = Screen.Search
+            }
             notSearchedYet = false
             Search.updateData(context)
         }
         searchCancellable = Cancellable()
         results = Search.query(query, searchCancellable)
         post {
-            searchAdapter.update(results, true)
-            extraButton.setImageResource(R.drawable.cross)
+            searchAdapter.update(results)
         }
+    }
+    
+    private fun openCategory(category: AppCategorizer.AppCategory, apps: List<App>) {
+        screen = Screen.Category
+        categoryAdapter.update(category, apps)
     }
 
     fun applyCustomizations(settings: Settings, sideMargin: Int) {
         searchAdapter.notifyDataSetChanged()
-        if (!searchAdapter.isSearch)
+        if (screen != Screen.Search)
             unsearch()
-        layout.spanCount = settings["dock:columns", 5]
-        searchAdapter.showLabels = settings["drawer:labels", true]
+        categoryAdapter.showLabels = settings["drawer:labels", true]
         with(recyclerView) {
-            adapter = searchAdapter
+            (layoutManager as GridLayoutManager).spanCount = settings["dock:columns", 5]
+            adapter = adapter
+            val p = sideMargin / 2
+            setPadding(p, p.coerceAtLeast(Utils.getStatusBarHeight(context)), p, p)
+        }
+        with(libraryView) {
+            adapter = adapter
             val p = sideMargin / 2
             setPadding(p, p.coerceAtLeast(Utils.getStatusBarHeight(context)), p, p)
         }
@@ -216,6 +285,14 @@ class DrawerArea(
             .coerceAtLeast(sideMargin))
         extraButton.imageTintList = ColorStateList.valueOf(fgColor)
         separator.background = FillDrawable(separatorColor)
-        icSearch.setTint(hintColor)
+        icSearch.setTint(fgColor)
+    }
+
+    fun onBackPressed(): Boolean {
+        if (screen == Screen.Category) {
+            screen = Screen.Library
+            return true
+        }
+        return false
     }
 }

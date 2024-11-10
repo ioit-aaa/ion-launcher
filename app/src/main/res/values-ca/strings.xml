@@ -62,12 +62,17 @@
     <string name="skeuomorphism">Esqueuformisme</string>
     <string name="icon_rim">Efecte 3D</string>
     <string name="icon_gloss">Brillantor</string>
-    <string name="all_apps">Aplicacions</string>
     <string name="edit">Editar</string>
     <string name="reset">Restablir</string>
     <string name="hidden_apps">Apps amagades</string>
-    <plurals name="missed_calls">
-        <item quantity="one">Una trucada perduda</item>
-        <item quantity="many">%d trucades perdudes</item>
-    </plurals>
+    <string name="all_apps">Totes aplicacions</string>
+    <string name="system">Sistema</string>
+    <string name="customization">Personalització</string>
+    <string name="utilities">Utilitats</string>
+    <string name="media">Multimèdia</string>
+    <string name="communication">Communicació</string>
+    <string name="productivity">Productivitat</string>
+    <string name="wellbeing">Benestar</string>
+    <string name="commute">Desplaçament</string>
+    <string name="games">Jocs</string>
 </resources>

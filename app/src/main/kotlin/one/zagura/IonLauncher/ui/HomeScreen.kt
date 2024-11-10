@@ -32,6 +32,7 @@ import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Widgets
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.icons.IconLoader
+import one.zagura.IonLauncher.provider.items.AppCategorizer
 import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.notification.TopNotificationProvider
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
@@ -102,8 +103,7 @@ class HomeScreen : Activity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             onBackInvokedDispatcher.registerOnBackInvokedCallback(0) {
-                if (sheetBehavior.state != STATE_COLLAPSED)
-                    sheetBehavior.state = STATE_COLLAPSED
+                onBackPressed()
             }
 
         homeScreen.background = screenBackground
@@ -146,7 +146,7 @@ class HomeScreen : Activity() {
         }
 
         val offset = (256 * dp).toInt()
-        drawerArea = DrawerArea(this, ::showDropTargets, ::onDrawerItemOpened).apply {
+        drawerArea = DrawerArea(this, drawCtx, ::showDropTargets, ::onDrawerItemOpened).apply {
             setPadding(0, offset, 0, 0)
         }
 
@@ -243,8 +243,10 @@ class HomeScreen : Activity() {
             NotificationService.MediaObserver.updateMediaItem(applicationContext)
             applyCustomizations()
         }
+        AppCategorizer.track(false) {
+            drawerArea.onAppsChanged(it)
+        }
         AppLoader.track(false) {
-            drawerArea.onAppsChanged()
             runOnUiThread {
                 pinnedGrid.updateGridApps()
             }
@@ -266,7 +268,7 @@ class HomeScreen : Activity() {
                 onPowerSaverModeChanged(it)
         }
         TaskRunner.submit {
-            drawerArea.onAppsChanged()
+            drawerArea.onAppsChanged(AppCategorizer.getResource())
         }
         homeScreen.post {
             // Just in case it died for some reason (in post cause lower priority)
@@ -310,6 +312,7 @@ class HomeScreen : Activity() {
 
     private fun showDropTargets() {
         // Otherwise the bottom sheet behavior gets confused, idk why
+        drawerArea.libraryView.requestDisallowInterceptTouchEvent(true)
         drawerArea.recyclerView.requestDisallowInterceptTouchEvent(true)
         sheetBehavior.state = STATE_COLLAPSED
         pinnedGrid.showDropTargets = true
@@ -327,7 +330,8 @@ class HomeScreen : Activity() {
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (sheetBehavior.state != STATE_COLLAPSED)
-            sheetBehavior.state = STATE_COLLAPSED
+            if (!drawerArea.onBackPressed())
+                sheetBehavior.state = STATE_COLLAPSED
     }
 
     override fun onNewIntent(intent: Intent) {

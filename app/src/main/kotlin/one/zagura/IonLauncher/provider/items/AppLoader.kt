@@ -44,6 +44,7 @@ object AppLoader : UpdatingResource<List<App>>() {
             }
             apps = collection.toMutableList()
             update(apps)
+            AppCategorizer.onAppsLoaded(ionApplication, apps)
             SuggestionsManager.onAppsLoaded(ionApplication)
         }
     }
@@ -81,10 +82,11 @@ object AppLoader : UpdatingResource<List<App>>() {
 
         override fun onPackageRemoved(packageName: String, user: UserHandle) {
             apps.removeAll { it.packageName == packageName && it.userHandle == user }
-            update(apps)
-            SuggestionsManager.onAppUninstalled(ionApplication, packageName, user)
+            AppCategorizer.onAppUninstalled(packageName, user)
+            SuggestionsManager.onAppUninstalled(packageName, user)
             IconLoader.removePackage(packageName)
             LabelLoader.removePackage(packageName)
+            update(apps)
         }
 
         override fun onPackageAdded(packageName: String?, user: UserHandle?) = reloadApps(ionApplication)
