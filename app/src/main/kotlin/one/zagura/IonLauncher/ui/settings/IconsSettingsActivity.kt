@@ -6,14 +6,13 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
 import one.zagura.IonLauncher.R
-import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.ui.view.settings.onClick
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
 import one.zagura.IonLauncher.ui.view.settings.setting
 import one.zagura.IonLauncher.ui.view.settings.switch
 import one.zagura.IonLauncher.ui.settings.iconPackPicker.IconPackPickerActivity
 import one.zagura.IonLauncher.ui.ionApplication
-import one.zagura.IonLauncher.ui.view.settings.colorSettings
+import one.zagura.IonLauncher.ui.view.settings.seekbar
 import one.zagura.IonLauncher.ui.view.settings.title
 
 class IconsSettingsActivity : Activity() {
@@ -39,7 +38,9 @@ class IconsSettingsActivity : Activity() {
                 }
                 bg.isVisible = ionApplication.settings["icon:monochrome", false]
             }
-            colorSettings("icon", ColorThemer.DEFAULT_LIGHT, ColorThemer.DEFAULT_DARK, 0xdd)
+            setting(R.string.background_opacity, isVertical = true) {
+                seekbar("icon:bg:alpha", 0xdd, min = 0, max = 0xff)
+            }
             title(R.string.skeuomorphism)
             setting(R.string.icon_rim) {
                 switch("icon:rim", false)

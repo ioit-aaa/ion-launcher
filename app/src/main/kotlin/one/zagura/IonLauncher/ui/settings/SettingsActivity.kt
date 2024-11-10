@@ -25,10 +25,10 @@ class SettingsActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setSettingsContentView(R.string.tweaks) {
+            setting(R.string.color) { onClick(ColorSettingsActivity::class.java) }
             setting(R.string.icons) { onClick(IconsSettingsActivity::class.java) }
             setting(R.string.cards) { onClick(CardsSettingsActivity::class.java) }
             setting(R.string.drawer) { onClick(DrawerSettingsActivity::class.java) }
-            setting(R.string.wallpaper) { onClick(WallpaperSettingsActivity::class.java) }
             setting(R.string.icon_size, isVertical = true) {
                 seekbar("dock:icon-size", 48, min = 24, max = 72, multiplier = 8)
             }
@@ -37,6 +37,9 @@ class SettingsActivity : Activity() {
             }
             setting(R.string.columns, isVertical = true) {
                 seekbar("dock:columns", 5, min = 2, max = 7)
+            }
+            setting(R.string.background_opacity, isVertical = true) {
+                seekbar("wall:bg:alpha", 0xdd, min = 0, max = 0x33)
             }
             title(R.string.pinned_grid)
             setting(R.string.rows, isVertical = true) {
