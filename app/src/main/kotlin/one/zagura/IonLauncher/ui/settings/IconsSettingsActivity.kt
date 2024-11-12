@@ -23,6 +23,9 @@ class IconsSettingsActivity : Activity() {
             setting(R.string.icon_packs) {
                 onClick(IconPackPickerActivity::class.java)
             }
+            setting(R.string.reshape_legacy) {
+                switch("icon:reshape-legacy", true)
+            }
             setting(R.string.grayscale_icons) {
                 switch("icon:grayscale", false)
             }

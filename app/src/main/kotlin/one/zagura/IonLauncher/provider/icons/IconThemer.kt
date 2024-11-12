@@ -39,6 +39,8 @@ import kotlin.math.max
 
 object IconThemer {
 
+    private var doForceAdaptive = false
+
     var doGrayscale = false
         private set
     private var doMonochrome = false
@@ -56,6 +58,7 @@ object IconThemer {
     private var iconSize = 0
 
     fun updateSettings(context: Context, settings: Settings) {
+        doForceAdaptive = settings["icon:reshape-legacy", true]
         doGrayscale = settings["icon:grayscale", false]
         doMonochrome = settings["icon:monochrome", false]
         doMonochromeBG = settings["icon:monochrome-bg", true]
@@ -119,13 +122,16 @@ object IconThemer {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                 doMonochrome && !doMonochromeBG)
                 return InsetDrawable(icon, w / 12)
+            val isIconFullQuad = icon.toBitmap(1, 1)[0, 0].alpha == 255
+            if (!doForceAdaptive && !isIconFullQuad)
+                return icon
             val path = Path().apply {
                 val r = w * radiusRatio
                 addRoundRect(
                     0f, 0f, w.toFloat(), h.toFloat(),
                     floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
             }
-            var icon = if (icon.toBitmap(1, 1)[0, 0].alpha == 255) icon
+            var icon = if (isIconFullQuad) icon
             else InsetDrawable(icon, w / 6)
             if (doIconGloss)
                 icon = IconGlossDrawable(icon)
