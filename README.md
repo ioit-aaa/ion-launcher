@@ -1,5 +1,9 @@
 # Ion Launcher
 
+<img src=metadata/en-US/images/phoneScreenshots/1.jpg height=360px>
+<img src=metadata/en-US/images/phoneScreenshots/2.jpg height=360px>
+<img src=metadata/en-US/images/phoneScreenshots/3.jpg height=360px>
+
 **Small**: The launcher is made to take up as little space as possible (within reason)
 
 **Unobtrusive**: Elements are arranged in an optimal way for muscle memory and reachability
