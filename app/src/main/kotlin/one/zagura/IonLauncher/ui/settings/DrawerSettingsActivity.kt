@@ -19,6 +19,9 @@ class DrawerSettingsActivity : Activity() {
             setting(R.string.background_opacity, isVertical = true) {
                 seekbar("drawer:bg:alpha", 0xdd, min = 0, max = 0xff)
             }
+            setting(R.string.open_keyboard_auto) {
+                switch("drawer:auto_keyboard", false)
+            }
         }
     }
 }

@@ -46,7 +46,7 @@
     <string name="lock_screen">Lock Screen</string>
     <string name="both">Both</string>
     <string name="apply">Apply</string>
-    <string name="show_search_in_suggestions">Search button in suggestions row</string>
+    <string name="show_search_in_suggestions">Search Button in Suggestions Row</string>
     <string name="monochrome_icons">Monochrome Icons</string>
     <string name="monochrome_bg">Monochrome Icons Background</string>
     <string name="turn_off_torch">Turn off torch</string>
@@ -60,11 +60,11 @@
     <string name="discharging">%1$d%%</string>
     <string name="labels">Labels</string>
     <string name="media_player">Media Player</string>
-    <string name="dynamically_tint">Dynamically tint</string>
+    <string name="dynamically_tint">Dynamically Tint</string>
     <string name="skeuomorphism">Skeuomorphism</string>
     <string name="icon_rim">Icon Rim</string>
     <string name="icon_gloss">Gloss</string>
-    <string name="icon_gloss_themed">Gloss themed icons too</string>
+    <string name="icon_gloss_themed">Gloss Themed Icons Too</string>
     <string name="edit">Edit</string>
     <string name="reset">Reset</string>
     <string name="hidden_apps">Hidden Apps</string>
@@ -78,4 +78,5 @@
     <string name="wellbeing">Wellbeing</string>
     <string name="commute">Commute</string>
     <string name="games">Games</string>
+    <string name="open_keyboard_auto">Open Keyboard Automatically</string>
 </resources>

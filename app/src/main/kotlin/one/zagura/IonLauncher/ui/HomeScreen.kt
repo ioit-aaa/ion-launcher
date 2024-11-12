@@ -219,6 +219,8 @@ class HomeScreen : Activity() {
             drawerArea.clearSearchField()
             drawerArea.entry.clearFocus()
         }
+        if (newState == STATE_EXPANDED && ionApplication.settings["drawer:auto_keyboard", false])
+            drawerArea.focusSearch()
         desktop.isVisible = newState != STATE_EXPANDED
         if (newState == STATE_COLLAPSED) {
             drawerArea.isInvisible = true
