@@ -9,6 +9,7 @@ import android.provider.Settings
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.provider.UpdatingResource
 import one.zagura.IonLauncher.provider.icons.IconPackInfo
+import one.zagura.IonLauncher.provider.icons.LabelLoader
 
 object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<App>>>() {
 
@@ -45,6 +46,24 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
 
     fun onAppUninstalled(packageName: String, user: UserHandle) {
         categories.forEach { (_, l) -> l.removeAll { it.packageName == packageName && it.userHandle == user } }
+        update(categories)
+    }
+
+    fun onHide(app: App) {
+        categories.forEach { (_, c) ->
+            c.remove(app)
+        }
+        update(categories)
+    }
+
+    fun onShow(context: Context, app: App) {
+        for ((c, _) in CategorizationContext(context).apply { processApp(app) }.categories) {
+            val apps = categories.getOrPut(c, ::ArrayList)
+            val i = apps.binarySearchBy(LabelLoader.loadLabel(context, app).lowercase()) { LabelLoader.loadLabel(context, it).lowercase() }
+            if (i < 0)
+                apps.add(-i - 1, app)
+        }
+        update(categories)
     }
 
     class CategorizationContext(val context: Context) {

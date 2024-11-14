@@ -67,6 +67,7 @@ object AppLoader : UpdatingResource<List<App>>() {
     fun onHide(app: App) {
         apps.remove(app)
         update(apps)
+        AppCategorizer.onHide(app)
     }
 
     fun onShow(context: Context, app: App) {
@@ -74,6 +75,7 @@ object AppLoader : UpdatingResource<List<App>>() {
         if (i < 0)
             apps.add(-i - 1, app)
         update(apps)
+        AppCategorizer.onShow(context, app)
     }
 
     class AppCallback(

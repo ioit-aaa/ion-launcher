@@ -212,7 +212,9 @@ class DrawerArea(
             Screen.Category -> post {
                 categoryAdapter.update(
                     categoryAdapter.category,
-                    categories[categoryAdapter.category] ?: emptyList()
+                    if (categoryAdapter.category == AppCategorizer.AppCategory.AllApps)
+                        AppLoader.getResource()
+                    else categories[categoryAdapter.category] ?: emptyList()
                 )
             }
         }
