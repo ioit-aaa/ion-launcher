@@ -78,6 +78,9 @@
     <string name="wellbeing">Wellbeing</string>
     <string name="commute">Commute</string>
     <string name="games">Games</string>
+    <string name="audio">Audio</string>
+    <string name="image">Image</string>
+    <string name="news">News</string>
     <string name="open_keyboard_auto">Open Keyboard Automatically</string>
     <string name="reshape_legacy">Reshape Legacy Icons</string>
 </resources>

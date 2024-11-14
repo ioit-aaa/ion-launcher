@@ -76,6 +76,9 @@
     <string name="wellbeing">Benestar</string>
     <string name="commute">Desplaçament</string>
     <string name="games">Jocs</string>
+    <string name="audio">Audio</string>
+    <string name="image">Imatge</string>
+    <string name="news">Notícies</string>
     <string name="open_keyboard_auto">Obrir teclat automaticament</string>
     <string name="reshape_legacy">Adaptar icones antigues</string>
 </resources>

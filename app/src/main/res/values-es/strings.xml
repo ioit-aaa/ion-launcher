@@ -76,6 +76,9 @@
     <string name="wellbeing">Bienestar</string>
     <string name="commute">Desplazamiento</string>
     <string name="games">Juegos</string>
+    <string name="audio">Audio</string>
+    <string name="image">Imagen</string>
+    <string name="news">Noticias</string>
     <string name="open_keyboard_auto">Abrir teclado automaticamente</string>
     <string name="reshape_legacy">Adaptar iconos antiguos</string>
 </resources>

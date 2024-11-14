@@ -76,6 +76,9 @@
     <string name="wellbeing">Здоровье</string>
     <string name="commute">Движение</string>
     <string name="games">Игры</string>
+    <string name="audio">Аудио</string>
+    <string name="image">Визуальное</string>
+    <string name="news">Новости</string>
     <string name="open_keyboard_auto">Автоматически открывать клавиатуру</string>
     <string name="reshape_legacy">Адаптировать старые иконки</string>
 </resources>

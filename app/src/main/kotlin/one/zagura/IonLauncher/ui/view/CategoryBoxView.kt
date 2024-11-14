@@ -38,6 +38,9 @@ class CategoryBoxView(
                 AppCategorizer.AppCategory.Wellbeing -> R.string.wellbeing
                 AppCategorizer.AppCategory.Commute -> R.string.commute
                 AppCategorizer.AppCategory.Games -> R.string.games
+                AppCategorizer.AppCategory.Audio -> R.string.audio
+                AppCategorizer.AppCategory.Image -> R.string.image
+                AppCategorizer.AppCategory.News -> R.string.news
             })
     }
 

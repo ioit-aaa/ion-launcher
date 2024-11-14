@@ -15,14 +15,22 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
 
     enum class AppCategory {
         AllApps,
+
         System,
         Customization,
+
         Utilities,
-        Media,
-        Communication,
-        Productivity,
-        Wellbeing,
         Commute,
+        Wellbeing,
+
+        Media,
+        Audio,
+        Image,
+
+        Communication,
+        News,
+
+        Productivity,
         Games,
     }
 
@@ -40,6 +48,8 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
         c.joinBIntoAIfSmall(AppCategory.System, AppCategory.Customization)
         c.joinBIntoAIfSmall(AppCategory.Utilities, AppCategory.Wellbeing)
         c.joinBIntoAIfSmall(AppCategory.Utilities, AppCategory.Commute)
+        c.joinBIntoAIfSmall(AppCategory.Communication, AppCategory.News)
+        c.ifSmallJoinTogether(AppCategory.Audio, AppCategory.Image, AppCategory.Media)
         categories = c.categories
         update(categories)
     }
@@ -84,9 +94,10 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
         private val wellbeingPackages = getForCategory(Intent.CATEGORY_APP_FITNESS).map { it.activityInfo.packageName }
         private val productivityPackages = getForCategory(Intent.CATEGORY_APP_CALENDAR).map { it.activityInfo.packageName }
 
-        private val mediaPackages = (getForCategory(Intent.CATEGORY_APP_GALLERY).asSequence() +
-                getForCategory(Intent.CATEGORY_APP_MUSIC) +
+        private val imagePackages = (getForCategory(Intent.CATEGORY_APP_GALLERY).asSequence() +
                 getForAction(Intent.ACTION_CAMERA_BUTTON)).map { it.activityInfo.packageName }.toSet()
+
+        private val audioPackages = getForCategory(Intent.CATEGORY_APP_MUSIC).map { it.activityInfo.packageName }
 
         private val commPackages = (getForCategory(Intent.CATEGORY_APP_EMAIL).asSequence() +
                 getForCategory(Intent.CATEGORY_APP_MESSAGING) +
@@ -108,10 +119,12 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 when (info.category) {
                     ApplicationInfo.CATEGORY_GAME -> categories.add(AppCategory.Games)
-                    ApplicationInfo.CATEGORY_IMAGE, ApplicationInfo.CATEGORY_VIDEO, ApplicationInfo.CATEGORY_AUDIO -> categories.add(AppCategory.Media)
+                    ApplicationInfo.CATEGORY_IMAGE -> categories.add(AppCategory.Image)
+                    ApplicationInfo.CATEGORY_VIDEO -> categories.add(AppCategory.Image)
+                    ApplicationInfo.CATEGORY_AUDIO -> categories.add(AppCategory.Audio)
                     ApplicationInfo.CATEGORY_SOCIAL -> categories.add(AppCategory.Communication)
 
-                    ApplicationInfo.CATEGORY_NEWS -> categories.add(AppCategory.Communication) // hmmm
+                    ApplicationInfo.CATEGORY_NEWS -> categories.add(AppCategory.News)
                     ApplicationInfo.CATEGORY_MAPS -> categories.add(AppCategory.Commute)
 
                     ApplicationInfo.CATEGORY_PRODUCTIVITY -> categories.add(AppCategory.Productivity)
@@ -130,8 +143,10 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
                 categories.add(AppCategory.Utilities)
             if (productivityPackages.contains(packageName))
                 categories.add(AppCategory.Productivity)
-            if (mediaPackages.contains(packageName))
-                categories.add(AppCategory.Media)
+            if (audioPackages.contains(packageName))
+                categories.add(AppCategory.Audio)
+            if (imagePackages.contains(packageName))
+                categories.add(AppCategory.Image)
             if (systemPackages.contains(packageName))
                 categories.add(AppCategory.System)
             if (customizationPackages.contains(packageName))
@@ -152,6 +167,20 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
             if (aa.size < 3 || bb.size < 3) {
                 for (app in bb) if (app !in aa)
                     aa.add(app)
+                categories.remove(b)
+            }
+        }
+
+        fun ifSmallJoinTogether(a: AppCategory, b: AppCategory, new: AppCategory) {
+            val aa = categories[a] ?: return
+            val bb = categories[b] ?: return
+            if (aa.size < 3 || bb.size < 3) {
+                val dest = categories.getOrPut(new, ::ArrayList)
+                for (app in aa) if (app !in dest)
+                    dest.add(app)
+                for (app in bb) if (app !in dest)
+                    dest.add(app)
+                categories.remove(a)
                 categories.remove(b)
             }
         }
