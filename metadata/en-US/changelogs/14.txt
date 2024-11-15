@@ -1,0 +1,13 @@
+New, category-based app drawer
+
+Changed some default settings
+Tweaked first time setup process
+Added setting to disable media player
+Added button to clear search
+Added options button in app drawer, to open settings
+Added a hint icon to make it clear that the icon in the app editing menu can be changed
+Added setting to apply gloss to themed icons too
+Separated color settings from the rest into their own page
+Tweaked skeuomorphic card effect to look better with transparent/translucent cards
+Added setting to automatically open keyboard when app drawer is opened.
+Added option to leave non-adaptive icons as is instead of shrinking them.

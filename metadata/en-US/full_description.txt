@@ -1,7 +1,9 @@
-<b>Small</b>: The launcher is made to take up as little space as possible (within reason)
+<b>Productive</b>: Ion Launcher shows you relevant information on the home screen when its needed, and organizes the app drawer into categories automatically
 
-<b>Unobtrusive</b>: Elements are arranged in an optimal way for muscle memory and reachability
+<b>Easy Customization</b>: Customize your home screen fast, by changing only a handful of settings, like foreground and background colors
 
-<b>Productive</b>: The launcher shows you relevant information on the home screen when its needed
+<b>Ergonomic</b>: Elements are arranged in an optimal way for muscle memory and reachability
 
 <b>Elegant</b>: The design does not take a back seat in this launcher, the default setup looks great, and you can make it look even better with a couple adjustments
+
+<b>Lightweight & fast</b>: Ion Launcher is made to take up as little storage space as possible (within reason)
