@@ -2,9 +2,6 @@ package one.zagura.IonLauncher.ui.settings.iconPackPicker
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
 import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -14,6 +11,7 @@ import androidx.recyclerview.widget.ItemTouchHelper.UP
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.provider.icons.IconPackInfo
+import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.view.settings.setupWindow
 import one.zagura.IonLauncher.ui.settings.iconPackPicker.viewHolder.IconPackViewHolder
@@ -49,7 +47,7 @@ class IconPackPickerActivity : Activity() {
         }
 
         iconPacks.sortWith { o1, o2 ->
-            o1.label.compareTo(o2.label, ignoreCase = true)
+            AppLoader.compareLabels(o1.label, o2.label)
         }
 
         val chosenIconPacks = run {

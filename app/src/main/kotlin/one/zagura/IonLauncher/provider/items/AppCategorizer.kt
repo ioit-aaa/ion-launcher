@@ -10,6 +10,7 @@ import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.provider.UpdatingResource
 import one.zagura.IonLauncher.provider.icons.IconPackInfo
 import one.zagura.IonLauncher.provider.icons.LabelLoader
+import one.zagura.IonLauncher.provider.items.AppLoader.compareLabels
 
 object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<App>>>() {
 
@@ -38,11 +39,11 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
 
     override fun getResource(): Map<AppCategory, List<App>> = categories
 
-    fun onAppsLoaded(context: Context, apps: MutableList<App>) {
+    fun onAppsLoaded(context: Context, apps: List<App>) {
         categorizeAllApps(context, apps)
     }
 
-    fun categorizeAllApps(context: Context, apps: MutableList<App>) {
+    fun categorizeAllApps(context: Context, apps: List<App>) {
         val c = CategorizationContext(context)
         apps.forEach(c::processApp)
         c.joinBIntoAIfSmall(AppCategory.System, AppCategory.Customization)
@@ -69,7 +70,8 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
     fun onShow(context: Context, app: App) {
         for ((c, _) in CategorizationContext(context).apply { processApp(app) }.categories) {
             val apps = categories.getOrPut(c, ::ArrayList)
-            val i = apps.binarySearchBy(LabelLoader.loadLabel(context, app).lowercase()) { LabelLoader.loadLabel(context, it).lowercase() }
+            val l = LabelLoader.loadLabel(context, app)
+            val i = apps.binarySearch { compareLabels(LabelLoader.loadLabel(context, it), l) }
             if (i < 0)
                 apps.add(-i - 1, app)
         }
@@ -90,14 +92,14 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
                 getForCategory(Intent.CATEGORY_APP_WEATHER) +
                 getForCategory(Intent.CATEGORY_APP_FITNESS)).map { it.activityInfo.packageName }.toSet()
 
-        private val utilityPackages = getForCategory(Intent.CATEGORY_APP_CALCULATOR).map { it.activityInfo.packageName }
-        private val wellbeingPackages = getForCategory(Intent.CATEGORY_APP_FITNESS).map { it.activityInfo.packageName }
-        private val productivityPackages = getForCategory(Intent.CATEGORY_APP_CALENDAR).map { it.activityInfo.packageName }
+        private val utilityPackages = getForCategory(Intent.CATEGORY_APP_CALCULATOR).map { it.activityInfo.packageName }.toSet()
+        private val wellbeingPackages = getForCategory(Intent.CATEGORY_APP_FITNESS).map { it.activityInfo.packageName }.toSet()
+        private val productivityPackages = getForCategory(Intent.CATEGORY_APP_CALENDAR).map { it.activityInfo.packageName }.toSet()
 
         private val imagePackages = (getForCategory(Intent.CATEGORY_APP_GALLERY).asSequence() +
                 getForAction(Intent.ACTION_CAMERA_BUTTON)).map { it.activityInfo.packageName }.toSet()
 
-        private val audioPackages = getForCategory(Intent.CATEGORY_APP_MUSIC).map { it.activityInfo.packageName }
+        private val audioPackages = getForCategory(Intent.CATEGORY_APP_MUSIC).map { it.activityInfo.packageName }.toSet()
 
         private val commPackages = (getForCategory(Intent.CATEGORY_APP_EMAIL).asSequence() +
                 getForCategory(Intent.CATEGORY_APP_MESSAGING) +
@@ -115,26 +117,28 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
 
         private fun categorizePackage(packageName: String): HashSet<AppCategory> {
             val categories = HashSet<AppCategory>()
-            val info = context.packageManager.getApplicationInfo(packageName, 0)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                when (info.category) {
-                    ApplicationInfo.CATEGORY_GAME -> categories.add(AppCategory.Games)
-                    ApplicationInfo.CATEGORY_IMAGE -> categories.add(AppCategory.Image)
-                    ApplicationInfo.CATEGORY_VIDEO -> categories.add(AppCategory.Image)
-                    ApplicationInfo.CATEGORY_AUDIO -> categories.add(AppCategory.Audio)
-                    ApplicationInfo.CATEGORY_SOCIAL -> categories.add(AppCategory.Communication)
+            try {
+                val info = context.packageManager.getApplicationInfo(packageName, 0)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    when (info.category) {
+                        ApplicationInfo.CATEGORY_GAME -> categories.add(AppCategory.Games)
+                        ApplicationInfo.CATEGORY_IMAGE -> categories.add(AppCategory.Image)
+                        ApplicationInfo.CATEGORY_VIDEO -> categories.add(AppCategory.Image)
+                        ApplicationInfo.CATEGORY_AUDIO -> categories.add(AppCategory.Audio)
+                        ApplicationInfo.CATEGORY_SOCIAL -> categories.add(AppCategory.Communication)
 
-                    ApplicationInfo.CATEGORY_NEWS -> categories.add(AppCategory.News)
-                    ApplicationInfo.CATEGORY_MAPS -> categories.add(AppCategory.Commute)
+                        ApplicationInfo.CATEGORY_NEWS -> categories.add(AppCategory.News)
+                        ApplicationInfo.CATEGORY_MAPS -> categories.add(AppCategory.Commute)
 
-                    ApplicationInfo.CATEGORY_PRODUCTIVITY -> categories.add(AppCategory.Productivity)
-                    ApplicationInfo.CATEGORY_ACCESSIBILITY -> categories.add(AppCategory.Utilities)
-                    ApplicationInfo.CATEGORY_UNDEFINED -> {}
+                        ApplicationInfo.CATEGORY_PRODUCTIVITY -> categories.add(AppCategory.Productivity)
+                        ApplicationInfo.CATEGORY_ACCESSIBILITY -> categories.add(AppCategory.Utilities)
+                        ApplicationInfo.CATEGORY_UNDEFINED -> {}
+                    }
+                } else @Suppress("DEPRECATION") {
+                    if (info.flags and ApplicationInfo.FLAG_IS_GAME == ApplicationInfo.FLAG_IS_GAME)
+                        categories.add(AppCategory.Games)
                 }
-            } else @Suppress("DEPRECATION") {
-                if (info.flags and ApplicationInfo.FLAG_IS_GAME == ApplicationInfo.FLAG_IS_GAME)
-                    categories.add(AppCategory.Games)
-            }
+            } catch (_: Exception) {}
             if (commutePackages.contains(packageName))
                 categories.add(AppCategory.Commute)
             if (commPackages.contains(packageName))

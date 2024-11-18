@@ -11,7 +11,10 @@ object TaskRunner : Thread() {
             queue.addLast(task)
             if (!isRunning) {
                 isRunning = true
-                Thread(::run).apply { isDaemon = false }.start()
+                Thread(::run).apply {
+                    priority = MAX_PRIORITY
+                    isDaemon = false
+                }.start()
             }
         }
     }

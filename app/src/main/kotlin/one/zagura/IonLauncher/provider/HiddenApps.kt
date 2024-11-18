@@ -46,8 +46,16 @@ object HiddenApps {
             AppLoader.onShow(context, item)
     }
 
-    fun isHidden(settings: Settings, app: LauncherItem): Boolean {
+    fun isHidden(settings: Settings, item: LauncherItem): Boolean {
         val hidden = settings.getStrings(KEY) ?: return false
-        return hidden.contains(app.toString())
+        return hidden.contains(item.toString())
+    }
+
+    fun reshow(context: Context, item: App) {
+        val settings = context.ionApplication.settings
+        if (isHidden(settings, item))
+            return
+        AppLoader.onHide(item)
+        AppLoader.onShow(context, item)
     }
 }

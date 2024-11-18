@@ -7,7 +7,6 @@ import android.graphics.Typeface
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.OvalShape
-import android.graphics.drawable.shapes.RoundRectShape
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -196,6 +195,8 @@ object LongPressMenu {
             w.setOnDismissListener {
                 current = null
                 EditedItems.setLabel(context, settings, item, label.text.toString())
+                if (item is App)
+                    HiddenApps.reshow(context, item)
             }
         }
         w.show()

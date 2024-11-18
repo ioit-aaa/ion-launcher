@@ -13,6 +13,7 @@ import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.ui.IonLauncherApp
 import one.zagura.IonLauncher.util.TaskRunner
 import java.util.TreeSet
+import kotlin.math.min
 
 object AppLoader : UpdatingResource<List<App>>() {
 
@@ -28,7 +29,7 @@ object AppLoader : UpdatingResource<List<App>>() {
             val collection = TreeSet<App> { a, b ->
                 val la = LabelLoader.loadLabel(ionApplication, a)
                 val lb = LabelLoader.loadLabel(ionApplication, b)
-                val c = la.compareTo(lb, ignoreCase = true)
+                val c = compareLabels(la, lb)
                 if (c == 0) a.compareTo(b) else c
             }
 
@@ -44,8 +45,8 @@ object AppLoader : UpdatingResource<List<App>>() {
             }
             apps = collection.toMutableList()
             update(apps)
-            AppCategorizer.onAppsLoaded(ionApplication, apps)
             SuggestionsManager.onAppsLoaded(ionApplication)
+            AppCategorizer.onAppsLoaded(ionApplication, apps)
         }
     }
 
@@ -71,7 +72,8 @@ object AppLoader : UpdatingResource<List<App>>() {
     }
 
     fun onShow(context: Context, app: App) {
-        val i = apps.binarySearchBy(LabelLoader.loadLabel(context, app).lowercase()) { LabelLoader.loadLabel(context, it).lowercase() }
+        val l = LabelLoader.loadLabel(context, app)
+        val i = apps.binarySearch { compareLabels(LabelLoader.loadLabel(context, it), l) }
         if (i < 0)
             apps.add(-i - 1, app)
         update(apps)
@@ -114,5 +116,28 @@ object AppLoader : UpdatingResource<List<App>>() {
         override fun onPackagesSuspended(packageNames: Array<out String>?, user: UserHandle?) = reloadApps(ionApplication)
 
         override fun onPackagesUnsuspended(packageNames: Array<out String>?, user: UserHandle?) = reloadApps(ionApplication)
+    }
+
+    private const val MAX_LATIN = '\u024F'
+
+    fun compareLabels(s1: String, s2: String): Int {
+        val n1 = s1.length
+        val n2 = s2.length
+        val min = min(n1, n2)
+        for (i in 0 until min) {
+            var c1 = s1[i]
+            var c2 = s2[i]
+            // Non-latin labels go first to avoid untranslated
+            // apps pushing translated ones down in the app drawer
+            if (MAX_LATIN in c2..<c1) return -1
+            if (MAX_LATIN in c1..<c2) return 1
+            if (c1 != c2) {
+                c1 = c1.lowercaseChar()
+                c2 = c2.lowercaseChar()
+                if (c1 != c2)
+                    return c1.code - c2.code
+            }
+        }
+        return n1 - n2
     }
 }
