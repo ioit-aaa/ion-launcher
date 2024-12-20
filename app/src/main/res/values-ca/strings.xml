@@ -81,4 +81,5 @@
     <string name="news">Notícies</string>
     <string name="open_keyboard_auto">Obrir teclat automaticament</string>
     <string name="reshape_legacy">Adaptar icones antigues</string>
+    <string name="categories">Categories</string>
 </resources>

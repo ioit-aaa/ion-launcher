@@ -55,6 +55,7 @@ class DrawerArea(
     private val separator = View(context)
     private val icSearch = context.getDrawable(R.drawable.search)!!
 
+    private var categorize = true
     private var results = emptyList<LauncherItem>()
 
     enum class Screen {
@@ -222,7 +223,7 @@ class DrawerArea(
 
     private fun unsearch() {
         results = emptyList()
-        screen = Screen.Library
+        screen = if (categorize) Screen.Library else Screen.Category
         notSearchedYet = true
     }
 
@@ -255,6 +256,7 @@ class DrawerArea(
 
     fun applyCustomizations(settings: Settings, sideMargin: Int) {
         searchAdapter.notifyDataSetChanged()
+        categorize = settings["drawer:categories", true]
         if (screen != Screen.Search)
             unsearch()
         categoryAdapter.showLabels = settings["drawer:labels", true]
@@ -291,7 +293,7 @@ class DrawerArea(
     }
 
     fun onBackPressed(): Boolean {
-        if (screen == Screen.Category) {
+        if (categorize && screen == Screen.Category) {
             screen = Screen.Library
             return true
         }

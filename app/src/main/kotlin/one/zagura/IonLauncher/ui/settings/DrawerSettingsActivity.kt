@@ -22,6 +22,9 @@ class DrawerSettingsActivity : Activity() {
             setting(R.string.open_keyboard_auto) {
                 switch("drawer:auto_keyboard", false)
             }
+            setting(R.string.categories) {
+                switch("drawer:categories", true)
+            }
         }
     }
 }

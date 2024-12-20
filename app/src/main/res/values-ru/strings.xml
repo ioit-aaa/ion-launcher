@@ -81,4 +81,5 @@
     <string name="news">Новости</string>
     <string name="open_keyboard_auto">Автоматически открывать клавиатуру</string>
     <string name="reshape_legacy">Адаптировать старые иконки</string>
+    <string name="categories">Категории</string>
 </resources>
