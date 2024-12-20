@@ -44,11 +44,12 @@ class DrawerArea(
     onItemOpened: (LauncherItem) -> Unit,
 ) : LinearLayout(context) {
 
-    val libraryView: RecyclerView
-    val recyclerView: RecyclerView
     private val libraryAdapter = LibraryAdapter(showDropTargets, onItemOpened, context, drawCtx, ::openCategory)
     private val categoryAdapter = CategoryAdapter(showDropTargets, onItemOpened, context)
     private val searchAdapter = SearchAdapter(showDropTargets, onItemOpened, context)
+
+    val libraryView: RecyclerView
+    val recyclerView: RecyclerView
     val entry: EditText
     private val extraButton: ImageView
     private val bottomBar: LinearLayout
@@ -61,7 +62,7 @@ class DrawerArea(
     enum class Screen {
         Library, Category, Search
     }
-    var screen: Screen = Screen.Library
+    private var screen: Screen = Screen.Library
         set(s) {
             field = s
             when (s) {
@@ -257,6 +258,7 @@ class DrawerArea(
     fun applyCustomizations(settings: Settings, sideMargin: Int) {
         searchAdapter.notifyDataSetChanged()
         categorize = settings["drawer:categories", true]
+        categoryAdapter.update(AppCategorizer.AppCategory.AllApps, AppLoader.getResource())
         if (screen != Screen.Search)
             unsearch()
         categoryAdapter.showLabels = settings["drawer:labels", true]
