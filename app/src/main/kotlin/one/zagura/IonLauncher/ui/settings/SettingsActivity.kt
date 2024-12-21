@@ -43,7 +43,7 @@ class SettingsActivity : Activity() {
             }
             title(R.string.pinned_grid)
             setting(R.string.rows, isVertical = true) {
-                seekbar("dock:rows", 2, min = 1, max = 5)
+                seekbar("dock:rows", 2, min = 0, max = 5)
             }
             title(R.string.widgets)
             setting(R.string.choose_widget) {

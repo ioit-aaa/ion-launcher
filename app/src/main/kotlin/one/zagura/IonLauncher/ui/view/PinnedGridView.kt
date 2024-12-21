@@ -18,6 +18,7 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.record
+import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
@@ -80,6 +81,7 @@ class PinnedGridView(
     fun applyCustomizations(settings: Settings) {
         columns = settings["dock:columns", 5]
         rows = settings["dock:rows", 2]
+        isVisible = rows != 0
         updateLayoutParams {
             height = calculateGridHeight()
         }
@@ -242,7 +244,7 @@ class PinnedGridView(
     @RequiresApi(Build.VERSION_CODES.Q)
     fun prepareIconifyAnim(packageName: String, user: UserHandle): IconifyAnim? {
         val i = items.indexOfFirst { it is App && it.packageName == packageName && it.userHandle == user }
-        if (i == -1)
+        if (i == -1 || rows == 0)
             return null
 
         val gridX = i % columns
