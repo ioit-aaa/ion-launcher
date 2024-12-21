@@ -48,7 +48,9 @@ object LabelLoader {
                 context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
             launcherApps.getActivityList(app.packageName, app.userHandle)
                 ?.find { it.name == app.name }
-                ?.label?.toString() ?: app.packageName
+                ?.label
+                ?.let { context.packageManager.getUserBadgedLabel(it, app.userHandle) }
+                ?.toString() ?: app.packageName
         }
     }
 
@@ -96,14 +98,17 @@ object LabelLoader {
     }
 
     fun loadLabel(context: Context, packageName: String, userHandle: UserHandle): String {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val launcherApps =
-                context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
-            launcherApps.getApplicationInfo(packageName, 0, userHandle)
-                .loadLabel(context.packageManager).toString()
-        } else
-            context.packageManager.getApplicationInfo(packageName, 0)
-                .loadLabel(context.packageManager).toString()
+        return try {
+            context.packageManager.getUserBadgedLabel(
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val launcherApps =
+                        context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+                    launcherApps.getApplicationInfo(packageName, 0, userHandle)
+                        .loadLabel(context.packageManager).toString()
+                } else
+                    context.packageManager.getApplicationInfo(packageName, 0)
+                        .loadLabel(context.packageManager).toString(), userHandle).toString()
+        } catch (_: Exception) { packageName }
     }
 
     fun clearCache() {

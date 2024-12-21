@@ -95,21 +95,21 @@ object IconLoader {
 
     private fun loadIcon(context: Context, app: App): Drawable {
         return cacheApps.getOrPut(app) {
-            iconPacksLock.withLock {
+            context.packageManager.getUserBadgedIcon(iconPacksLock.withLock {
                 val custom = EditedItems.getIcon(context, app)
                 if (custom != null)
-                    return@getOrPut IconThemer.transformIconFromIconPack(custom)
+                    return@withLock IconThemer.transformIconFromIconPack(custom)
                 val externalIcon = getIconPackIcon(context, app.packageName, app.name)
                 if (externalIcon != null)
-                    return@getOrPut IconThemer.transformIconFromIconPack(externalIcon)
+                    return@withLock IconThemer.transformIconFromIconPack(externalIcon)
                 val launcherApps =
                     context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
                 launcherApps.getActivityList(app.packageName, app.userHandle)
                     ?.find { it.name == app.name }
                     ?.getIcon(context.resources.displayMetrics.densityDpi)
                     ?.let { IconThemer.applyTheming(context, it, iconPacks) }
-                    ?: return@getOrPut NonDrawable
-            }
+                    ?: return@withLock NonDrawable
+            }, app.userHandle)
         }
     }
 
