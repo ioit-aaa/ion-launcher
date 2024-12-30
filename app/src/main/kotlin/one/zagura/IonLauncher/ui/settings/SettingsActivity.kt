@@ -39,7 +39,7 @@ class SettingsActivity : Activity() {
                 seekbar("dock:columns", 5, min = 2, max = 7)
             }
             setting(R.string.background_opacity, isVertical = true) {
-                seekbar("wall:bg:alpha", 0xdd, min = 0, max = 0x33)
+                seekbar("wall:bg:alpha", 0x33, min = 0, max = 0xff)
             }
             title(R.string.pinned_grid)
             setting(R.string.rows, isVertical = true) {
