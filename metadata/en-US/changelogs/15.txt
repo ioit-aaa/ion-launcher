@@ -1,0 +1,5 @@
+Added option to disable categories
+Added option to have 0 rows in the pinned grid
+Made work app icons & labels appear correctly labeled as work apps
+Tweaked app sorting to show non-latin-named apps first
+A couple of small fixes
