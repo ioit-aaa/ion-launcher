@@ -74,6 +74,7 @@ class CategoryBoxView(
         val iconCount = if (apps.size <= GRID_SIZE * GRID_SIZE) apps.size
         else GRID_SIZE * GRID_SIZE - 1
         val l = pl + ((width - pl - pr) - drawCtx.iconSize * GRID_SIZE) / (GRID_SIZE + 1) / 2
+        val w = width - l * 2
         drawCtx.drawCard(dp, canvas,
             pl.toFloat(),
             pt.toFloat(),
@@ -91,8 +92,8 @@ class CategoryBoxView(
             val icon = IconLoader.loadIcon(context, apps[i])
             val x = i % GRID_SIZE
             val y = i / GRID_SIZE
-            val centerX = l + (width - l * 2) * (0.5f + x) / GRID_SIZE
-            val centerY = l + (width - l * 2) * (0.5f + y) / GRID_SIZE
+            val centerX = l + w * (0.5f + x) / GRID_SIZE
+            val centerY = l + w * (0.5f + y) / GRID_SIZE
             icon.copyBounds(drawCtx.tmpRect)
             val r = drawCtx.iconSize / 2f
             icon.setBounds((centerX - r).toInt(), (centerY - r).toInt(), (centerX + r).toInt(), (centerY + r).toInt())
@@ -100,13 +101,23 @@ class CategoryBoxView(
             icon.bounds = drawCtx.tmpRect
         }
         if (iconCount < apps.size) {
-            val centerX = l + (width - l * 2) * (0.5f + GRID_SIZE - 1) / GRID_SIZE
-            val centerY = l + (width - l * 2) * (0.5f + GRID_SIZE - 1) / GRID_SIZE
-            openIcon.copyBounds(drawCtx.tmpRect)
             val r = drawCtx.iconSize / 2f
-            openIcon.setBounds((centerX - r).toInt(), (centerY - r).toInt(), (centerX + r).toInt(), (centerY + r).toInt())
-            openIcon.draw(canvas)
-            openIcon.bounds = drawCtx.tmpRect
+            val cx = l + w * (GRID_SIZE - 0.5f) / GRID_SIZE - r
+            val cy = l + w * (GRID_SIZE - 0.5f) / GRID_SIZE - r
+
+            for (ii in iconCount until apps.size.coerceAtMost(iconCount + 4)) {
+                val icon = IconLoader.loadIcon(context, apps[ii])
+                val i = ii - (GRID_SIZE * GRID_SIZE - 1)
+                val x = i % 2
+                val y = i / 2
+                val centerX = cx + r * 2 * (0.5f + x) / GRID_SIZE
+                val centerY = cy + r * 2 * (0.5f + y) / GRID_SIZE
+                icon.copyBounds(drawCtx.tmpRect)
+                val r = r * 0.4
+                icon.setBounds((centerX - r).toInt(), (centerY - r).toInt(), (centerX + r).toInt(), (centerY + r).toInt())
+                icon.draw(canvas)
+                icon.bounds = drawCtx.tmpRect
+            }
         }
     }
 
