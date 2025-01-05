@@ -93,3 +93,6 @@
 
 # These classes are duplicated between android.jar and core-lambda-stubs.jar.
 -dontnote java.lang.invoke.**
+
+# Keep Smartspacer's client SDK
+-keep class com.kieronquinn.app.smartspacer.sdk.**  { *; }

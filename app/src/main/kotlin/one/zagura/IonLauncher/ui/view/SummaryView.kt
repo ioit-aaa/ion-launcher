@@ -41,11 +41,75 @@ class SummaryView(
     private val drawCtx: SharedDrawingContext,
 ) : View(context) {
 
+    var showAtAGlance = true
+        set(value) {
+            field = value
+            invalidate()
+        }
+
     private var topString: CharSequence = ""
     private var bottomString: CharSequence? = ""
     private var events = emptyArray<CompiledEvent>()
     private var isGlanceMultiline = false
     private var onGlanceTap: (() -> Unit)? = null
+
+    fun updateAtAGlance() {
+        // dependencies: notification, media, battery
+        updateAtAGlanceInternal()
+        val cd = if (bottomString == null) topString
+        else "$topString\n$bottomString"
+        post {
+            contentDescription = cd
+            val ax = drawCtx.radius / 3
+            topString = TextUtils.ellipsize(
+                topString,
+                pureTitlePaint,
+                width - paddingLeft - paddingRight - ax * 2,
+                TextUtils.TruncateAt.END,
+            )
+            if (bottomString != null) {
+                bottomString = TextUtils.ellipsize(
+                    bottomString,
+                    pureTextPaint,
+                    width - paddingLeft - paddingRight - ax * 2,
+                    TextUtils.TruncateAt.END,
+                )
+            }
+            invalidate()
+        }
+    }
+
+    fun updateEvents(events: List<Event>) {
+        val alarm = Alarm.get(context)
+
+        var i = 0
+        val e = arrayOfNulls<CompiledEvent>(events.size + (alarm?.let { 1 } ?: 0))
+
+        alarm?.let {
+            e[i++] = CompiledEvent.Alarm(
+                it.open,
+                context.getString(R.string.upcoming_alarm),
+                Utils.format(context, it.time),
+            )
+        }
+        for (event in events) {
+            val textRight = if (event.allDay) null else {
+                val begin = Utils.format(context, event.begin)
+                val end = Utils.format(context, event.end)
+                "$begin - $end"
+            }
+            e[i++] = CompiledEvent.Calendar(event.title, textRight, event.color)
+        }
+        this.events = e as Array<CompiledEvent>
+        postInvalidate()
+    }
+
+    fun clearData() {
+        events = emptyArray()
+        topString = ""
+        contentDescription = ""
+        bottomString = null
+    }
 
     private val pureTitlePaint = TextPaint().apply {
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 28f, resources.displayMetrics)
@@ -133,64 +197,6 @@ class SummaryView(
         onGlanceTap = ::openBatterySettings
     }
 
-    fun updateAtAGlance() {
-        // dependencies: notification, media, battery
-        updateAtAGlanceInternal()
-        val cd = if (bottomString == null) topString
-            else "$topString\n$bottomString"
-        post {
-            contentDescription = cd
-            val ax = drawCtx.radius / 3
-            topString = TextUtils.ellipsize(
-                topString,
-                pureTitlePaint,
-                width - paddingLeft - paddingRight - ax * 2,
-                TextUtils.TruncateAt.END,
-            )
-            if (bottomString != null) {
-                bottomString = TextUtils.ellipsize(
-                    bottomString,
-                    pureTextPaint,
-                    width - paddingLeft - paddingRight - ax * 2,
-                    TextUtils.TruncateAt.END,
-                )
-            }
-            invalidate()
-        }
-    }
-
-    fun updateEvents(events: List<Event>) {
-        val alarm = Alarm.get(context)
-
-        var i = 0
-        val e = arrayOfNulls<CompiledEvent>(events.size + (alarm?.let { 1 } ?: 0))
-
-        alarm?.let {
-            e[i++] = CompiledEvent.Alarm(
-                it.open,
-                context.getString(R.string.upcoming_alarm),
-                Utils.format(context, it.time),
-            )
-        }
-        for (event in events) {
-            val textRight = if (event.allDay) null else {
-                val begin = Utils.format(context, event.begin)
-                val end = Utils.format(context, event.end)
-                "$begin - $end"
-            }
-            e[i++] = CompiledEvent.Calendar(event.title, textRight, event.color)
-        }
-        this.events = e as Array<CompiledEvent>
-        postInvalidate()
-    }
-
-    fun clearData() {
-        events = emptyArray()
-        topString = ""
-        contentDescription = ""
-        bottomString = null
-    }
-
     override fun onDraw(canvas: Canvas) {
         val dp = resources.displayMetrics.density
 
@@ -198,13 +204,17 @@ class SummaryView(
         val padding = (14 * dp).coerceAtLeast(drawCtx.radius * 3 / 4)
         val dotRadius = 2 * dp
 
-        var y = paddingTop - pureTitlePaint.ascent()
-        val ax = drawCtx.radius / 3
-        canvas.drawText(topString, 0, topString.length, paddingLeft + ax, y, pureTitlePaint)
-        bottomString?.let {
-            y += pureTitlePaint.descent() + separation - pureTextPaint.ascent()
-            canvas.drawText(it, 0, it.length, paddingLeft + ax, y, pureTextPaint)
-        }
+        var y = if (showAtAGlance) {
+            var y = paddingTop - pureTitlePaint.ascent()
+            val ax = drawCtx.radius / 3
+            canvas.drawText(topString, 0, topString.length, paddingLeft + ax, y, pureTitlePaint)
+            bottomString?.let {
+                y += pureTitlePaint.descent() + separation - pureTextPaint.ascent()
+                canvas.drawText(it, 0, it.length, paddingLeft + ax, y, pureTextPaint)
+            }
+            y
+        } else 0f
+
         if (events.isEmpty())
             return
 
@@ -248,7 +258,7 @@ class SummaryView(
         override fun onLongPress(e: MotionEvent) {
             val w = resources.displayMetrics.widthPixels
             val h = Utils.getDisplayHeight(context as Activity)
-            LongPressMenu.popupLauncher(this@SummaryView, Gravity.CENTER, e.x.toInt() - w / 2, e.y.toInt() - h / 2)
+            LongPressMenu.popupLauncher(this@SummaryView, Gravity.CENTER, e.x.toInt() - w / 2, e.y.toInt() - h / 2 + y.toInt())
             Utils.click(context)
         }
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float) =

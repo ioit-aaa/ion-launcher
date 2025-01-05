@@ -142,6 +142,8 @@ class Settings(
     fun getStrings(key: String): Array<String>? = lists[key]?.let { l -> Array(l.size) { l[it].toString() } }
     fun getInts(key: String): IntArray? = lists[key]?.let { l -> IntArray(l.size) { l[it].toInt() } }
 
+    fun has(s: String): Boolean = singles.contains(s) || lists.contains(s)
+
     fun init(context: Context) {
         fileLock.withLock {
             if (!isInitialized) {

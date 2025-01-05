@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "one.zagura.IonLauncher"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "one.zagura.IonLauncher"
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 15
         versionName = "y24-v14"
 
@@ -48,6 +48,10 @@ dependencies {
 //    implementation("androidx.coordinatorlayout:coordinatorlayout:1.2.0")
     implementation("androidx.palette:palette-ktx:1.0.0")
     implementation("com.google.android.material:material:1.12.0")
+
+    implementation("com.kieronquinn.smartspacer:sdk-client:1.1") {
+        exclude(group = "com.github.skydoves", module = "balloon")
+    }
 
     // Idk how else to control wallpaper zoom
     implementation("org.lsposed.hiddenapibypass:hiddenapibypass:4.3")

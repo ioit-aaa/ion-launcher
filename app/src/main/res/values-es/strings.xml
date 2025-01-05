@@ -82,4 +82,6 @@
     <string name="open_keyboard_auto">Abrir teclado automaticamente</string>
     <string name="reshape_legacy">Adaptar iconos antiguos</string>
     <string name="categories">Categorias</string>
+    <string name="smartspacer">Usar Smartspacer</string>
+    <string name="settings">Ajustes</string>
 </resources>

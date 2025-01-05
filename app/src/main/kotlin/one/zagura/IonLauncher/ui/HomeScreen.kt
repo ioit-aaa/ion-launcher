@@ -20,6 +20,7 @@ import androidx.annotation.RequiresApi
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.record
+import androidx.core.view.doOnLayout
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -27,6 +28,11 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+import com.kieronquinn.app.smartspacer.sdk.client.SmartspacerClient
+import com.kieronquinn.app.smartspacer.sdk.client.views.BcSmartspaceView
+import com.kieronquinn.app.smartspacer.sdk.client.views.popup.PopupFactory
+import com.kieronquinn.app.smartspacer.sdk.model.SmartspaceTarget
+import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Widgets
@@ -53,7 +59,6 @@ import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 
-
 class HomeScreen : Activity() {
 
     private lateinit var sheetBehavior: BottomSheetBehavior<View>
@@ -65,6 +70,7 @@ class HomeScreen : Activity() {
     private lateinit var drawerArea: DrawerArea
 
     private lateinit var summaryView: SummaryView
+    private lateinit var smartspacerView: View
 
     private lateinit var mediaView: MediaView
 
@@ -132,6 +138,26 @@ class HomeScreen : Activity() {
         desktop = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                addView(
+                    layoutInflater.inflate(R.layout.smartspacer, this, false).also {
+                        smartspacerView = it
+                        (it as BcSmartspaceView).popupFactory = object : PopupFactory {
+                            override fun createPopup(
+                                context: Context,
+                                anchorView: View,
+                                target: SmartspaceTarget,
+                                backgroundColor: Int,
+                                textColour: Int,
+                                launchIntent: (Intent?) -> Unit,
+                                dismissAction: ((SmartspaceTarget) -> Unit)?,
+                                aboutIntent: Intent?,
+                                feedbackIntent: Intent?,
+                                settingsIntent: Intent?
+                            ) = LongPressMenu.popupSmartspacer(context, anchorView, target, backgroundColor, textColour, launchIntent, dismissAction, aboutIntent, feedbackIntent, settingsIntent)
+                        }
+                    },
+                    LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0, .5f))
             addView(
                 summaryView,
                 LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f))
@@ -235,6 +261,8 @@ class HomeScreen : Activity() {
     override fun onDestroy() {
         super.onDestroy()
         SuggestionsManager.release()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            SmartspacerClient.close()
     }
 
     override fun onStart() {
@@ -398,6 +426,18 @@ class HomeScreen : Activity() {
         summaryView.applyCustomizations(settings)
         suggestionsView.applyCustomizations(settings)
         summaryView.setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 2), m, m)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val replaceAtAGlance = settings["smartspacer:replace-ataglance", false]
+            summaryView.showAtAGlance = !replaceAtAGlance
+            if (replaceAtAGlance) {
+                smartspacerView.isVisible = true
+                smartspacerView.findViewById<View>(R.id.smartspace_card_pager).setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 2), m, 0)
+                smartspacerView.findViewById<View>(R.id.smartspace_page_indicator).setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 4), m, 0)
+                val fg = ColorThemer.wallForeground(this)
+                (smartspacerView as BcSmartspaceView).setTintColour(fg)
+            } else
+                smartspacerView.isVisible = false
+        }
         mediaView.setPadding(m, m / 2, m, m / 2)
         suggestionsView.setPadding(m, m / 2, m, m / 2)
         val iconSize = (settings["dock:icon-size", 48] * dp).toInt()

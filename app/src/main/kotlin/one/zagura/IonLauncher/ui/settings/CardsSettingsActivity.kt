@@ -1,9 +1,12 @@
 package one.zagura.IonLauncher.ui.settings
 
 import android.app.Activity
+import android.content.pm.PackageManager.NameNotFoundException
 import android.os.Bundle
+import com.kieronquinn.app.smartspacer.sdk.SmartspacerConstants
 import one.zagura.IonLauncher.BuildConfig
 import one.zagura.IonLauncher.R
+import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.view.settings.onClick
 import one.zagura.IonLauncher.ui.view.settings.seekbar
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
@@ -21,6 +24,12 @@ class CardsSettingsActivity : Activity() {
             }
             setting(R.string.skeuomorphism) {
                 switch("card:skeumorph", false)
+            }
+            if (ionApplication.settings.has("smartspacer:replace-ataglance") ||
+                try { packageManager.getPackageInfo(SmartspacerConstants.SMARTSPACER_PACKAGE_NAME, 0); true } catch (_: NameNotFoundException) { false }) {
+                setting(R.string.smartspacer) {
+                    switch("smartspacer:replace-ataglance", false)
+                }
             }
             title(R.string.suggestions)
             if (BuildConfig.DEBUG) setting(R.string.suggestions) {

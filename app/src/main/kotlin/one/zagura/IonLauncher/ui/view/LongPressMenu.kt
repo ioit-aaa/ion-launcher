@@ -1,6 +1,7 @@
 package one.zagura.IonLauncher.ui.view
 
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Typeface
@@ -22,6 +23,8 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.annotation.StringRes
+import com.kieronquinn.app.smartspacer.sdk.client.views.popup.Popup
+import com.kieronquinn.app.smartspacer.sdk.model.SmartspaceTarget
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
@@ -90,6 +93,54 @@ object LongPressMenu {
         }
         w.showAtLocation(parent, gravity, xoff - (2 * dp).toInt() - p, yoff - p)
         current = w
+    }
+
+    fun popupSmartspacer(
+        context: Context,
+        anchorView: View,
+        target: SmartspaceTarget,
+        backgroundColor: Int,
+        textColour: Int,
+        launchIntent: (Intent?) -> Unit,
+        dismissAction: ((SmartspaceTarget) -> Unit)?,
+        aboutIntent: Intent?,
+        feedbackIntent: Intent?,
+        settingsIntent: Intent?,
+    ) : Popup {
+        val dp = context.resources.displayMetrics.density
+        dismissCurrent()
+        val content = LinearLayout(context)
+        val w = PopupWindow(content, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true)
+        w.setOnDismissListener { current = null }
+        val p = (12 * dp).toInt()
+        with(content) {
+            setPadding(p, p, p, p)
+            clipToPadding = false
+            val bg = ColorThemer.cardBackgroundOpaque(context)
+            val fg = ColorThemer.cardForeground(context)
+            orientation = LinearLayout.VERTICAL
+            if (settingsIntent != null)
+                addOption(R.string.settings, bg, fg, place = Place.First) {
+                    w.dismiss()
+                    launchIntent(settingsIntent)
+                }
+            addOption(R.string.tweaks, bg, fg, place = if (settingsIntent != null) Place.Other else Place.First) {
+                w.dismiss()
+                context.startActivity(Intent(context, SettingsActivity::class.java)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK), LauncherItem.createOpeningAnimation(it).toBundle())
+            }
+            addOption(R.string.wallpaper, bg, fg, place = Place.Last) {
+                w.dismiss()
+                context.startActivity(Intent(Intent.ACTION_SET_WALLPAPER), LauncherItem.createOpeningAnimation(it).toBundle())
+            }
+        }
+        w.showAtLocation(anchorView, Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, anchorView.height)
+        current = w
+        return object : Popup {
+            override fun dismiss() {
+                w.dismiss()
+            }
+        }
     }
 
     fun popupLauncher(parent: View, gravity: Int, xoff: Int, yoff: Int) {

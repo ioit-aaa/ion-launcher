@@ -82,4 +82,6 @@
     <string name="open_keyboard_auto">Автоматически открывать клавиатуру</string>
     <string name="reshape_legacy">Адаптировать старые иконки</string>
     <string name="categories">Категории</string>
+    <string name="smartspacer">Использовать Смартспейсер</string>
+    <string name="settings">Настройки</string>
 </resources>

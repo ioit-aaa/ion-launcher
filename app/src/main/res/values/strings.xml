@@ -84,4 +84,6 @@
     <string name="open_keyboard_auto">Open Keyboard Automatically</string>
     <string name="reshape_legacy">Reshape Legacy Icons</string>
     <string name="categories">Categories</string>
+    <string name="smartspacer">Use Smartspacer</string>
+    <string name="settings">Settings</string>
 </resources>

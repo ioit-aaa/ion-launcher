@@ -82,4 +82,6 @@
     <string name="open_keyboard_auto">Obrir teclat automaticament</string>
     <string name="reshape_legacy">Adaptar icones antigues</string>
     <string name="categories">Categories</string>
+    <string name="smartspacer">Usar Smartspacer</string>
+    <string name="settings">Configuració</string>
 </resources>
