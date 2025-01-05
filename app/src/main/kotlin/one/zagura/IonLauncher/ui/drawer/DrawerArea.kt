@@ -28,6 +28,7 @@ import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.items.AppCategorizer
 import one.zagura.IonLauncher.provider.search.Search
+import one.zagura.IonLauncher.ui.view.CategoryBoxView
 import one.zagura.IonLauncher.ui.view.LongPressMenu
 import one.zagura.IonLauncher.ui.view.SharedDrawingContext
 import one.zagura.IonLauncher.util.Cancellable
@@ -209,7 +210,10 @@ class DrawerArea(
             }
             Screen.Library -> post {
                 libraryAdapter.update(
-                    listOf(AppCategorizer.AppCategory.AllApps to AppLoader.getResource()) + categories.toList())
+                    listOf(AppCategorizer.AppCategory.AllApps to AppLoader.getResource()) +
+                        categories.toList().sortedBy {
+                            CategoryBoxView.getNameForCategory(context, it.first)
+                        })
             }
             Screen.Category -> post {
                 categoryAdapter.update(
