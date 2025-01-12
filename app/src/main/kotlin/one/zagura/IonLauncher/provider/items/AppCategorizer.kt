@@ -3,8 +3,11 @@ package one.zagura.IonLauncher.provider.items
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.content.pm.PackageManager.NameNotFoundException
 import android.os.Build
 import android.os.UserHandle
+import android.provider.MediaStore
 import android.provider.Settings
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.provider.UpdatingResource
@@ -83,7 +86,9 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
         private val systemPackages = (getForCategory(Intent.CATEGORY_APP_MARKET) +
                 getForCategory(Intent.CATEGORY_APP_FILES) +
                 getForCategory(Intent.CATEGORY_APP_BROWSER) +
-                getForAction(Settings.ACTION_SETTINGS)).map { it.activityInfo.packageName }.toSet()
+                getForAction(Settings.ACTION_SETTINGS)).map { it.activityInfo.packageName }
+                // Hard coded package names: only the "must-haves" are hardcoded
+                .plus(arrayOf("com.topjohnwu.magisk", "org.fdroid.fdroid", "org.kde.kdeconnect_tp")).toSet()
 
         private val customizationPackages = (IconPackInfo.getAvailableIconPacks(context.packageManager).asSequence() +
                 getForCategory(Intent.CATEGORY_HOME)).map { it.activityInfo.packageName }.toSet()
@@ -97,7 +102,9 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
         private val productivityPackages = getForCategory(Intent.CATEGORY_APP_CALENDAR).map { it.activityInfo.packageName }.toSet()
 
         private val imagePackages = (getForCategory(Intent.CATEGORY_APP_GALLERY).asSequence() +
-                getForAction(Intent.ACTION_CAMERA_BUTTON)).map { it.activityInfo.packageName }.toSet()
+                getForAction(Intent.ACTION_CAMERA_BUTTON) +
+                getForAction(MediaStore.ACTION_IMAGE_CAPTURE) +
+                getForAction(MediaStore.ACTION_VIDEO_CAPTURE)).map { it.activityInfo.packageName }.toSet()
 
         private val audioPackages = getForCategory(Intent.CATEGORY_APP_MUSIC).map { it.activityInfo.packageName }.toSet()
 
@@ -157,6 +164,64 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
                 categories.add(AppCategory.Customization)
             if (wellbeingPackages.contains(packageName))
                 categories.add(AppCategory.Wellbeing)
+            try {
+                val features = context.packageManager.getPackageInfo(packageName, PackageManager.GET_CONFIGURATIONS).reqFeatures
+                for (feature in features.orEmpty()) {
+                    when (feature.name) {
+                        "android.hardware.camera.capability.raw",
+                        "android.hardware.camera.capability.manual_post_processing",
+                        "android.hardware.camera.capability.manual_sensor",
+                        "android.hardware.camera.level.full",
+                            -> categories.add(AppCategory.Image)
+                        "android.software.live_wallpaper" ->
+                            if (categories.isEmpty())
+                                categories.add(AppCategory.Customization)
+                    }
+                }
+            } catch (_: NameNotFoundException) {}
+
+            if (categories.any())
+                return categories
+
+            try {
+                val permissions = context.packageManager.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS).requestedPermissions
+                if (permissions != null) {
+                    if (permissions.contains("android.permission.CAMERA") && !permissions.contains("android.permission.INTERNET"))
+                        categories.add(AppCategory.Image)
+                    if (permissions.contains("android.permission.READ_CALL_LOG") && permissions.contains("android.permission.MANAGE_OWN_CALLS"))
+                        categories.add(AppCategory.Image)
+                    for (permission in permissions) {
+                        when (permission) {
+                            "android.permission.BODY_SENSORS",
+                            "android.permission.BODY_SENSORS_BACKGROUND",
+                                -> categories.add(AppCategory.Wellbeing)
+                            "android.permission.WRITE_CALL_LOG",
+                            "android.permission.ANSWER_PHONE_CALLS",
+                                -> categories.add(AppCategory.Communication)
+                        }
+                    }
+                }
+            } catch (_: NameNotFoundException) {}
+
+            if (categories.any())
+                return categories
+
+            // these are workarounds, so we only do them as a last resort
+            if (packageName.contains("chat"))
+                categories.add(AppCategory.Communication)
+            else if (packageName.contains("messenger"))
+                categories.add(AppCategory.Communication)
+            else if (packageName.contains("maps"))
+                categories.add(AppCategory.Commute)
+            else if (packageName.contains("file"))
+                categories.add(AppCategory.System)
+            else if (packageName.contains(".docs"))
+                categories.add(AppCategory.Productivity)
+            else if (packageName.contains("sms"))
+                categories.add(AppCategory.Communication)
+            else if (packageName.contains(".osm"))
+                categories.add(AppCategory.Commute)
+
             return categories
         }
 
@@ -164,6 +229,9 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
             context.packageManager.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(category), 0)
         private fun getForAction(action: String) =
             context.packageManager.queryIntentActivities(Intent(action), 0)
+
+        private fun getForAcaaaation(action: String) =
+            context.packageManager.getPackageInfo(action, 0).featureGroups
 
         fun joinBIntoAIfSmall(a: AppCategory, b: AppCategory) {
             val aa = categories[a] ?: return
