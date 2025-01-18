@@ -36,6 +36,7 @@ class SuggestionRowView(
 
     private var showSearchButton = false
     private var showLabels = false
+    private var pillShape = false
     private var suggestions = emptyList<LauncherItem>()
     private var labels = emptyArray<CharSequence>()
     private var hideI = -1
@@ -63,6 +64,7 @@ class SuggestionRowView(
     fun applyCustomizations(settings: Settings) {
         showSearchButton = settings["layout:search-in-suggestions", true]
         showLabels = settings["suggestion:labels", false]
+        pillShape = settings["suggestion:pill", false]
         icSearch.setTint(ColorThemer.cardForeground(context))
         if (showLabels && suggestions.isNotEmpty())
             updateLabels()
@@ -79,47 +81,92 @@ class SuggestionRowView(
         val height = height - pt - pb
         val dp = resources.displayMetrics.density
 
-        drawCtx.drawCard(dp, canvas,
-            pl.toFloat(),
-            pt.toFloat(),
-            pl + width.toFloat(),
-            pt + height.toFloat())
+        if (!pillShape)
+            drawCtx.drawCard(dp, canvas,
+                pl.toFloat(),
+                pt.toFloat(),
+                pl + width.toFloat(),
+                pt + height.toFloat())
 
-        val iconPadding = 8 * dp
         if (showSearchButton) {
-            val r = (drawCtx.radius - iconPadding)
-                .coerceAtLeast(drawCtx.radius / drawCtx.iconSize * (height - iconPadding * 2))
             val x = pl + width - height
             val p = (10 * dp).toInt()
+            if (pillShape)
+                drawCtx.drawCard(dp, canvas,
+                    x.toFloat(),
+                    pt.toFloat(),
+                    pl + width.toFloat(),
+                    pt + height.toFloat())
             icSearch.setBounds(x + p, pt + p, x + height - p, pt + height - p)
             icSearch.draw(canvas)
         }
+        if (suggestions.isEmpty())
+            return
 
+        val suggestionsWidth = if (showSearchButton) width - height else width
         if (!showLabels) {
-            var x = pl.toFloat()
-            val singleWidth = height - iconPadding
+            val spacing = 8 * dp
+            val o = if (pillShape) 0 else spacing.toInt()
+            val cellSize = (height - o).coerceAtMost(suggestionsWidth / suggestions.size)
+            val singleWidth = cellSize - spacing.toInt()
+            var x = pl
+            val t = pt + (height - singleWidth) / 2
             for (i in suggestions.indices) {
                 if (i == hideI) {
-                    x += singleWidth
+                    x += cellSize
                     continue
                 }
                 val item = suggestions[i]
                 val icon = IconLoader.loadIcon(context, item)
                 icon.copyBounds(drawCtx.tmpRect)
                 icon.setBounds(
-                    (x + iconPadding).toInt(),
-                    (pt + iconPadding).toInt(),
-                    (x + height - iconPadding).toInt(),
-                    (pt + height - iconPadding).toInt())
+                    x + o,
+                    t,
+                    x + o + singleWidth,
+                    t + singleWidth)
                 icon.draw(canvas)
                 icon.bounds = drawCtx.tmpRect
+                x += cellSize
+            }
+            return
+        }
+        if (pillShape) {
+            val spacing = (8 * dp).toInt()
+            val iconPadding = (8 * dp).toInt()
+            val pillHeight = height - (18 * dp).toInt()
+            val singleWidth = (if (showSearchButton) suggestionsWidth - spacing else suggestionsWidth + spacing) / suggestions.size
+            var x = pl.toFloat()
+            val t = pt + (height - pillHeight) / 2
+            for (i in suggestions.indices) {
+                if (i == hideI) {
+                    x += singleWidth
+                    continue
+                }
+                drawCtx.drawCard(dp, canvas,
+                    x,
+                    t.toFloat(),
+                    x + singleWidth - spacing,
+                    t + pillHeight.toFloat())
+                val item = suggestions[i]
+                val icon = IconLoader.loadIcon(context, item)
+                icon.copyBounds(drawCtx.tmpRect)
+                icon.setBounds(
+                    x.toInt() + iconPadding,
+                    t + iconPadding,
+                    (x + pillHeight).toInt() - iconPadding,
+                    t + pillHeight - iconPadding)
+                icon.draw(canvas)
+                icon.bounds = drawCtx.tmpRect
+                val textX = x + pillHeight
+                val text = labels[i]
+                canvas.drawText(text, 0, text.length, textX, pt + (height + drawCtx.textHeight) / 2f, drawCtx.textPaint)
                 x += singleWidth
             }
             return
         }
-        val suggestionsWidth = if (showSearchButton) width - height else width
         val singleWidth = suggestionsWidth.toFloat() / suggestions.size
         var x = pl.toFloat()
+        val iconPadding = 8 * dp
         for (i in suggestions.indices) {
             if (i == hideI) {
                 x += singleWidth
@@ -165,29 +212,30 @@ class SuggestionRowView(
     }
 
     private fun xToI(x: Float): Int {
-        val xi = x.toInt() - paddingLeft
+        val w = width - paddingLeft - paddingRight
         val h = height - paddingTop - paddingBottom
-        return if (showLabels) {
-            val w = width - paddingLeft - paddingRight
-            val s = if (showSearchButton) h else 0
-            xi * suggestions.size / (w - s)
-        } else {
+        val suggestionsWidth = if (showSearchButton) w - h else w
+        val xi = x.toInt() - paddingLeft
+        return if (showLabels)
+            xi * suggestions.size / suggestionsWidth
+        else {
             val dp = resources.displayMetrics.density
             val iconPadding = (8 * dp).toInt()
-            (xi - iconPadding / 2) / (h - iconPadding)
+            (xi - iconPadding / 2) / (h - iconPadding).coerceAtMost(suggestionsWidth / suggestions.size.also { if (it == 0) return -1 })
         }
     }
 
     private fun iToX(i: Int): Int {
+        val w = width - paddingLeft - paddingRight
         val h = height - paddingTop - paddingBottom
-        return paddingLeft + if (showLabels) {
-            val w = width - paddingLeft - paddingRight
-            val s = if (showSearchButton) h else 0
-            (w - s) * i / suggestions.size
-        } else {
+        val suggestionsWidth = if (showSearchButton) w - h else w
+        return paddingLeft + if (showLabels)
+            suggestionsWidth * i / suggestions.size
+        else {
             val dp = resources.displayMetrics.density
             val iconPadding = (8 * dp).toInt()
-            iconPadding + i * (h - iconPadding)
+            val o = if (pillShape) 0 else iconPadding
+            o + i * (h - iconPadding).coerceAtMost(suggestionsWidth / suggestions.size.also { if (it == 0) return o })
         }
     }
 
@@ -203,15 +251,16 @@ class SuggestionRowView(
         }
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
-            if (showSearchButton && (
-                    suggestions.isEmpty() ||
-                    e.x > width - paddingRight - (height - paddingTop - paddingBottom))) {
-                onSearch()
-                return true
-            }
             val i = xToI(e.x)
-            if (i < 0 || i >= suggestions.size)
+            if (i < 0)
                 return false
+            if (i >= suggestions.size) {
+                if (showSearchButton) {
+                    onSearch()
+                    return true
+                }
+                return false
+            }
             suggestions[i].open(this@SuggestionRowView, run {
                 val w = (width - paddingLeft - paddingRight) / suggestions.size
                 val h = (height - paddingTop - paddingBottom)

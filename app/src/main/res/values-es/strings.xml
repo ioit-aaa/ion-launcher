@@ -14,7 +14,7 @@
     <string name="available">Disponibles</string>
     <string name="grayscale_icons">Iconos blanco y negros</string>
     <string name="suggestions">Sugerencias</string>
-    <string name="count">Cantidad</string>
+    <string name="count_0_is_none">Cantidad (0 lo desactiva del todo)</string>
     <string name="other">Otros</string>
     <string name="choose_launcher">Elegir lanzador predeterminado</string>
     <string name="grant_permissions">Dar permisos</string>
@@ -84,4 +84,5 @@
     <string name="categories">Categorias</string>
     <string name="smartspacer">Usar Smartspacer</string>
     <string name="settings">Ajustes</string>
+    <string name="pill_shaped">Forma de píldora</string>
 </resources>

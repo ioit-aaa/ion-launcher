@@ -35,7 +35,7 @@ class CardsSettingsActivity : Activity() {
             if (BuildConfig.DEBUG) setting(R.string.suggestions) {
                 onClick(BuildConfig.APPLICATION_ID + ".debug.suggestions.DebugSuggestionsActivity")
             }
-            setting(R.string.count, isVertical = true) {
+            setting(R.string.count_0_is_none, isVertical = true) {
                 seekbar("suggestion:count", 4, min = 0, max = 6)
             }
             setting(R.string.show_search_in_suggestions) {
@@ -43,6 +43,9 @@ class CardsSettingsActivity : Activity() {
             }
             setting(R.string.labels) {
                 switch("suggestion:labels", false)
+            }
+            setting(R.string.pill_shaped) {
+                switch("suggestion:pill", false)
             }
             title(R.string.media_player)
             setting(R.string.media_player) {
