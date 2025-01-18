@@ -1,0 +1,5 @@
+Added the ability to make suggestions be pill-shaped
+Improved app drawer categorization
+Replaced arrow icon in app drawer category cards with a preview of the apps inside
+Added Smartspacer integration
+Fixed app drawer categories randomly reordering themselves
