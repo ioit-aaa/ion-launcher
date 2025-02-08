@@ -252,9 +252,7 @@ class SuggestionRowView(
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             val i = xToI(e.x)
-            if (i < 0)
-                return false
-            if (i >= suggestions.size) {
+            if (i < 0 || i >= suggestions.size) {
                 if (showSearchButton) {
                     onSearch()
                     return true
