@@ -84,14 +84,18 @@ object IconThemer {
         return makeIcon(iconBG, monochrome, false)
     }
 
-    fun makeMasked(pic: Drawable): Drawable {
+    fun iconifyQuadImage(icon: Drawable): ClippedDrawable {
+        val icon = if (doIconGloss) IconGlossDrawable(icon) else icon
+        val w = icon.intrinsicWidth
+        val h = icon.intrinsicHeight
         val path = Path().apply {
-            val w = pic.bounds.width().toFloat()
             val r = w * radiusRatio
-            addRoundRect(0f, 0f, w, w,
+            addRoundRect(
+                0f, 0f, w.toFloat(), h.toFloat(),
                 floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
         }
-        return ClippedDrawable(pic, path, iconBG, doIconRim)
+        icon.setBounds(0, 0, w, h)
+        return ClippedDrawable(icon, path, iconBG, doIconRim)
     }
 
     fun makeContact(name: String): Drawable = ContactDrawable(
@@ -118,25 +122,13 @@ object IconThemer {
             if (isIconPack)
                 return icon
             val w = icon.intrinsicWidth
-            val h = icon.intrinsicHeight
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                 doMonochrome && !doMonochromeBG)
                 return InsetDrawable(icon, w / 12)
             val isIconFullQuad = icon.toBitmap(1, 1)[0, 0].alpha == 255
             if (!doForceAdaptive && !isIconFullQuad)
                 return icon
-            val path = Path().apply {
-                val r = w * radiusRatio
-                addRoundRect(
-                    0f, 0f, w.toFloat(), h.toFloat(),
-                    floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
-            }
-            var icon = if (isIconFullQuad) icon
-            else InsetDrawable(icon, w / 6)
-            if (doIconGloss)
-                icon = IconGlossDrawable(icon)
-            icon.setBounds(0, 0, w, h)
-            return ClippedDrawable(icon, path, iconBG, doIconRim)
+            return iconifyQuadImage(if (isIconFullQuad) icon else InsetDrawable(icon, w / 6))
         }
 
         var fg = icon.foreground?.let(::reshapeNestedAdaptiveIcons) ?: NonDrawable

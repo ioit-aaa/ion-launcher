@@ -2,7 +2,6 @@ package one.zagura.IonLauncher.ui.view
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Path
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.text.TextUtils
@@ -13,6 +12,9 @@ import androidx.core.view.isVisible
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.media.MediaPlayerData
 import one.zagura.IonLauncher.provider.ColorThemer
+import one.zagura.IonLauncher.provider.icons.IconLoader
+import one.zagura.IonLauncher.provider.icons.IconThemer
+import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.StatusBarExpandHelper
 import one.zagura.IonLauncher.util.TaskRunner
@@ -36,8 +38,6 @@ class MediaView(
 
     private var separation = 0f
 
-    private var iconPath: Path? = null
-
     private val icPlay = resources.getDrawable(R.drawable.play)
     private val icPause = resources.getDrawable(R.drawable.pause)
     private val icTrackNext = resources.getDrawable(R.drawable.track_next)
@@ -55,10 +55,11 @@ class MediaView(
             this.players = Array(players.size) {
                 val player = players[it]
                 val drawable = player.cover?.let {
-                    BitmapDrawable(it).apply {
+                    IconThemer.iconifyQuadImage(BitmapDrawable(it).apply {
                         setBounds(0, 0, it.width, it.height)
-                    }
-                }
+                    })
+                } ?: AppLoader.getResource().firstOrNull { it.packageName == player.controller.packageName }
+                    ?.let { IconLoader.loadIcon(context, it) }
                 PreparedMediaData(drawable, "", "", player.isPlaying, player)
             }
             post {
@@ -76,10 +77,6 @@ class MediaView(
         val dp = resources.displayMetrics.density
         separation = 12 * dp
         fgColor = ColorThemer.cardForeground(context)
-        iconPath = Path().apply {
-            val r = drawCtx.radius
-            addRoundRect(0f, 0f, drawCtx.iconSize, drawCtx.iconSize, floatArrayOf(r, r, 0f, 0f, 0f, 0f, r, r), Path.Direction.CW)
-        }
         requestLayout()
         invalidate()
     }
@@ -105,18 +102,17 @@ class MediaView(
                 drawCtx.drawCard(dp, canvas, pl.toFloat(), y, pl + w.toFloat(), y + drawCtx.iconSize)
                 drawCtx.cardPaint.color = c
             }
-            if (icon != null) {
+
+            val textX = if (icon == null) 4 * dp else {
                 icon.copyBounds(drawCtx.tmpRect)
                 canvas.save()
                 canvas.translate(pl.toFloat(), y)
                 icon.setBounds(0, 0, drawCtx.iconSize.toInt(), drawCtx.iconSize.toInt())
-                canvas.clipPath(iconPath ?: return)
                 icon.draw(canvas)
                 canvas.restore()
                 icon.bounds = drawCtx.tmpRect
-            }
-
-            val textX = pl + drawCtx.iconSize + 8 * dp
+                drawCtx.iconSize
+            } + pl + 8 * dp
             val s = 3 * dp
             if (player.data.textColor == 0) {
                 canvas.drawText(player.title, 0, player.title.length, textX, y + drawCtx.iconSize / 2f - s, drawCtx.titlePaint)

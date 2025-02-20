@@ -12,7 +12,7 @@ import androidx.core.graphics.alpha
 import androidx.core.graphics.record
 import androidx.core.graphics.toXfermode
 
-internal class ClippedDrawable(
+class ClippedDrawable(
     private val content: Drawable,
     path: Path,
     color: Int,

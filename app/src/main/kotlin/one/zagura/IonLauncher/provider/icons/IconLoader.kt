@@ -119,8 +119,7 @@ object IconLoader {
                 val inputStream = context.contentResolver.openInputStream(contact.iconUri)
                 val pic = Drawable.createFromStream(inputStream, contact.iconUri.toString())
                     ?: return@getOrPut NonDrawable
-                pic.setBounds(0, 0, pic.intrinsicWidth, pic.intrinsicHeight)
-                return@getOrPut IconThemer.makeMasked(pic)
+                return@getOrPut IconThemer.iconifyQuadImage(pic)
             } catch (_: FileNotFoundException) {}
             val realName = LabelLoader.loadLabel(context, contact).trim()
             if (realName.isEmpty())
