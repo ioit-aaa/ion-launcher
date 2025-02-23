@@ -17,7 +17,7 @@ class IconPackIconsAdapter(
     val res: Resources,
     val packageName: String,
     val items: List<IconPackInfo.IconPackResourceItem>,
-    val sideMargin: Int,
+    private val sideMargin: Int,
     val onSelected: (String) -> Unit,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 

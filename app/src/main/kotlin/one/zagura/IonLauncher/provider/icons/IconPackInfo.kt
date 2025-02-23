@@ -13,9 +13,12 @@ import org.xmlpull.v1.XmlPullParserFactory
 import java.util.*
 import kotlin.collections.HashMap
 
-class IconPackInfo(
+class IconPackInfo private constructor(
     private val res: Resources,
     private val iconPackPackageName: String,
+    private val iconResourceNames: HashMap<String, String>,
+    private val calendarPrefixes: HashMap<String, String>,
+    val iconModificationInfo: IconGenInfo?,
 ) {
     class IconGenInfo(val res: Resources) {
         var back: Bitmap? = null
@@ -24,9 +27,6 @@ class IconPackInfo(
         var scaleFactor = 1f
     }
 
-    val iconResourceNames = HashMap<String, String>()
-    val calendarPrefixes = HashMap<String, String>()
-    var iconModificationInfo: IconGenInfo? = null
 
     @SuppressLint("DiscouragedApi")
     private fun getDrawable(iconResource: String) = res.getIdentifier(
@@ -34,6 +34,22 @@ class IconPackInfo(
         "drawable",
         iconPackPackageName
     ).takeIf { it != 0 }
+
+    @SuppressLint("DiscouragedApi")
+    fun getDrawableName(packageName: String, name: String, density: Int): String? {
+        val key = "$packageName/$name"
+        return calendarPrefixes[key]
+            ?.let { it + Calendar.getInstance()[Calendar.DAY_OF_MONTH] }?.takeIf { res.getIdentifier(
+                it,
+                "drawable",
+                iconPackPackageName
+            ) != 0 }
+            ?: iconResourceNames[key]?.takeIf { res.getIdentifier(
+                it,
+                "drawable",
+                iconPackPackageName
+            ) != 0 }
+    }
 
     fun getDrawable(packageName: String, name: String, density: Int): Drawable? {
         val key = "$packageName/$name"
@@ -88,7 +104,7 @@ class IconPackInfo(
             }
         }
 
-        private fun loadIconMod(name: String, res: Resources, iconPackPackageName: String, info: IconPackInfo, uniformOptions: BitmapFactory.Options): Bitmap? {
+        private fun loadIconMod(name: String, res: Resources, iconPackPackageName: String, uniformOptions: BitmapFactory.Options): Bitmap? {
             val i = res.getIdentifier(
                 name,
                 "drawable",
@@ -96,8 +112,6 @@ class IconPackInfo(
             )
             if (i == 0)
                 return null
-            if (info.iconModificationInfo == null)
-                info.iconModificationInfo = IconGenInfo(res)
             return BitmapFactory.decodeResource(res, i, uniformOptions)
         }
 
@@ -107,7 +121,11 @@ class IconPackInfo(
             iconPackPackageName: String,
         ): IconPackInfo {
             val res = packageManager.getResourcesForApplication(iconPackPackageName)
-            val info = IconPackInfo(res, iconPackPackageName)
+
+            var iconModificationInfo: IconGenInfo? = null
+            val iconResourceNames = HashMap<String, String>()
+            val calendarPrefixes = HashMap<String, String>()
+
             val uniformOptions = BitmapFactory.Options().apply {
                 inScaled = false
             }
@@ -128,50 +146,59 @@ class IconPackInfo(
                         try {
                             when (x.name) {
                                 "scale" -> {
-                                    if (info.iconModificationInfo == null)
-                                        info.iconModificationInfo = IconGenInfo(res)
-                                    info.iconModificationInfo!!.scaleFactor = x.getAttributeValue(0).toFloat()
+                                    if (iconModificationInfo == null)
+                                        iconModificationInfo = IconGenInfo(res)
+                                    iconModificationInfo.scaleFactor = x.getAttributeValue(0).toFloat()
                                 }
                                 "item" -> {
                                     val key = x.getAttributeValue(null, "component")
                                     val value = x.getAttributeValue(null, "drawable")
                                     if (key != null && value != null)
-                                        parseEntry(packageManager, info.iconResourceNames, key, value)
+                                        parseEntry(packageManager, iconResourceNames, key, value)
                                 }
                                 "calendar" -> {
                                     val key = x.getAttributeValue(null, "component")
                                     val value = x.getAttributeValue(null, "prefix")
                                     if (key != null && value != null)
-                                        parseEntry(packageManager, info.calendarPrefixes, key, value)
+                                        parseEntry(packageManager, calendarPrefixes, key, value)
                                 }
-                                "iconback" -> loadIconMod(
-                                    x.getAttributeValue(0),
-                                    res,
-                                    iconPackPackageName,
-                                    info,
-                                    uniformOptions
-                                ).let { info.iconModificationInfo!!.back = it }
-                                "iconmask" -> loadIconMod(
-                                    x.getAttributeValue(0),
-                                    res,
-                                    iconPackPackageName,
-                                    info,
-                                    uniformOptions
-                                ).let { info.iconModificationInfo!!.mask = it }
-                                "iconupon" -> loadIconMod(
-                                    x.getAttributeValue(0),
-                                    res,
-                                    iconPackPackageName,
-                                    info,
-                                    uniformOptions
-                                ).let { info.iconModificationInfo!!.front = it }
+                                "iconback" -> {
+                                    if (iconModificationInfo == null)
+                                        iconModificationInfo = IconGenInfo(res)
+                                    iconModificationInfo.back = loadIconMod(
+                                        x.getAttributeValue(0),
+                                        res,
+                                        iconPackPackageName,
+                                        uniformOptions
+                                    )
+                                }
+                                "iconmask" -> {
+                                    if (iconModificationInfo == null)
+                                        iconModificationInfo = IconGenInfo(res)
+                                    iconModificationInfo.mask = loadIconMod(
+                                        x.getAttributeValue(0),
+                                        res,
+                                        iconPackPackageName,
+                                        uniformOptions
+                                    )
+                                }
+                                "iconupon" -> {
+                                    if (iconModificationInfo == null)
+                                        iconModificationInfo = IconGenInfo(res)
+                                    iconModificationInfo.front = loadIconMod(
+                                        x.getAttributeValue(0),
+                                        res,
+                                        iconPackPackageName,
+                                        uniformOptions
+                                    )
+                                }
                             }
                         } catch (_: Exception) {}
                     }
                     x.next()
                 }
             } catch (e: Exception) { e.printStackTrace() }
-            return info
+            return IconPackInfo(res, iconPackPackageName, iconResourceNames, calendarPrefixes, iconModificationInfo)
         }
 
         @SuppressLint("DiscouragedApi")

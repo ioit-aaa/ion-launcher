@@ -11,13 +11,17 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.R
-import one.zagura.IonLauncher.data.items.LauncherItem
+import one.zagura.IonLauncher.provider.icons.IconPackInfo
+import one.zagura.IonLauncher.provider.icons.IconThemer
+import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.view.settings.TitleViewHolder
 
 class IconPackSourcesAdapter(
-    val item: LauncherItem,
-    val iconPacks: List<ResolveInfo>,
+    private val defIcons: List<Pair<String, String>>,
+    private val iconPacks: List<ResolveInfo>,
+    private val sideMargin: Int,
     val onSelected: (String?) -> Unit,
+    val onIconSelected: (packageName: String, icon: String) -> Unit,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     class ViewHolder(
@@ -25,12 +29,13 @@ class IconPackSourcesAdapter(
         val icon: ImageView,
         val label: TextView,
     ) : RecyclerView.ViewHolder(view)
+    class IconViewHolder(val icon: ImageView) : RecyclerView.ViewHolder(icon)
 
-    override fun getItemCount() = iconPacks.size + 2
+    override fun getItemCount() = iconPacks.size + 2 + defIcons.size
 
     override fun getItemViewType(i: Int) = when (i) {
         0 -> 0
-        else -> 1
+        else -> if (i < defIcons.size + 1) 2 else 1
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, type: Int): RecyclerView.ViewHolder {
@@ -39,6 +44,19 @@ class IconPackSourcesAdapter(
                 bind(parent.context.getString(R.string.icon_packs))
             }
         val dp = parent.resources.displayMetrics.density
+        if (type == 2) {
+            val settings = parent.context.ionApplication.settings
+            val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
+            return IconViewHolder(ImageView(parent.context).apply {
+                setPadding(0, sideMargin / 2, 0, sideMargin / 2)
+                layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, iconSize + sideMargin)
+            }).apply {
+                itemView.setOnClickListener {
+                    val (packageName, icon) = defIcons[bindingAdapterPosition - 1]
+                    onIconSelected(packageName, icon)
+                }
+            }
+        }
         val icon = ImageView(parent.context)
         val text = TextView(parent.context).apply {
             val v = (12 * dp).toInt()
@@ -65,9 +83,10 @@ class IconPackSourcesAdapter(
             }, LayoutParams(s, LayoutParams.MATCH_PARENT))
         }, icon, text).apply {
             itemView.setOnClickListener {
+                val i = bindingAdapterPosition - 1 - defIcons.size
                 onSelected(
-                    if (bindingAdapterPosition == 1) null
-                    else iconPacks[bindingAdapterPosition - 2].activityInfo.packageName)
+                    if (i == 0) null
+                    else iconPacks[i - 1].activityInfo.packageName)
             }
         }
     }
@@ -75,13 +94,22 @@ class IconPackSourcesAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, i: Int) {
         if (i == 0)
             return
+        if (i < defIcons.size + 1) {
+            holder as IconViewHolder
+            val (packageName, icon) = defIcons[i - 1]
+            val density = holder.icon.context.resources.displayMetrics.densityDpi
+            val res = holder.icon.context.packageManager.getResourcesForApplication(packageName)
+            holder.icon.setImageDrawable(IconPackInfo.fromResourceName(res, packageName, icon, density)
+                ?.let(IconThemer::transformIconFromIconPack))
+            return
+        }
         holder as ViewHolder
-        if (i == 1) {
+        if (i == defIcons.size + 1) {
             holder.icon.setImageDrawable(null)
             holder.label.setText(R.string.reset)
             return
         }
-        val iconPack = iconPacks[i - 2]
+        val iconPack = iconPacks[i - 2 - defIcons.size]
         holder.icon.setImageDrawable(iconPack.loadIcon(holder.icon.context.packageManager))
         holder.label.text = iconPack.loadLabel(holder.icon.context.packageManager)
     }
