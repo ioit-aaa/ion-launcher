@@ -2,6 +2,7 @@ package one.zagura.IonLauncher.ui.view
 
 import android.app.Activity
 import android.app.PendingIntent
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.graphics.Canvas
@@ -323,9 +324,14 @@ class SummaryView(
 
     override fun performClick(): Boolean {
         super.performClick()
-        context.startActivity(Intent(Intent.ACTION_MAIN)
-            .addCategory(Intent.CATEGORY_APP_CALENDAR)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), LauncherItem.createOpeningAnimation(this).toBundle())
+        try {
+            context.startActivity(
+                Intent(Intent.ACTION_MAIN)
+                    .addCategory(Intent.CATEGORY_APP_CALENDAR)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                LauncherItem.createOpeningAnimation(this).toBundle()
+            )
+        } catch (_: ActivityNotFoundException) {}
         return true
     }
 
@@ -365,9 +371,14 @@ class SummaryView(
             color: Int,
         ) : CompiledEvent(left, right, color) {
             override fun open(view: View) {
-                view.context.startActivity(Intent(Intent.ACTION_MAIN)
-                    .addCategory(Intent.CATEGORY_APP_CALENDAR)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), LauncherItem.createOpeningAnimation(view).toBundle())
+                try {
+                    view.context.startActivity(
+                        Intent(Intent.ACTION_MAIN)
+                            .addCategory(Intent.CATEGORY_APP_CALENDAR)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        LauncherItem.createOpeningAnimation(view).toBundle()
+                    )
+                } catch (_: ActivityNotFoundException) {}
             }
         }
     }
