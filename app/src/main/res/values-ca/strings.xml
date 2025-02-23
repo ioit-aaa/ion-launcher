@@ -85,4 +85,5 @@
     <string name="smartspacer">Usar Smartspacer</string>
     <string name="settings">Configuració</string>
     <string name="pill_shaped">Forma de pastilla</string>
+    <string name="smoother_rounded_corners">Puntes arrodonides suavitzades</string>
 </resources>

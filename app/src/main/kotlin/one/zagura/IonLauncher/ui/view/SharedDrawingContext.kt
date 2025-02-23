@@ -11,8 +11,10 @@ import android.text.TextPaint
 import android.util.TypedValue
 import androidx.core.graphics.alpha
 import androidx.core.graphics.toXfermode
+import androidx.core.graphics.translationMatrix
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.util.Settings
+import one.zagura.IonLauncher.util.drawable.SquircleRectShape
 
 class SharedDrawingContext(context: Context) {
 
@@ -25,6 +27,7 @@ class SharedDrawingContext(context: Context) {
         private set
 
     private var doSkeumorphism = false
+    private var doSquircle = true
 
     val cardPaint = Paint()
     val cardBorderPaint = Paint().apply {
@@ -57,15 +60,29 @@ class SharedDrawingContext(context: Context) {
     }
 
     fun drawCard(dp: Float, canvas: Canvas, x0: Float, y0: Float, x1: Float, y1: Float, r: Float = radius) {
-        if (!doSkeumorphism) {
+        if (doSquircle)
+            canvas.drawPath(SquircleRectShape.createPath(x1 - x0, y1 - y0, r, r, r, r).apply {
+                transform(translationMatrix(x0, y0))
+            }, cardPaint)
+        else
             canvas.drawRoundRect(x0, y0, x1, y1, r, r, cardPaint)
+
+        if (!doSkeumorphism)
             return
-        }
 
-        canvas.drawRoundRect(x0, y0, x1, y1, r, r, cardPaint)
-        canvas.drawRoundRect(x0 - dp / 2, y0 - dp / 2, x1 + dp / 2, y1 + dp / 2, r + dp / 2, r + dp / 2, cardBorderPaint)
+        val br = r + dp / 2
+        if (doSquircle)
+            canvas.drawPath(SquircleRectShape.createPath(x1 - x0 + dp, y1 - y0 + dp, br, br, br, br).apply {
+                transform(translationMatrix(x0 - dp / 2, y0 - dp / 2))
+            }, cardBorderPaint)
+        else
+            canvas.drawRoundRect(x0 - dp / 2, y0 - dp / 2, x1 + dp / 2, y1 + dp / 2, br, br, cardBorderPaint)
 
-        val path = Path().apply {
+        val path = if (doSquircle)
+            SquircleRectShape.createPath(x1 - x0, y1 - y0, r, r, r, r).apply {
+                transform(translationMatrix(x0, y0))
+            }
+        else Path().apply {
             addRoundRect(x0, y0, x1, y1, r, r, Path.Direction.CW)
         }
         canvas.save()
@@ -104,6 +121,7 @@ class SharedDrawingContext(context: Context) {
         iconSize = settings["dock:icon-size", 48] * dp
         radius = iconSize * settings["icon:radius-ratio", 25] / 100f
         doSkeumorphism = settings["card:skeumorph", false]
+        doSquircle = settings["icon:squircle", true]
         cardPaint.color = ColorThemer.cardBackground(context)
         if (doSkeumorphism) {
             cardBorderPaint.color = (0x66 + 0x44 * (cardPaint.color.alpha / 255f)).toInt() shl 24

@@ -85,4 +85,5 @@
     <string name="smartspacer">Usar Smartspacer</string>
     <string name="settings">Ajustes</string>
     <string name="pill_shaped">Forma de píldora</string>
+    <string name="smoother_rounded_corners">Puntas redondeadas suavizadas</string>
 </resources>

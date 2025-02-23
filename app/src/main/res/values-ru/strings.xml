@@ -85,4 +85,5 @@
     <string name="smartspacer">Использовать Смартспейсер</string>
     <string name="settings">Настройки</string>
     <string name="pill_shaped">Разделeнное</string>
+    <string name="smoother_rounded_corners">Сглаженые закругленные кончики</string>
 </resources>

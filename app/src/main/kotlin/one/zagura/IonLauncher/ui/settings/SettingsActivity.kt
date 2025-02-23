@@ -18,6 +18,7 @@ import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
 import one.zagura.IonLauncher.ui.view.settings.setting
 import one.zagura.IonLauncher.ui.view.settings.title
 import one.zagura.IonLauncher.ui.settings.widgetChooser.WidgetChooserActivity
+import one.zagura.IonLauncher.ui.view.settings.switch
 import one.zagura.IonLauncher.util.Utils
 
 class SettingsActivity : Activity() {
@@ -34,6 +35,9 @@ class SettingsActivity : Activity() {
             }
             setting(R.string.radius_percent, isVertical = true) {
                 seekbar("icon:radius-ratio", 25, min = 0, max = 50, multiplier = 5)
+            }
+            setting(R.string.smoother_rounded_corners) {
+                switch("icon:squircle", true)
             }
             setting(R.string.columns, isVertical = true) {
                 seekbar("dock:columns", 5, min = 2, max = 7)

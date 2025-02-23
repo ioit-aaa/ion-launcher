@@ -20,29 +20,29 @@ class ClippedDrawable(
 ) : Drawable() {
 
     companion object {
-        fun drawRim(canvas: Canvas, path: Path) {
-            val rimPaint = Paint().apply {
-                this.color = 0x77ffffff
-                xfermode = PorterDuff.Mode.OVERLAY.toXfermode()
-            }
-            val rimShadowShPaint = Paint().apply {
-                this.color = 0x44ffffff
-                xfermode = PorterDuff.Mode.OVERLAY.toXfermode()
-            }
-            val rimBorderPaint = Paint().apply {
-                this.color = 0x11eeeeee
-            }
+        private val rimPaint = Paint().apply {
+            this.color = 0x77ffffff
+            xfermode = PorterDuff.Mode.OVERLAY.toXfermode()
+        }
+        private val rimShadowShPaint = Paint().apply {
+            this.color = 0x44ffffff
+            xfermode = PorterDuff.Mode.OVERLAY.toXfermode()
+        }
+        private val rimBorderPaint = Paint().apply {
+            this.color = 0x11eeeeee
+        }
 
+        fun drawRim(canvas: Canvas, path: Path) {
             path.fillType = Path.FillType.INVERSE_EVEN_ODD
             canvas.save()
-            canvas.scale(0.95f, 0.95f, canvas.width / 2f, canvas.height / 2f)
+            canvas.scale(0.975f, 0.975f, canvas.width / 2f, canvas.height / 2f)
             canvas.drawPath(path, rimBorderPaint)
             canvas.restore()
 
             canvas.save()
-            canvas.translate(0f, canvas.height * 0.025f)
+            canvas.translate(0f, canvas.height * 0.0075f)
             canvas.drawPath(path, rimPaint)
-            canvas.translate(0f, -canvas.height * 0.05f)
+            canvas.translate(0f, -canvas.height * 0.015f)
             canvas.drawPath(path, rimShadowShPaint)
             canvas.restore()
             path.fillType = Path.FillType.EVEN_ODD
@@ -56,12 +56,12 @@ class ClippedDrawable(
             if (shadowPaint.color.alpha < 100)
                 shadowPaint.clearShadowLayer()
             else if (is3D)
-                shadowPaint.setShadowLayer(8f / s, 0f, 3f / s, 0x55000000)
+                shadowPaint.setShadowLayer(12f / s, 0f, 3f / s, 0x3a000000)
             else
-                shadowPaint.setShadowLayer(21f / s, 0f, 4f / s, 0x22000000)
+                shadowPaint.setShadowLayer(18f / s, 0f, 4f / s, 0x22000000)
             if (is3D) {
                 val rimOutBorderPaint = Paint().apply {
-                    this.color = 0xbb000000.toInt()
+                    this.color = 0x88000000.toInt()
                     style = Paint.Style.STROKE
                     strokeWidth = canvas.height * 0.025f
                 }

@@ -19,17 +19,7 @@ class SquircleRectShape(
     private var path = Path()
 
     override fun onResize(w: Float, h: Float) {
-        path = Path().apply {
-            moveTo(0f, tl)
-            quadTo(0f, 0f, tl, 0f)
-            lineTo(w - tr, 0f)
-            quadTo(w, 0f, w, tr)
-            lineTo(w, h - br)
-            quadTo(w, h, w - br, h)
-            lineTo(bl, h)
-            quadTo(0f, h, 0f, h - bl)
-            close()
-        }
+        path = createPath(w, h, tl, tr, br, bl)
     }
 
     override fun getOutline(outline: Outline) {
@@ -40,5 +30,26 @@ class SquircleRectShape(
 
     override fun draw(canvas: Canvas, paint: Paint) {
         canvas.drawPath(path, paint)
+    }
+
+    companion object {
+        fun createPath(
+            width: Float,
+            height: Float,
+            tl: Float,
+            tr: Float,
+            br: Float,
+            bl: Float
+        ): Path = Path().apply {
+            moveTo(0f, tl)
+            quadTo(0f, 0f, tl, 0f)
+            lineTo(width - tr, 0f)
+            quadTo(width, 0f, width, tr)
+            lineTo(width, height - br)
+            quadTo(width, height, width - br, height)
+            lineTo(bl, height)
+            quadTo(0f, height, 0f, height - bl)
+            close()
+        }
     }
 }

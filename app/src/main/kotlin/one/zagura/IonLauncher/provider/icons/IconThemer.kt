@@ -34,6 +34,7 @@ import one.zagura.IonLauncher.util.drawable.ContactDrawable
 import one.zagura.IonLauncher.util.drawable.FillDrawable
 import one.zagura.IonLauncher.util.drawable.IconGlossDrawable
 import one.zagura.IonLauncher.util.drawable.NonDrawable
+import one.zagura.IonLauncher.util.drawable.SquircleRectShape
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -51,6 +52,7 @@ object IconThemer {
     private var doIconGlossOnThemed = false
 
     private var radiusRatio = 0f
+    private var doSquircle = true
 
     private var iconFG = 0
     private var iconBG = 0
@@ -66,6 +68,7 @@ object IconThemer {
         doIconGloss = settings["icon:gloss", false]
         doIconGlossOnThemed = settings["icon:gloss-themed", false]
         radiusRatio = settings["icon:radius-ratio", 25] / 100f
+        doSquircle = settings["icon:squircle", true]
         iconFG = ColorThemer.iconForeground(context)
         iconBG = ColorThemer.iconBackground(context)
         val dp = context.resources.displayMetrics.density
@@ -88,8 +91,10 @@ object IconThemer {
         val icon = if (doIconGloss) IconGlossDrawable(icon) else icon
         val w = icon.intrinsicWidth
         val h = icon.intrinsicHeight
-        val path = Path().apply {
-            val r = w * radiusRatio
+        val r = w * radiusRatio
+        val path = if (doSquircle)
+            SquircleRectShape.createPath(w.toFloat(), h.toFloat(), r, r, r, r)
+        else Path().apply {
             addRoundRect(
                 0f, 0f, w.toFloat(), h.toFloat(),
                 floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
@@ -189,8 +194,10 @@ object IconThemer {
         layers.setLayerInset(1, -w / 4, -h / 4, -w / 4, -h / 4)
         layers.setBounds(0, 0, w, h)
 
-        val path = Path().apply {
-            val r = w * radiusRatio
+        val r = w * radiusRatio
+        val path = if (doSquircle)
+            SquircleRectShape.createPath(w.toFloat(), h.toFloat(), r, r, r, r)
+        else Path().apply {
             addRoundRect(
                 0f, 0f, w.toFloat(), w.toFloat(),
                 floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
@@ -211,8 +218,10 @@ object IconThemer {
         val layers = InsetDrawable(fg, -w / 4)
         layers.setBounds(0, 0, w, h)
 
-        val path = Path().apply {
-            val r = w * radiusRatio
+        val r = w * radiusRatio
+        val path = if (doSquircle)
+            SquircleRectShape.createPath(w.toFloat(), h.toFloat(), r, r, r, r)
+        else Path().apply {
             addRoundRect(
                 0f, 0f, w.toFloat(), w.toFloat(),
                 floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
@@ -295,8 +304,10 @@ object IconThemer {
         return when (icon) {
             is AdaptiveIconDrawable -> {
                 val w = max(icon.intrinsicWidth, icon.intrinsicHeight).coerceAtLeast(1)
-                val path = Path().apply {
-                    val r = w * radiusRatio
+                val r = w * radiusRatio
+                val path = if (doSquircle)
+                    SquircleRectShape.createPath(w.toFloat(), w.toFloat(), r, r, r, r)
+                else Path().apply {
                     addRoundRect(
                         0f, 0f, w.toFloat(), w.toFloat(),
                         floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)

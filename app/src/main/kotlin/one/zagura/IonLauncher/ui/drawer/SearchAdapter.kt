@@ -28,6 +28,8 @@ import one.zagura.IonLauncher.provider.icons.LabelLoader
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.view.LongPressMenu
 import one.zagura.IonLauncher.util.Utils
+import one.zagura.IonLauncher.util.drawable.SquircleRectShape
+import one.zagura.IonLauncher.util.drawable.UniformSquircleRectShape
 
 class SearchAdapter(
     val showDropTargets: () -> Unit,
@@ -82,7 +84,7 @@ class SearchAdapter(
             })
             val iconRadius = iconSize * settings["icon:radius-ratio", 25] / 100f
             val r = if (iconRadius == 0f) 0f else iconRadius + 12f * dp
-            background = ShapeDrawable(RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
+            background = ShapeDrawable(if (settings["icon:squircle", true]) UniformSquircleRectShape(r) else RoundRectShape(floatArrayOf(r, r, r, r, r, r, r, r), null, null))
         }
         return ViewHolder(view, icon, label).apply {
             itemView.setOnClickListener {
