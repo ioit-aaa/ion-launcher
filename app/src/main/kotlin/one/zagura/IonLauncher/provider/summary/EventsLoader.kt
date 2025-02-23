@@ -40,7 +40,7 @@ object EventsLoader {
                 CalendarContract.Instances.BEGIN,
                 CalendarContract.Instances.END),
             null, null,
-            CalendarContract.Instances.DTSTART + " ASC",
+            CalendarContract.Instances.BEGIN + " ASC",
         ) ?: return emptyList()
         val events = ArrayList<Event>(cur.count)
         while (cur.moveToNext()) {
