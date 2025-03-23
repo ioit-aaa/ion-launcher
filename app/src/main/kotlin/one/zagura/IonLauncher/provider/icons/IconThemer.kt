@@ -35,8 +35,10 @@ import one.zagura.IonLauncher.util.drawable.FillDrawable
 import one.zagura.IonLauncher.util.drawable.IconGlossDrawable
 import one.zagura.IonLauncher.util.drawable.NonDrawable
 import one.zagura.IonLauncher.util.drawable.SquircleRectShape
-import kotlin.math.abs
 import kotlin.math.max
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
+import androidx.core.graphics.drawable.toDrawable
 
 object IconThemer {
 
@@ -138,8 +140,7 @@ object IconThemer {
 
         var fg = icon.foreground?.let(::reshapeNestedAdaptiveIcons) ?: NonDrawable
         var bg = icon.background?.let(::reshapeNestedAdaptiveIcons)
-        fg?.setGrayscale(doGrayscale)
-        bg?.setGrayscale(doGrayscale)
+        fg.setGrayscale(doGrayscale)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val monochrome = icon.monochrome
@@ -153,32 +154,32 @@ object IconThemer {
                     monochrome.colorFilter = PorterDuffColorFilter(iconFG, PorterDuff.Mode.SRC_IN)
                     fg = monochrome
                     return makeIcon(iconBG, fg, isIconPack)
-                } else if (!doMonochromeBG) {
+                }
+                if (!doMonochromeBG) {
                     val i = makeIcon(bg, fg, isIconPack)
                     return InsetDrawable(i, fg.intrinsicWidth / 12)
-                } else if (bg == null)
-                    return makeIcon(iconBG, fg, isIconPack)
-                else if (bg is ColorDrawable || bg is ShapeDrawable || bg is GradientDrawable) {
-                    val pixel = bg.toBitmap(1, 1)[0, 0]
-                    val lab = DoubleArray(3)
-                    ColorUtils.colorToLAB(pixel, lab)
-                    val bgL = lab[0]
-                    ColorUtils.colorToLAB(iconBG, lab)
-                    if (abs(bgL - lab[0]) < 30.0)
-                        return makeIcon(iconBG, fg, isIconPack)
                 }
             }
         }
-        val color = when (bg) {
-            is ShapeDrawable -> bg.paint.color
-            is ColorDrawable -> bg.color
-            is GradientDrawable -> bg.color?.defaultColor
-                ?: return makeIcon(bg, fg, isIconPack)
-            else -> return makeIcon(bg, fg, isIconPack)
+        if (doGrayscale) when (bg) {
+            null -> return makeIcon(iconBG, fg, isIconPack)
+            is ColorDrawable ->
+                return makeIcon(ColorThemer.colorize(bg.color, iconBG), fg, isIconPack)
+            is ShapeDrawable ->
+                return makeIcon(ColorThemer.colorize(bg.paint.color, iconBG), fg, isIconPack)
+            is GradientDrawable -> {
+                bg.color?.let {
+                    return makeIcon(ColorThemer.colorize(it.defaultColor, iconBG), fg, isIconPack)
+                }
+                bg.colors = bg.colors?.map { ColorThemer.colorize(it, iconBG) }?.toIntArray()
+            }
+            else -> bg.setGrayscale(true)
         }
-        return makeIcon(if (doGrayscale)
-            ColorThemer.colorize(color, iconBG)
-        else color, fg, isIconPack)
+        return when (bg) {
+            is ShapeDrawable -> makeIcon(bg.paint.color, fg, isIconPack)
+            is ColorDrawable -> makeIcon(bg.color, fg, isIconPack)
+            else -> makeIcon(bg, fg, isIconPack)
+        }
     }
 
     private fun makeIcon(
@@ -241,15 +242,10 @@ object IconThemer {
         iconPackInfo: IconPackInfo.IconGenInfo,
         resources: Resources
     ): Drawable = try {
-        var orig = Bitmap.createBitmap(
-            icon.intrinsicWidth,
-            icon.intrinsicHeight,
-            Bitmap.Config.ARGB_8888
-        )
+        var orig = createBitmap(icon.intrinsicWidth, icon.intrinsicHeight)
         icon.setBounds(0, 0, icon.intrinsicWidth, icon.intrinsicHeight)
         icon.draw(Canvas(orig))
-        val scaledBitmap =
-            Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888)
+        val scaledBitmap = createBitmap(iconSize, iconSize)
         with(Canvas(scaledBitmap)) {
             val back = iconPackInfo.back
             if (back != null)
@@ -258,12 +254,11 @@ object IconThemer {
                     Rect(0, 0, back.width, back.height),
                     Rect(0, 0, iconSize, iconSize),
                     p)
-            val scaledOrig =
-                Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888)
+            val scaledOrig = createBitmap(iconSize, iconSize)
             with(Canvas(scaledOrig)) {
                 val s = (iconSize * iconPackInfo.scaleFactor).toInt()
                 val oldOrig = orig
-                orig = Bitmap.createScaledBitmap(orig, s, s, true)
+                orig = orig.scale(s, s)
                 oldOrig.recycle()
                 drawBitmap(
                     orig,
@@ -279,7 +274,7 @@ object IconThemer {
                         maskP)
             }
             drawBitmap(
-                Bitmap.createScaledBitmap(scaledOrig, iconSize, iconSize, true),
+                scaledOrig.scale(iconSize, iconSize),
                 0f,
                 0f,
                 p)
@@ -293,7 +288,7 @@ object IconThemer {
             orig.recycle()
             scaledOrig.recycle()
         }
-        BitmapDrawable(resources, scaledBitmap)
+        scaledBitmap.toDrawable(resources)
     } catch (e: Exception) {
         e.printStackTrace()
         icon

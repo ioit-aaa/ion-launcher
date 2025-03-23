@@ -5,6 +5,7 @@ import androidx.core.graphics.ColorUtils
 import one.zagura.IonLauncher.ui.ionApplication
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.sqrt
 
 object ColorThemer {
     const val DEFAULT_DARK = 0x111111
@@ -87,7 +88,11 @@ object ColorThemer {
         val lab = DoubleArray(3)
         ColorUtils.colorToLAB(color, lab)
         val l = lab[0]
+        val s = sqrt(lab[1] * lab[1] + lab[2] * lab[2])
         ColorUtils.colorToLAB(tint, lab)
+        val ts = sqrt(lab[1] * lab[1] + lab[2] * lab[2])
+        lab[1] *= (s + ts) / 2 / ts
+        lab[2] *= (s + ts) / 2 / ts
         return ColorUtils.LABToColor(l, lab[1], lab[2])
     }
 }
