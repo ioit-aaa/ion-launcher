@@ -2,6 +2,7 @@ package one.zagura.IonLauncher.util
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.admin.DevicePolicyManager
 import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ComponentName
@@ -121,11 +122,19 @@ object Utils {
             realMetrics.widthPixels
         }
 
-    fun pullStatusBar(context: Context) {
+    fun expandNotificationPanel(context: Context) {
         try {
             @SuppressLint("WrongConstant")
             val sbs = context.getSystemService("statusbar")
             Class.forName("android.app.StatusBarManager").getMethod("expandNotificationsPanel")(sbs)
+        } catch (e: Exception) { e.printStackTrace() }
+    }
+
+    fun expandQuickSettingsPanel(context: Context) {
+        try {
+            @SuppressLint("WrongConstant")
+            val sbs = context.getSystemService("statusbar")
+            Class.forName("android.app.StatusBarManager").getMethod("expandSettingsPanel")(sbs)
         } catch (e: Exception) { e.printStackTrace() }
     }
 
@@ -242,5 +251,11 @@ object Utils {
         colorFilter = if (value) ColorMatrixColorFilter(ColorMatrix().apply {
             setSaturation(0f)
         }) else null
+    }
+
+    fun lock(context: Context) {
+        val man = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        if (man.isAdminActive(ComponentName(context, Admin::class.java)))
+            man.lockNow()
     }
 }

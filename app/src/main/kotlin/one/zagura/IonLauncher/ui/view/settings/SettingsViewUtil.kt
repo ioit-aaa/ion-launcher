@@ -38,6 +38,7 @@ import androidx.annotation.StringRes
 import androidx.core.widget.NestedScrollView
 import androidx.core.widget.doOnTextChanged
 import one.zagura.IonLauncher.R
+import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.drawable.FillDrawable
 import one.zagura.IonLauncher.util.Utils
@@ -264,10 +265,10 @@ fun SettingViewScope.onClick(listener: (View) -> Unit) {
         ColorDrawable(view.resources.getColor(R.color.color_bg)), null)
 }
 
-fun SettingViewScope.color(settingId: String, default: Int) {
+fun SettingViewScope.color(settingId: String, default: ColorThemer.ColorSetting) {
     val dp = view.context.resources.displayMetrics.density
     val s = (32 * dp).toInt()
-    var color = view.context.ionApplication.settings[settingId, default] or 0xff000000.toInt()
+    var color = view.context.ionApplication.settings[settingId, default].get(view.context) or 0xff000000.toInt()
     val dr = GradientDrawable().apply {
         setColor(color)
         setStroke(dp.coerceAtMost(2f).toInt(), 0x33000000)
@@ -280,12 +281,13 @@ fun SettingViewScope.color(settingId: String, default: Int) {
             it.context,
             settings[settingId, default],
         ) { newColor ->
-            color = newColor or 0xff000000.toInt()
+            val c = newColor.get(it.context)
+            color = c or 0xff000000.toInt()
             dr.setColor(color)
             settings.edit(it.context) {
                 settingId set newColor
             }
-            updateSubtitle(ColorPicker.formatColorString(newColor))
+            updateSubtitle(ColorPicker.formatColorString(c))
         }
     }
     updateSubtitle(ColorPicker.formatColorString(color))

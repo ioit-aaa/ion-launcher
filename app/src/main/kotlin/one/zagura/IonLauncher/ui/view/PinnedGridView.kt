@@ -30,7 +30,7 @@ import one.zagura.IonLauncher.util.iconify.IconifyAnim
 import one.zagura.IonLauncher.util.LiveWallpaper
 import one.zagura.IonLauncher.util.drawable.NonDrawable
 import one.zagura.IonLauncher.util.Settings
-import one.zagura.IonLauncher.util.StatusBarExpandHelper
+import one.zagura.IonLauncher.util.SlideGestureHelper
 import one.zagura.IonLauncher.util.Utils
 import kotlin.math.abs
 
@@ -269,7 +269,7 @@ class PinnedGridView(
     }
 
     override fun onTouchEvent(e: MotionEvent): Boolean {
-        StatusBarExpandHelper.onTouchEvent(context, e)
+        SlideGestureHelper.onTouchEvent(context, e)
         if (e.action == MotionEvent.ACTION_UP || e.action == MotionEvent.ACTION_CANCEL) {
             showPress = null
             invalidate()
@@ -284,15 +284,10 @@ class PinnedGridView(
             showPress = viewToGridCoords(e.x.toInt(), e.y.toInt())
             invalidate()
         }
-
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float) =
-            StatusBarExpandHelper.onScroll(context, e1, e2)
-
-        override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
-            if (abs(vy) > abs(vx) && vy > 0)
-                Utils.pullStatusBar(context)
-            return true
-        }
+            SlideGestureHelper.onScroll(context, e1, e2)
+        override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float) =
+            SlideGestureHelper.onFling(context, vx, vy)
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             val (x, y) = viewToGridCoords(e.x.toInt(), e.y.toInt())

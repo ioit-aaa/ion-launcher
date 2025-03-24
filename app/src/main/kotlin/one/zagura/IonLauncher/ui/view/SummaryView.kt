@@ -1,6 +1,5 @@
 package one.zagura.IonLauncher.ui.view
 
-import android.app.Activity
 import android.app.PendingIntent
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -14,7 +13,7 @@ import android.text.TextUtils
 import android.text.format.DateFormat
 import android.util.TypedValue
 import android.view.GestureDetector
-import android.view.Gravity
+import android.view.GestureDetector.OnDoubleTapListener
 import android.view.MotionEvent
 import android.view.View
 import one.zagura.IonLauncher.R
@@ -28,14 +27,12 @@ import one.zagura.IonLauncher.provider.summary.Alarm
 import one.zagura.IonLauncher.provider.summary.Battery
 import one.zagura.IonLauncher.util.LiveWallpaper
 import one.zagura.IonLauncher.util.Settings
-import one.zagura.IonLauncher.util.StatusBarExpandHelper
+import one.zagura.IonLauncher.util.SlideGestureHelper
 import one.zagura.IonLauncher.util.Utils
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Calendar
-import kotlin.math.abs
-
 
 class SummaryView(
     context: Context,
@@ -249,26 +246,30 @@ class SummaryView(
     }
 
     override fun onTouchEvent(e: MotionEvent): Boolean {
-        StatusBarExpandHelper.onTouchEvent(context, e)
+        SlideGestureHelper.onTouchEvent(context, e)
         return gestureDetector.onTouchEvent(e)
     }
 
-    private val gestureDetector = GestureDetector(context, object : GestureDetector.OnGestureListener {
+    private val gestureDetector = GestureDetector(context, object : GestureDetector.OnGestureListener, OnDoubleTapListener {
         override fun onDown(e: MotionEvent) = true
         override fun onShowPress(e: MotionEvent) {}
-        override fun onLongPress(e: MotionEvent) {
-            val w = resources.displayMetrics.widthPixels
-            val h = Utils.getDisplayHeight(context as Activity)
-            LongPressMenu.popupLauncher(this@SummaryView, Gravity.CENTER, e.x.toInt() - w / 2, e.y.toInt() - h / 2 + y.toInt())
-            Utils.click(context)
-        }
+        override fun onLongPress(e: MotionEvent) =
+            Gestures.onLongPress(this@SummaryView, e.x.toInt(), e.y.toInt() + y.toInt())
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float) =
-            StatusBarExpandHelper.onScroll(context, e1, e2)
+            SlideGestureHelper.onScroll(context, e1, e2)
+        override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float) =
+            SlideGestureHelper.onFling(context, vx, vy)
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             if (tryConsumeTap(e)) return true
             LiveWallpaper.tap(context, windowToken, e.x.toInt(), e.y.toInt())
             return false
+        }
+        override fun onSingleTapConfirmed(e: MotionEvent) = false
+        override fun onDoubleTap(e: MotionEvent) = false
+        override fun onDoubleTapEvent(e: MotionEvent): Boolean {
+            Gestures.onDoubleTap(context)
+            return true
         }
 
         private fun tryConsumeTap(e: MotionEvent): Boolean {
@@ -302,17 +303,6 @@ class SummaryView(
             if (i >= events.size)
                 return false
             events[i].open(this@SummaryView)
-            return true
-        }
-
-        override fun onFling(
-            e1: MotionEvent?,
-            e2: MotionEvent,
-            velocityX: Float,
-            velocityY: Float
-        ): Boolean {
-            if (abs(velocityY) > abs(velocityX) && velocityY > 0)
-                Utils.pullStatusBar(context)
             return true
         }
     })

@@ -21,8 +21,10 @@ import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.icons.IconLoader
 import one.zagura.IonLauncher.provider.icons.LabelLoader
 import one.zagura.IonLauncher.ui.ionApplication
+import one.zagura.IonLauncher.ui.view.SummaryView
 import one.zagura.IonLauncher.util.iconify.IconifyAnim
 import one.zagura.IonLauncher.util.Settings
+import one.zagura.IonLauncher.util.SlideGestureHelper
 import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
 import kotlin.math.abs
@@ -244,11 +246,8 @@ class SuggestionRowView(
         override fun onShowPress(e: MotionEvent) {}
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float) = false
 
-        override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
-            if (abs(vy) > abs(vx) && vy > 0)
-                Utils.pullStatusBar(context)
-            return true
-        }
+        override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float) =
+            SlideGestureHelper.onFling(context, vx, vy)
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             val i = xToI(e.x)
@@ -270,8 +269,10 @@ class SuggestionRowView(
 
         override fun onLongPress(e: MotionEvent) {
             val i = xToI(e.x)
-            if (i < 0 || i >= suggestions.size)
+            if (i < 0 || i >= suggestions.size) {
+                Gestures.onLongPress(this@SuggestionRowView, e.x.toInt(), e.y.toInt() + y.toInt())
                 return
+            }
             val item = suggestions[i]
             val dp = resources.displayMetrics.density
             val xOff = iToX(i)

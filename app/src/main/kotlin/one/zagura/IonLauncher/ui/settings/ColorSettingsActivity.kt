@@ -11,7 +11,7 @@ import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
 import one.zagura.IonLauncher.ui.view.settings.setting
 import one.zagura.IonLauncher.ui.view.settings.title
 
-fun SettingsPageScope.colorSettings(@StringRes title: Int, namespace: String, defBG: Int, defFG: Int, defAlpha: Int) {
+fun SettingsPageScope.colorSettings(@StringRes title: Int, namespace: String, defBG: ColorThemer.ColorSetting, defFG: ColorThemer.ColorSetting, defAlpha: Int) {
     title(title)
     setting(R.string.background, subtitle = "") {
         color("$namespace:bg", defBG)

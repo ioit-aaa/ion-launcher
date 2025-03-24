@@ -160,7 +160,7 @@ class DrawerArea(
                     clearSearchField()
                 else {
                     LongPressMenu.popupLauncher(it,
-                        Gravity.BOTTOM or Gravity.END, 0,
+                        Gravity.BOTTOM or Gravity.END, (12 * dp).toInt(),
                         it.height + Utils.getNavigationBarHeight(context))
                 }
             }
@@ -305,4 +305,6 @@ class DrawerArea(
         }
         return false
     }
+
+    fun openAllApps() = openCategory(AppCategorizer.AppCategory.AllApps, AppLoader.getResource())
 }

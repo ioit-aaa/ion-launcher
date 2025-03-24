@@ -1,6 +1,7 @@
 package one.zagura.IonLauncher.util
 
 import android.content.Context
+import one.zagura.IonLauncher.provider.ColorThemer
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ObjectInputStream
@@ -33,7 +34,7 @@ class Settings(
     }
 
     private class SingleString(value: String) : Single<String>(value) {
-        override fun toInt(): Int = value.toInt()
+        override fun toInt(): Int = value.toIntOrNull() ?: 0
         override fun toBool(): Boolean = value.toBoolean()
         override fun toString() = value
     }
@@ -71,6 +72,21 @@ class Settings(
             else settings.lists[key] = Array(value.size) { SingleString(value[it]) }
         }
 
+        operator fun set(key: String, value: ColorThemer.ColorSetting?) {
+            if (value == null) settings.lists.keys.remove(key)
+            else settings.singles[key] = when (value) {
+                ColorThemer.ColorSetting.Dynamic.SHADE -> SingleString("shade")
+                ColorThemer.ColorSetting.Dynamic.SHADE_LIGHTER -> SingleString("shade-light")
+                ColorThemer.ColorSetting.Dynamic.VIBRANT_LIGHT -> SingleString("vib-light")
+                ColorThemer.ColorSetting.Dynamic.VIBRANT_DARK -> SingleString("vib-dark")
+                ColorThemer.ColorSetting.Dynamic.LIGHT -> SingleString("light")
+                ColorThemer.ColorSetting.Dynamic.DARK -> SingleString("dark")
+                ColorThemer.ColorSetting.Dynamic.LIGHTER -> SingleString("lighter")
+                ColorThemer.ColorSetting.Dynamic.DARKER -> SingleString("darker")
+                is ColorThemer.ColorSetting.Static -> SingleInt(value.value)
+            }
+        }
+
         fun setStrings(key: String, value: Array<String>?) {
             if (value == null) settings.lists.keys.remove(key)
             else settings.lists[key] = Array(value.size) { SingleString(value[it]) }
@@ -93,6 +109,9 @@ class Settings(
 
         @JvmName("set1")
         inline infix fun String.set(value: Int) = set(this, value)
+
+        @JvmName("set1")
+        inline infix fun String.set(value: ColorThemer.ColorSetting) = set(this, value)
 
         @JvmName("set1")
         inline infix fun String.set(value: Boolean) = set(this, value)
@@ -128,6 +147,7 @@ class Settings(
         PrivateStorage.write(context, saveFile, ::serializeData)
     }
 
+    inline operator fun get(key: String, default: ColorThemer.ColorSetting): ColorThemer.ColorSetting = getColor(key) ?: default
     inline operator fun get(key: String, default: Int): Int = getInt(key) ?: default
     inline operator fun get(key: String, default: Boolean): Boolean = getBoolean(key) ?: default
     inline operator fun get(key: String, default: String): String = getString(key) ?: default
@@ -136,6 +156,19 @@ class Settings(
     inline fun getBoolOr(key: String, default: () -> Boolean): Boolean = getBoolean(key) ?: default()
     inline fun getStringOr(key: String, default: () -> String): String = getString(key) ?: default()
 
+    fun getColor(key: String): ColorThemer.ColorSetting? = singles[key]?.let {
+        when (it.value) {
+            "shade" -> ColorThemer.ColorSetting.Dynamic.SHADE
+            "shade-light" -> ColorThemer.ColorSetting.Dynamic.SHADE_LIGHTER
+            "vib-light" -> ColorThemer.ColorSetting.Dynamic.VIBRANT_LIGHT
+            "vib-dark" -> ColorThemer.ColorSetting.Dynamic.VIBRANT_DARK
+            "light" -> ColorThemer.ColorSetting.Dynamic.LIGHT
+            "dark" -> ColorThemer.ColorSetting.Dynamic.DARK
+            "lighter" -> ColorThemer.ColorSetting.Dynamic.LIGHTER
+            "darker" -> ColorThemer.ColorSetting.Dynamic.DARKER
+            else -> ColorThemer.ColorSetting.Static(it.toInt())
+        }
+    }
     fun getInt(key: String): Int? = singles[key]?.toInt()
     fun getBoolean(key: String): Boolean? = singles[key]?.toBool()
     fun getString(key: String): String? = singles[key]?.toString()

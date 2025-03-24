@@ -1,10 +1,12 @@
 package one.zagura.IonLauncher.ui
 
 import android.app.Activity
+import android.app.WallpaperColors
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Picture
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
@@ -19,8 +21,8 @@ import android.widget.LinearLayout
 import androidx.annotation.RequiresApi
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.alpha
 import androidx.core.graphics.record
-import androidx.core.view.doOnLayout
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -29,10 +31,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCa
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 import com.kieronquinn.app.smartspacer.sdk.client.SmartspacerClient
-import com.kieronquinn.app.smartspacer.sdk.client.views.BcSmartspaceView
-import com.kieronquinn.app.smartspacer.sdk.client.views.popup.PopupFactory
-import com.kieronquinn.app.smartspacer.sdk.model.SmartspaceTarget
-import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Widgets
@@ -45,6 +43,8 @@ import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.provider.summary.Battery
 import one.zagura.IonLauncher.provider.summary.EventsLoader
 import one.zagura.IonLauncher.ui.drawer.DrawerArea
+import one.zagura.IonLauncher.ui.smartspacer.CustomSmartspaceView
+import one.zagura.IonLauncher.ui.view.Gestures
 import one.zagura.IonLauncher.ui.view.LongPressMenu
 import one.zagura.IonLauncher.ui.view.MediaView
 import one.zagura.IonLauncher.ui.view.PinnedGridView
@@ -52,7 +52,6 @@ import one.zagura.IonLauncher.ui.view.SharedDrawingContext
 import one.zagura.IonLauncher.ui.view.SuggestionRowView
 import one.zagura.IonLauncher.ui.view.SummaryView
 import one.zagura.IonLauncher.ui.view.WidgetView
-import one.zagura.IonLauncher.util.drawable.FillDrawable
 import one.zagura.IonLauncher.util.iconify.FloatingIconView
 import one.zagura.IonLauncher.util.iconify.GestureNavContract
 import one.zagura.IonLauncher.util.TaskRunner
@@ -70,7 +69,7 @@ class HomeScreen : Activity() {
     private lateinit var drawerArea: DrawerArea
 
     private lateinit var summaryView: SummaryView
-    private lateinit var smartspacerView: View
+    private lateinit var smartspacerView: CustomSmartspaceView
 
     private lateinit var mediaView: MediaView
 
@@ -81,7 +80,7 @@ class HomeScreen : Activity() {
 
     private lateinit var drawCtx: SharedDrawingContext
 
-    private val screenBackground = FillDrawable(0)
+    private val screenBackground = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf())
     private var screenBackgroundColor = 0
     private var drawerBackgroundColor = 0
 
@@ -95,6 +94,7 @@ class HomeScreen : Activity() {
         homeScreen = createHomeScreen()
         val h = Utils.getDisplayHeight(this) * 2
         setContentView(homeScreen, FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, h, Gravity.BOTTOM))
+        homeScreen.background = screenBackground
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
@@ -112,15 +112,28 @@ class HomeScreen : Activity() {
                 onBackPressed()
             }
 
-        homeScreen.background = screenBackground
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            val w = getSystemService(WALLPAPER_SERVICE) as WallpaperManager
+            w.addOnColorsChangedListener(object : WallpaperManager.OnColorsChangedListener {
+                override fun onColorsChanged(
+                    colors: WallpaperColors?,
+                    which: Int
+                ) {
+                    if ((which and WallpaperManager.FLAG_SYSTEM) == 0)
+                        return
+                    applyCustomizations(false)
+                }
+
+            }, desktop.handler)
+        }
         IconLoader.updateIconPacks(this, ionApplication.settings)
-        applyCustomizations()
+        applyCustomizations(true)
         SuggestionsManager.track {
             suggestionsView.update(it)
         }
         homeScreen.post {
             // windowToken might not be loaded, so we post this to the view
-            val wallpaperManager = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
+            val wallpaperManager = getSystemService(WALLPAPER_SERVICE) as WallpaperManager
             wallpaperManager.setWallpaperOffsetSteps(0f, 0f)
             wallpaperManager.setWallpaperOffsets(homeScreen.windowToken, 0.5f, 0.5f)
         }
@@ -135,28 +148,14 @@ class HomeScreen : Activity() {
         suggestionsView = SuggestionRowView(this, drawCtx, ::showDropTargets, ::search)
         pinnedGrid = PinnedGridView(this, drawCtx)
 
+        smartspacerView = CustomSmartspaceView(this)
+
         desktop = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                 addView(
-                    layoutInflater.inflate(R.layout.smartspacer, this, false).also {
-                        smartspacerView = it
-                        (it as BcSmartspaceView).popupFactory = object : PopupFactory {
-                            override fun createPopup(
-                                context: Context,
-                                anchorView: View,
-                                target: SmartspaceTarget,
-                                backgroundColor: Int,
-                                textColour: Int,
-                                launchIntent: (Intent?) -> Unit,
-                                dismissAction: ((SmartspaceTarget) -> Unit)?,
-                                aboutIntent: Intent?,
-                                feedbackIntent: Intent?,
-                                settingsIntent: Intent?
-                            ) = LongPressMenu.popupSmartspacer(context, anchorView, target, backgroundColor, textColour, launchIntent, dismissAction, aboutIntent, feedbackIntent, settingsIntent)
-                        }
-                    },
+                    smartspacerView,
                     LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0, .5f))
             addView(
                 summaryView,
@@ -212,7 +211,7 @@ class HomeScreen : Activity() {
             drawerArea.alpha = slideOffset * slideOffset / 0.6f - 0.4f
             val a = (slideOffset * 2f).coerceAtMost(1f)
             val inva = 1f - a
-            screenBackground.color = ColorUtils.blendARGB(screenBackgroundColor, drawerBackgroundColor, a)
+            updateBGColors(Utils.getDisplayHeight(this@HomeScreen) - pinnedGrid.y.toFloat(), a)
             desktop.alpha = inva
             desktop.translationY = a * offset
             val scale = 1f - a * 0.05f
@@ -230,7 +229,7 @@ class HomeScreen : Activity() {
 
         override fun onSlide(view: View, slideOffset: Float) {
             val a = (slideOffset * 1.5f).coerceAtMost(1f)
-            screenBackground.color = ColorUtils.blendARGB(screenBackgroundColor, drawerBackgroundColor, a)
+            updateBGColors(Utils.getDisplayHeight(this@HomeScreen) - pinnedGrid.y.toFloat(), a)
             drawerArea.alpha = a * a * a
             desktop.alpha = 1f - a
         }
@@ -271,7 +270,7 @@ class HomeScreen : Activity() {
             IconLoader.updateIconPacks(this, ionApplication.settings)
             suggestionsView.update(SuggestionsManager.getResource())
             NotificationService.MediaObserver.updateMediaItem(applicationContext)
-            applyCustomizations()
+            applyCustomizations(true)
         }
         AppCategorizer.track(false) {
             drawerArea.onAppsChanged(it)
@@ -376,13 +375,23 @@ class HomeScreen : Activity() {
                         sheetBehavior.state = STATE_COLLAPSED
                     } else if (sheetBehavior.state == STATE_COLLAPSED) {
                         if (!LongPressMenu.dismissCurrent())
-                            sheetBehavior.state = STATE_EXPANDED
+                            Gestures.onHomePress(this)?.let { onNewIntent(intent.setAction(it)) }
                     }
                 }
                 else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                     handleGestureContract(intent)
             }
-            Intent.ACTION_ALL_APPS -> sheetBehavior.state = STATE_EXPANDED
+            Gestures.ACTION_OPEN_MENU_POPUP ->
+                LongPressMenu.popupLauncher(homeScreen, Gravity.CENTER, 0, 0)
+            Gestures.ACTION_OPEN_DRAWER -> sheetBehavior.state = STATE_EXPANDED
+            Intent.ACTION_ALL_APPS -> {
+                sheetBehavior.state = STATE_EXPANDED
+                drawerArea.openAllApps()
+            }
+            Intent.ACTION_SEARCH -> {
+                sheetBehavior.state = STATE_EXPANDED
+                drawerArea.focusSearch()
+            }
         }
     }
 
@@ -411,59 +420,80 @@ class HomeScreen : Activity() {
         surfaceView.bringToFront()
     }
 
-    private fun applyCustomizations() {
+    private fun updateBGColors(bottomHeight: Float, a: Float) {
+        val h = Utils.getDisplayHeight(this)
+        val top = screenBackgroundColor and 0xffffff or (screenBackgroundColor.alpha.coerceAtLeast(100) shl 24)
+        val bottom = screenBackgroundColor and 0xffffff or (screenBackgroundColor.alpha.coerceAtLeast(240) shl 24)
+        val c = ColorUtils.blendARGB(screenBackgroundColor, drawerBackgroundColor, a)
+        screenBackground.setColors(intArrayOf(
+            ColorUtils.blendARGB(top, drawerBackgroundColor, a),
+            c, c,
+            ColorUtils.blendARGB(bottom, drawerBackgroundColor, a)),
+            floatArrayOf(
+                0.5f,
+                0.5f + Utils.getStatusBarHeight(this) / h.toFloat(),
+                0.5f + (h - bottomHeight * 1.15f) / h / 2f,
+                0.5f + (h - bottomHeight * 0.5f) / h / 2f))
+    }
+
+    private fun applyCustomizations(layout: Boolean) {
         val settings = ionApplication.settings
-        screenBackgroundColor = ColorThemer.wallBackground(this)
-        drawerBackgroundColor = ColorThemer.drawerBackground(this)
-        screenBackground.color = screenBackgroundColor
         val dp = resources.displayMetrics.density
-        Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.wallForeground(this)) < 0.5f)
         drawCtx.applyCustomizations(this, settings)
-        pinnedGrid.applyCustomizations(settings)
+        if (layout)
+            pinnedGrid.applyCustomizations(settings)
         val m = pinnedGrid.calculateSideMargin()
         drawerArea.applyCustomizations(settings, m)
         mediaView.applyCustomizations(settings)
         summaryView.applyCustomizations(settings)
         suggestionsView.applyCustomizations(settings)
-        summaryView.setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 2), m, m)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val replaceAtAGlance = settings["smartspacer:replace-ataglance", false]
             summaryView.showAtAGlance = !replaceAtAGlance
             if (replaceAtAGlance) {
                 smartspacerView.isVisible = true
-                smartspacerView.findViewById<View>(R.id.smartspace_card_pager).setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 2), m, 0)
-                smartspacerView.findViewById<View>(R.id.smartspace_page_indicator).setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 4), m, 0)
-                val fg = ColorThemer.wallForeground(this)
-                (smartspacerView as BcSmartspaceView).setTintColour(fg)
+                smartspacerView.applyCustomizations(settings, m)
             } else
                 smartspacerView.isVisible = false
         }
-        mediaView.setPadding(m, m / 2, m, m / 2)
-        suggestionsView.setPadding(m, m / 2, m, m / 2)
-        val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
-        suggestionsView.updateLayoutParams {
-            height = iconSize + m
-        }
-        val b = (Utils.getNavigationBarHeight(this@HomeScreen) - m / 2)
-            .coerceAtLeast(m / 2)
-        desktop.setPadding(0, 0, 0, b)
-        val widget = Widgets.getWidget(this)
-        if (widget != widgetView?.widget) {
-            if (widgetView != null) {
-                desktop.removeView(widgetView)
-                widgetView = null
+
+        Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.wallForeground(this)) < 0.5f)
+        screenBackgroundColor = ColorThemer.wallBackground(this)
+        drawerBackgroundColor = ColorThemer.drawerBackground(this)
+
+        if (layout) {
+            summaryView.setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 2), m, m)
+            mediaView.setPadding(m, m / 2, m, m / 2)
+            suggestionsView.setPadding(m, m / 2, m, m / 2)
+            val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
+            val suggestionRowHeight = iconSize + m
+            suggestionsView.updateLayoutParams {
+                height = suggestionRowHeight
             }
-            if (widget != null) {
-                widgetView = WidgetView.new(this, widget)
-                desktop.addView(widgetView, 2, LinearLayout.LayoutParams(
-                    LayoutParams.MATCH_PARENT,
-                    (96 * dp).toInt(),
-                ).apply {
-                    gravity = Gravity.CENTER
-                    val v = (dp * 6).toInt()
-                    setMargins(m, 0, m, v)
-                })
+            val b = (Utils.getNavigationBarHeight(this@HomeScreen) - m / 2)
+                .coerceAtLeast(m / 2)
+            desktop.setPadding(0, 0, 0, b)
+            val widget = Widgets.getWidget(this)
+            if (widget != widgetView?.widget) {
+                if (widgetView != null) {
+                    desktop.removeView(widgetView)
+                    widgetView = null
+                }
+                if (widget != null) {
+                    widgetView = WidgetView.new(this, widget)
+                    desktop.addView(
+                        widgetView, 2, LinearLayout.LayoutParams(
+                            LayoutParams.MATCH_PARENT,
+                            (96 * dp).toInt(),
+                        ).apply {
+                            gravity = Gravity.CENTER
+                            val v = (dp * 6).toInt()
+                            setMargins(m, 0, m, v)
+                        })
+                }
             }
-        }
+            updateBGColors(pinnedGrid.calculateGridHeight() + suggestionRowHeight.toFloat() + b, 0f)
+        } else
+            updateBGColors(Utils.getDisplayHeight(this@HomeScreen) - pinnedGrid.y.toFloat(), 0f)
     }
 }

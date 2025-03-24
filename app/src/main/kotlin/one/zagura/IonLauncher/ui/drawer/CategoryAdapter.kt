@@ -2,8 +2,6 @@ package one.zagura.IonLauncher.ui.drawer
 
 import android.app.Activity
 import android.graphics.Typeface
-import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.shapes.RoundRectShape
 import android.os.Build
 import android.text.TextUtils
 import android.view.DragEvent
@@ -11,11 +9,9 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
-import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.view.setPadding
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem

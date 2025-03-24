@@ -99,8 +99,6 @@ object LongPressMenu {
         context: Context,
         anchorView: View,
         target: SmartspaceTarget,
-        backgroundColor: Int,
-        textColour: Int,
         launchIntent: (Intent?) -> Unit,
         dismissAction: ((SmartspaceTarget) -> Unit)?,
         aboutIntent: Intent?,
@@ -166,7 +164,7 @@ object LongPressMenu {
                 context.startActivity(Intent(Intent.ACTION_SET_WALLPAPER), LauncherItem.createOpeningAnimation(it).toBundle())
             }
         }
-        w.showAtLocation(parent, gravity, xoff - (2 * dp).toInt() - p, yoff)
+        w.showAtLocation(parent, gravity, xoff, yoff)
         current = w
     }
 

@@ -16,10 +16,9 @@ import one.zagura.IonLauncher.provider.icons.IconLoader
 import one.zagura.IonLauncher.provider.icons.IconThemer
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.util.Settings
-import one.zagura.IonLauncher.util.StatusBarExpandHelper
+import one.zagura.IonLauncher.util.SlideGestureHelper
 import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
-import kotlin.math.abs
 
 class MediaView(
     context: Context,
@@ -159,7 +158,7 @@ class MediaView(
     }
 
     override fun onTouchEvent(e: MotionEvent): Boolean {
-        StatusBarExpandHelper.onTouchEvent(context, e)
+        SlideGestureHelper.onTouchEvent(context, e)
         return gestureListener.onTouchEvent(e)
     }
 
@@ -167,14 +166,12 @@ class MediaView(
         override fun onDown(e: MotionEvent) = true
         override fun onShowPress(e: MotionEvent) {}
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float) =
-            StatusBarExpandHelper.onScroll(context, e1, e2)
-        override fun onLongPress(e: MotionEvent) {}
+            SlideGestureHelper.onScroll(context, e1, e2)
+        override fun onLongPress(e: MotionEvent) =
+            Gestures.onLongPress(this@MediaView, e.x.toInt(), e.y.toInt() + y.toInt())
 
-        override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
-            if (abs(vy) > abs(vx) && vy > 0)
-                Utils.pullStatusBar(context)
-            return true
-        }
+        override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float) =
+            SlideGestureHelper.onFling(context, vx, vy)
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             if (players.isEmpty())
