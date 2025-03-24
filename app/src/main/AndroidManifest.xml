@@ -91,7 +91,12 @@
 
         <activity
             android:name=".ui.settings.iconPackPicker.IconPackPickerActivity"
-            android:theme="@style/IonLauncher.Settings"/>
+            android:theme="@style/IonLauncher.Settings"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.ICON_PACK"/>
+            </intent-filter>
+        </activity>
         <activity
             android:name=".ui.settings.widgetChooser.WidgetChooserActivity"
             android:theme="@style/IonLauncher.Settings"/>
