@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="search">Search</string>
-    <string name="upcoming_alarm">Следуйщий будильник</string>
-    <string name="next_track">Следуйщая песня</string>
+    <string name="search">Поиск</string>
+    <string name="upcoming_alarm">Следующий будильник</string>
+    <string name="next_track">Следующая песня</string>
     <string name="play">Играть</string>
     <string name="pause">Пауза</string>
     <string name="tweaks">Настройки Ion Launcher</string>
     <string name="pinned_grid">Сетка приложений</string>
     <string name="rows">Ряды</string>
-    <string name="columns">Столбы</string>
+    <string name="columns">Столбцы</string>
     <string name="icon_packs">Пакеты иконок</string>
     <string name="chosen">Выбранные</string>
     <string name="available">Не выбранные</string>
@@ -17,18 +17,18 @@
     <string name="count_0_is_none">Количество (0 полностью отключает)</string>
     <string name="other">Другие</string>
     <string name="choose_launcher">Выбрать главный лаунчер</string>
-    <string name="grant_permissions">Дать разришения</string>
+    <string name="grant_permissions">Дать разрешения</string>
     <string name="notification_access">Доступ к уведомлениям</string>
     <string name="contacts_access">Доступ к контактам</string>
     <string name="calendar_access">Доступ к календарю</string>
-    <string name="usage_access">Доступ к использованию прилошений</string>
-    <string name="to_show_in_search">Чтобы их показывать в результатах поиска</string>
-    <string name="to_show_media_player">Чтобы показывать играющую музику</string>
-    <string name="for_suggestions">Для рекомендацый и улучшеного поиска</string>
-    <string name="for_summary_view">Чтобы показывать инфо в сегоднешнем виджете</string>
-    <string name="to_show_upcoming_events">Чтобы показывать следуйщие эвенты</string>
+    <string name="usage_access">Доступ к использованию приложений</string>
+    <string name="to_show_in_search">Чтобы показывать их в результатах поиска</string>
+    <string name="to_show_media_player">Чтобы показывать играющую музыку</string>
+    <string name="for_suggestions">Для рекомендаций и улучшеного поиска</string>
+    <string name="for_summary_view">Чтобы показывать инфо в сегодняшнем виджете</string>
+    <string name="to_show_upcoming_events">Чтобы показывать следующие события</string>
     <string name="finish_setup">Закончить настройку</string>
-    <string name="just_look">Просто увидить лаунчер</string>
+    <string name="just_look">Просто увидеть лаунчер</string>
     <string name="icon_size">Размер иконок</string>
     <string name="background">Фон</string>
     <string name="foreground">Техт и иконки</string>
@@ -50,7 +50,7 @@
     <string name="show_search_in_suggestions">Кнопка поиск в ряду рекомендаций</string>
     <string name="monochrome_icons">Монохромные иконки</string>
     <string name="monochrome_bg">Фон монохромных иконок</string>
-    <string name="turn_off_torch">Выключить фонарь</string>
+    <string name="turn_off_torch">Выключить фонарик</string>
     <string name="radius_percent">Процент радиуса</string>
     <string name="alarms">Будильники</string>
     <string name="icons">Иконки</string>
@@ -58,7 +58,7 @@
     <string name="cards">Карточки</string>
     <string name="labels">Этикетки</string>
     <string name="media_player">Медиа плеер</string>
-    <string name="dynamically_tint">Динамическы перекрашивать</string>
+    <string name="dynamically_tint">Динамически перекрашивать</string>
     <string name="skeuomorphism">Скевоморфизм</string>
     <string name="icon_rim">3D эффект</string>
     <string name="icon_gloss">Лакировка</string>
@@ -66,7 +66,7 @@
     <string name="edit">Изменить</string>
     <string name="reset">Восстановить</string>
     <string name="hidden_apps">Спрятанные приложения</string>
-    <string name="all_apps">Все Приложения</string>
+    <string name="all_apps">Все приложения</string>
     <string name="system">Система</string>
     <string name="customization">Персонализация</string>
     <string name="utilities">Utilities</string>
@@ -85,5 +85,5 @@
     <string name="smartspacer">Использовать Смартспейсер</string>
     <string name="settings">Настройки</string>
     <string name="pill_shaped">Разделeнное</string>
-    <string name="smoother_rounded_corners">Сглаженые закругленные кончики</string>
+    <string name="smoother_rounded_corners">Сглаженные закругленные кончики</string>
 </resources>
