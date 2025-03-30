@@ -32,7 +32,6 @@ import one.zagura.IonLauncher.util.drawable.NonDrawable
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.SlideGestureHelper
 import one.zagura.IonLauncher.util.Utils
-import kotlin.math.abs
 
 @SuppressLint("UseCompatLoadingForDrawables")
 class PinnedGridView(
@@ -78,7 +77,7 @@ class PinnedGridView(
         Dock.setItem(context, i, item)
     }
 
-    fun applyCustomizations(settings: Settings) {
+    fun applyLayoutCustomizations(settings: Settings) {
         columns = settings["dock:columns", 5]
         rows = settings["dock:rows", 2]
         isVisible = rows != 0
@@ -90,7 +89,7 @@ class PinnedGridView(
     }
 
     /**
-     * Called after [applyCustomizations] if necessary
+     * Called after [applyLayoutCustomizations] if necessary
      */
     fun calculateSideMargin(): Int {
         val w = resources.displayMetrics.widthPixels - paddingLeft - paddingRight

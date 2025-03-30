@@ -121,6 +121,7 @@ class HomeScreen : Activity() {
                 ) {
                     if ((which and WallpaperManager.FLAG_SYSTEM) == 0)
                         return
+                    IconLoader.updateIconPacks(this@HomeScreen, ionApplication.settings)
                     applyCustomizations(false)
                 }
 
@@ -421,27 +422,31 @@ class HomeScreen : Activity() {
     }
 
     private fun updateBGColors(bottomHeight: Float, a: Float) {
-        val h = Utils.getDisplayHeight(this)
-        val top = screenBackgroundColor and 0xffffff or (screenBackgroundColor.alpha.coerceAtLeast(100) shl 24)
         val bottom = screenBackgroundColor and 0xffffff or (screenBackgroundColor.alpha.coerceAtLeast(240) shl 24)
         val c = ColorUtils.blendARGB(screenBackgroundColor, drawerBackgroundColor, a)
-        screenBackground.setColors(intArrayOf(
-            ColorUtils.blendARGB(top, drawerBackgroundColor, a),
-            c, c,
-            ColorUtils.blendARGB(bottom, drawerBackgroundColor, a)),
-            floatArrayOf(
-                0.5f,
-                0.5f + Utils.getStatusBarHeight(this) / h.toFloat(),
-                0.5f + (h - bottomHeight * 1.15f) / h / 2f,
-                0.5f + (h - bottomHeight * 0.5f) / h / 2f))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val h = Utils.getDisplayHeight(this)
+            val top = screenBackgroundColor and 0xffffff or (screenBackgroundColor.alpha.coerceAtLeast(100) shl 24)
+            screenBackground.setColors(intArrayOf(
+                ColorUtils.blendARGB(top, drawerBackgroundColor, a),
+                c, c,
+                ColorUtils.blendARGB(bottom, drawerBackgroundColor, a)),
+                floatArrayOf(
+                    0.5f,
+                    0.5f + Utils.getStatusBarHeight(this) / h.toFloat(),
+                    0.5f + (h - bottomHeight * 1.15f) / h / 2f,
+                    0.5f + (h - bottomHeight * 0.5f) / h / 2f))
+        } else screenBackground.colors = intArrayOf(c, c, c,
+            ColorUtils.blendARGB(bottom, drawerBackgroundColor, a))
     }
 
     private fun applyCustomizations(layout: Boolean) {
         val settings = ionApplication.settings
         val dp = resources.displayMetrics.density
-        drawCtx.applyCustomizations(this, settings)
+        drawCtx.applyLayoutCustomizations(this, settings)
+        drawCtx.applyColorCustomizations(this)
         if (layout)
-            pinnedGrid.applyCustomizations(settings)
+            pinnedGrid.applyLayoutCustomizations(settings)
         val m = pinnedGrid.calculateSideMargin()
         drawerArea.applyCustomizations(settings, m)
         mediaView.applyCustomizations(settings)

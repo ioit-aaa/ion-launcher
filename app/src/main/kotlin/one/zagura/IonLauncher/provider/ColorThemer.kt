@@ -4,8 +4,8 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.os.Build
 import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.alpha
 import one.zagura.IonLauncher.ui.ionApplication
-import one.zagura.IonLauncher.util.Settings
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.sqrt
@@ -88,6 +88,7 @@ object ColorThemer {
     }
 
     fun colorize(color: Int, tint: Int): Int {
+        val a = color.alpha * tint.alpha / 255
         val lab = DoubleArray(3)
         ColorUtils.colorToLAB(color, lab)
         val l = lab[0]
@@ -96,7 +97,7 @@ object ColorThemer {
         val ts = sqrt(lab[1] * lab[1] + lab[2] * lab[2])
         lab[1] *= (s + ts) / 2 / ts
         lab[2] *= (s + ts) / 2 / ts
-        return ColorUtils.LABToColor(l, lab[1], lab[2])
+        return ColorUtils.LABToColor(l, lab[1], lab[2]) and 0xffffff or (a shl 24)
     }
 
     sealed interface ColorSetting {

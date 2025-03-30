@@ -116,13 +116,21 @@ class SharedDrawingContext(context: Context) {
         canvas.restore()
     }
 
-    fun applyCustomizations(context: Context, settings: Settings) {
+    fun applyLayoutCustomizations(context: Context, settings: Settings) {
         val dp = context.resources.displayMetrics.density
         iconSize = settings["dock:icon-size", 48] * dp
         radius = iconSize * settings["icon:radius-ratio", 25] / 100f
         doSkeumorphism = settings["card:skeumorph", false]
         doSquircle = settings["icon:squircle", true]
+    }
+    fun applyColorCustomizations(context: Context) {
+        val dp = context.resources.displayMetrics.density
         cardPaint.color = ColorThemer.cardBackground(context)
+        val c = ColorThemer.cardForeground(context)
+        titlePaint.color = c
+        textPaint.color = c
+        subtitlePaint.color = ColorThemer.cardHint(context)
+
         if (doSkeumorphism) {
             cardBorderPaint.color = (0x66 + 0x44 * (cardPaint.color.alpha / 255f)).toInt() shl 24
             cardBorderPaint.strokeWidth = 1 * dp
@@ -136,10 +144,5 @@ class SharedDrawingContext(context: Context) {
             cardPaint.clearShadowLayer()
         else
             cardPaint.setShadowLayer(21f, 0f, 0f, 0x22000000)
-
-        val c = ColorThemer.cardForeground(context)
-        titlePaint.color = c
-        textPaint.color = c
-        subtitlePaint.color = ColorThemer.cardHint(context)
     }
 }
