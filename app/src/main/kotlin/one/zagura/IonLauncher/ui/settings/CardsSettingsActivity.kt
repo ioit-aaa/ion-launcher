@@ -6,6 +6,7 @@ import android.os.Bundle
 import com.kieronquinn.app.smartspacer.sdk.SmartspacerConstants
 import one.zagura.IonLauncher.BuildConfig
 import one.zagura.IonLauncher.R
+import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.view.settings.onClick
 import one.zagura.IonLauncher.ui.view.settings.seekbar
@@ -19,9 +20,6 @@ class CardsSettingsActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setSettingsContentView(R.string.cards) {
-            setting(R.string.background_opacity, isVertical = true) {
-                seekbar("card:bg:alpha", 0xdd, min = 0, max = 0xff)
-            }
             setting(R.string.skeuomorphism) {
                 switch("card:skeumorph", false)
             }
@@ -31,6 +29,7 @@ class CardsSettingsActivity : Activity() {
                     switch("smartspacer:replace-ataglance", false)
                 }
             }
+            colorSettings("card", ColorThemer.DEFAULT_DARK, ColorThemer.DEFAULT_LIGHT, 0xdd)
             title(R.string.suggestions)
             if (BuildConfig.DEBUG) setting(R.string.suggestions) {
                 onClick(BuildConfig.APPLICATION_ID + ".debug.suggestions.DebugSuggestionsActivity")

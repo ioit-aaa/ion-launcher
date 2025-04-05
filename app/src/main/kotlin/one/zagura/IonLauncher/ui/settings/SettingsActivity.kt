@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import one.zagura.IonLauncher.R
+import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.items.ContactsLoader
 import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
@@ -18,6 +19,8 @@ import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
 import one.zagura.IonLauncher.ui.view.settings.setting
 import one.zagura.IonLauncher.ui.view.settings.title
 import one.zagura.IonLauncher.ui.settings.widgetChooser.WidgetChooserActivity
+import one.zagura.IonLauncher.ui.view.settings.SettingsPageScope
+import one.zagura.IonLauncher.ui.view.settings.color
 import one.zagura.IonLauncher.ui.view.settings.switch
 import one.zagura.IonLauncher.util.Utils
 
@@ -26,10 +29,10 @@ class SettingsActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setSettingsContentView(R.string.tweaks) {
-            setting(R.string.color) { onClick(ColorSettingsActivity::class.java) }
             setting(R.string.icons) { onClick(IconsSettingsActivity::class.java) }
             setting(R.string.cards) { onClick(CardsSettingsActivity::class.java) }
             setting(R.string.drawer) { onClick(DrawerSettingsActivity::class.java) }
+            setting(R.string.wallpaper) { onClick(WallpaperSettingsActivity::class.java) }
             setting(R.string.icon_size, isVertical = true) {
                 seekbar("dock:icon-size", 48, min = 24, max = 72, multiplier = 8)
             }
@@ -41,9 +44,6 @@ class SettingsActivity : Activity() {
             }
             setting(R.string.columns, isVertical = true) {
                 seekbar("dock:columns", 5, min = 2, max = 7)
-            }
-            setting(R.string.background_opacity, isVertical = true) {
-                seekbar("wall:bg:alpha", 0x33, min = 0, max = 0xff)
             }
             title(R.string.pinned_grid)
             setting(R.string.rows, isVertical = true) {
@@ -101,5 +101,18 @@ class SettingsActivity : Activity() {
                 }
             }
         }
+    }
+}
+
+fun SettingsPageScope.colorSettings(namespace: String, defBG: ColorThemer.ColorSetting, defFG: ColorThemer.ColorSetting, defAlpha: Int) {
+    title(R.string.color)
+    setting(R.string.background, subtitle = "") {
+        color("$namespace:bg", defBG)
+    }
+    setting(R.string.foreground, subtitle = "") {
+        color("$namespace:fg", defFG)
+    }
+    setting(R.string.background_opacity, isVertical = true) {
+        seekbar("$namespace:bg:alpha", defAlpha, min = 0, max = 0xff)
     }
 }

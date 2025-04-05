@@ -3,6 +3,7 @@ package one.zagura.IonLauncher.ui.settings
 import android.app.Activity
 import android.os.Bundle
 import one.zagura.IonLauncher.R
+import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.ui.view.settings.seekbar
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
 import one.zagura.IonLauncher.ui.view.settings.setting
@@ -16,15 +17,13 @@ class DrawerSettingsActivity : Activity() {
             setting(R.string.labels) {
                 switch("drawer:labels", true)
             }
-            setting(R.string.background_opacity, isVertical = true) {
-                seekbar("drawer:bg:alpha", 0xdd, min = 0, max = 0xff)
-            }
             setting(R.string.open_keyboard_auto) {
                 switch("drawer:auto_keyboard", false)
             }
             setting(R.string.categories) {
                 switch("drawer:categories", true)
             }
+            colorSettings("drawer", ColorThemer.DEFAULT_DARK, ColorThemer.DEFAULT_LIGHT, 0xdd)
         }
     }
 }
