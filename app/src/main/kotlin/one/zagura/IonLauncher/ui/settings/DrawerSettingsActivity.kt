@@ -4,6 +4,7 @@ import android.app.Activity
 import android.os.Bundle
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.provider.ColorThemer
+import one.zagura.IonLauncher.provider.ColorThemer.ColorSetting
 import one.zagura.IonLauncher.ui.view.settings.seekbar
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
 import one.zagura.IonLauncher.ui.view.settings.setting
@@ -23,7 +24,7 @@ class DrawerSettingsActivity : Activity() {
             setting(R.string.categories) {
                 switch("drawer:categories", true)
             }
-            colorSettings("drawer", ColorThemer.DEFAULT_DARK, ColorThemer.DEFAULT_LIGHT, 0xdd)
+            colorSettings("drawer", ColorSetting.Dynamic.SHADE, ColorSetting.Dynamic.LIGHT, 0xff)
         }
     }
 }

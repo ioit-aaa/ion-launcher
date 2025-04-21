@@ -7,6 +7,7 @@ import android.view.View
 import androidx.core.view.isVisible
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.provider.ColorThemer
+import one.zagura.IonLauncher.provider.ColorThemer.ColorSetting
 import one.zagura.IonLauncher.ui.view.settings.onClick
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView
 import one.zagura.IonLauncher.ui.view.settings.setting
@@ -42,7 +43,7 @@ class IconsSettingsActivity : Activity() {
                 }
                 bg.isVisible = ionApplication.settings["icon:monochrome", false]
             }
-            colorSettings("icon", ColorThemer.DEFAULT_LIGHT, ColorThemer.DEFAULT_DARK, 0xdd)
+            colorSettings("icon", ColorSetting.Dynamic.LIGHT, ColorSetting.Dynamic.SHADE, 0xdd)
             title(R.string.skeuomorphism)
             setting(R.string.icon_rim) {
                 switch("icon:rim", false)

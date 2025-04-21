@@ -11,47 +11,44 @@ import kotlin.math.max
 import kotlin.math.sqrt
 
 object ColorThemer {
-    val DEFAULT_DARK = ColorSetting.Static(0x111111)
-    val DEFAULT_LIGHT = ColorSetting.Static(0xfefefe)
-
     fun iconBackground(context: Context): Int {
         val s = context.ionApplication.settings
-        return s["icon:bg", DEFAULT_LIGHT].get(context) and 0xffffff or (s["icon:bg:alpha", 0xdd] shl 24)
+        return s["icon:bg", ColorSetting.Dynamic.LIGHT].get(context) and 0xffffff or (s["icon:bg:alpha", 0xdd] shl 24)
     }
     fun iconForeground(context: Context): Int =
-        context.ionApplication.settings["icon:fg", DEFAULT_DARK].get(context) or 0xff000000.toInt()
+        context.ionApplication.settings["icon:fg", ColorSetting.Dynamic.SHADE].get(context) or 0xff000000.toInt()
 
 
     fun cardBackground(context: Context): Int {
         val s = context.ionApplication.settings
-        return s["card:bg", DEFAULT_DARK].get(context) and 0xffffff or (s["card:bg:alpha", 0xdd] shl 24)
+        return s["card:bg", ColorSetting.Dynamic.SHADE_LIGHTER].get(context) and 0xffffff or (s["card:bg:alpha", 0xdd] shl 24)
     }
     fun cardBackgroundOpaque(context: Context): Int =
-        context.ionApplication.settings["card:bg", DEFAULT_DARK].get(context) or 0xff000000.toInt()
+        context.ionApplication.settings["card:bg", ColorSetting.Dynamic.SHADE_LIGHTER].get(context) or 0xff000000.toInt()
     fun cardForeground(context: Context): Int =
-        context.ionApplication.settings["card:fg", DEFAULT_LIGHT].get(context) or 0xff000000.toInt()
+        context.ionApplication.settings["card:fg", ColorSetting.Dynamic.LIGHTER].get(context) or 0xff000000.toInt()
     fun cardHint(context: Context): Int =
-        context.ionApplication.settings["card:fg", DEFAULT_LIGHT].get(context) and 0xffffff or 0xaa000000.toInt()
+        context.ionApplication.settings["card:fg", ColorSetting.Dynamic.LIGHTER].get(context) and 0xffffff or 0xaa000000.toInt()
 
     fun wallBackground(context: Context): Int {
         val s = context.ionApplication.settings
-        return s["wall:bg", DEFAULT_DARK].get(context) and 0xffffff or (s["wall:bg:alpha", 0x33] shl 24)
+        return s["wall:bg", ColorSetting.Dynamic.SHADE].get(context) and 0xffffff or (s["wall:bg:alpha", 0x33] shl 24)
     }
     fun wallForeground(context: Context): Int =
-        context.ionApplication.settings["wall:fg", DEFAULT_LIGHT].get(context) or 0xff000000.toInt()
+        context.ionApplication.settings["wall:fg", ColorSetting.Dynamic.LIGHT].get(context) or 0xff000000.toInt()
 
     fun drawerBackground(context: Context): Int {
         val s = context.ionApplication.settings
-        return s["drawer:bg", DEFAULT_DARK].get(context) and 0xffffff or (s["drawer:bg:alpha", 0xdd] shl 24)
+        return s["drawer:bg", ColorSetting.Dynamic.SHADE].get(context) and 0xffffff or (s["drawer:bg:alpha", 0xff] shl 24)
     }
     fun drawerBackgroundOpaque(context: Context): Int =
-        context.ionApplication.settings["drawer:bg", DEFAULT_DARK].get(context) or 0xff000000.toInt()
+        context.ionApplication.settings["drawer:bg", ColorSetting.Dynamic.SHADE].get(context) or 0xff000000.toInt()
     fun drawerForeground(context: Context): Int =
-        context.ionApplication.settings["drawer:fg", DEFAULT_LIGHT].get(context) or 0xff000000.toInt()
+        context.ionApplication.settings["drawer:fg", ColorSetting.Dynamic.LIGHT].get(context) or 0xff000000.toInt()
     fun drawerHint(context: Context): Int =
-        context.ionApplication.settings["drawer:fg", DEFAULT_LIGHT].get(context) and 0xffffff or 0xaa000000.toInt()
+        context.ionApplication.settings["drawer:fg", ColorSetting.Dynamic.LIGHT].get(context) and 0xffffff or 0xaa000000.toInt()
     fun drawerHighlight(context: Context): Int =
-        context.ionApplication.settings["drawer:fg", DEFAULT_LIGHT].get(context) and 0xffffff or 0x33000000.toInt()
+        context.ionApplication.settings["drawer:fg", ColorSetting.Dynamic.LIGHT].get(context) and 0xffffff or 0x33000000.toInt()
 
     fun level(color: Int, level: Double): Int {
         val lab = DoubleArray(3)
