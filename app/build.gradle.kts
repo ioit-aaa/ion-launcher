@@ -11,8 +11,8 @@ android {
         applicationId = "one.zagura.IonLauncher"
         minSdk = 21
         targetSdk = 35
-        versionCode = 16
-        versionName = "y25-v1"
+        versionCode = 17
+        versionName = "y25-v2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

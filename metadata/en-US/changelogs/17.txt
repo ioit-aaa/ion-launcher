@@ -1,0 +1,9 @@
+Added dynamic color options in launcher settings
+Moved color settings around
+Improved russian translation
+Added gradient behind pinned apps area to reduce visual noise on busy wallpapers
+Improved smartspacer appearance
+Improved grayscale icon recoloring
+Added option to have squircle icon shapes
+Improved custom icon picker
+Fixed some bugs
