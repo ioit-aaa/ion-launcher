@@ -142,44 +142,43 @@ object IconThemer {
         var bg = icon.background?.let(::reshapeNestedAdaptiveIcons)
         fg.setGrayscale(doGrayscale)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (doMonochrome && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val monochrome = icon.monochrome
-            if (doMonochrome) {
-                if (monochrome != null) {
-                    if (!doMonochromeBG) {
-                        monochrome.colorFilter = PorterDuffColorFilter(iconFG, PorterDuff.Mode.SRC_IN)
-                        val w = monochrome.intrinsicWidth
-                        return InsetDrawable(monochrome, -w / if (willBeThemed) 5 else 7)
-                    }
-                    monochrome.colorFilter = PorterDuffColorFilter(iconFG, PorterDuff.Mode.SRC_IN)
-                    fg = monochrome
-                    return makeIcon(iconBG, fg, isIconPack)
-                }
+            if (monochrome != null) {
                 if (!doMonochromeBG) {
-                    val i = makeIcon(bg, fg, isIconPack)
-                    return InsetDrawable(i, fg.intrinsicWidth / 12)
+                    monochrome.colorFilter = PorterDuffColorFilter(iconFG, PorterDuff.Mode.SRC_IN)
+                    val w = monochrome.intrinsicWidth
+                    return InsetDrawable(monochrome, -w / if (willBeThemed) 5 else 7)
                 }
+                monochrome.colorFilter = PorterDuffColorFilter(iconFG, PorterDuff.Mode.SRC_IN)
+                fg = monochrome
+                return makeIcon(iconBG, fg, isIconPack)
             }
         }
-        if (doGrayscale) when (bg) {
-            null -> return makeIcon(iconBG, fg, isIconPack)
-            is ColorDrawable ->
-                return makeIcon(ColorThemer.colorize(bg.color, iconBG), fg, isIconPack)
-            is ShapeDrawable ->
-                return makeIcon(ColorThemer.colorize(bg.paint.color, iconBG), fg, isIconPack)
-            is GradientDrawable -> {
-                bg.color?.let {
-                    return makeIcon(ColorThemer.colorize(it.defaultColor, iconBG), fg, isIconPack)
+        var icon: Drawable = run {
+            if (doGrayscale) when (bg) {
+                null -> return@run makeIcon(iconBG, fg, isIconPack)
+                is ColorDrawable ->
+                    return@run makeIcon(ColorThemer.colorize(bg.color, iconBG), fg, isIconPack)
+                is ShapeDrawable ->
+                    return@run makeIcon(ColorThemer.colorize(bg.paint.color, iconBG), fg, isIconPack)
+                is GradientDrawable -> {
+                    bg.color?.let {
+                        return@run makeIcon(ColorThemer.colorize(it.defaultColor, iconBG), fg, isIconPack)
+                    }
+                    bg.colors = bg.colors?.map { ColorThemer.colorize(it, iconBG) }?.toIntArray()
                 }
-                bg.colors = bg.colors?.map { ColorThemer.colorize(it, iconBG) }?.toIntArray()
+                else -> bg.setGrayscale(true)
             }
-            else -> bg.setGrayscale(true)
+            when (bg) {
+                is ShapeDrawable -> makeIcon(bg.paint.color, fg, isIconPack)
+                is ColorDrawable -> makeIcon(bg.color, fg, isIconPack)
+                else -> makeIcon(bg, fg, isIconPack)
+            }
         }
-        return when (bg) {
-            is ShapeDrawable -> makeIcon(bg.paint.color, fg, isIconPack)
-            is ColorDrawable -> makeIcon(bg.color, fg, isIconPack)
-            else -> makeIcon(bg, fg, isIconPack)
-        }
+        if (doMonochrome && !doMonochromeBG)
+            icon = InsetDrawable(icon, fg.intrinsicWidth / 12)
+        return icon
     }
 
     private fun makeIcon(
