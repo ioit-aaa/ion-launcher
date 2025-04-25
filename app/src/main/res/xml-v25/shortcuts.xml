@@ -9,6 +9,6 @@
         <intent
             android:action="android.intent.action.MAIN"
             android:targetPackage="one.zagura.IonLauncher"
-            android:targetClass="one.zagura.IonLauncher.ui.drawer.HiddenAppsActivity"/>
+            android:targetClass="one.zagura.IonLauncher.ui.view.settings.HiddenAppsActivity"/>
     </shortcut>
 </shortcuts>

@@ -28,7 +28,7 @@ object IconLoader {
     private val cacheApps = HashMap<App, Drawable>()
     private val cacheContacts = HashMap<String, Drawable>() // only use lookup key
     private val cacheShortcuts = HashMap<StaticShortcut, Drawable>()
-    private var iconPacks = emptyList<IconPackInfo>()
+    private var iconPacks = ArrayList<IconPackInfo>()
 
     private val iconPacksLock = ReentrantLock()
 
@@ -37,9 +37,10 @@ object IconLoader {
         TaskRunner.submit {
             iconPacksLock.withLock {
                 internalClearCache()
-                iconPacks = settings.getStrings("icon_packs").orEmpty().mapNotNull { p ->
+                iconPacks.clear()
+                settings.getStrings("icon_packs") { _, p ->
                     try {
-                        IconPackInfo.get(context.packageManager, p)
+                        iconPacks.add(IconPackInfo.get(context.packageManager, p))
                     } catch (e: Exception) {
                         e.printStackTrace()
                         null

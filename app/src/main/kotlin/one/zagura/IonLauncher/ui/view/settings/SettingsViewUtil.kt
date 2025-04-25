@@ -75,20 +75,15 @@ inline fun Activity.setSettingsContentView(@StringRes titleId: Int, builder: Set
             orientation = LinearLayout.VERTICAL
             setPadding(0, 0, 0, Utils.getNavigationBarHeight(context))
             addView(TextView(context).apply {
-                gravity = Gravity.CENTER
+                textSize = 42f
+                gravity = Gravity.START or Gravity.BOTTOM
                 val h = (20 * dp).toInt()
-                setPadding(h, Utils.getStatusBarHeight(context).coerceAtLeast((64 * dp).toInt()), h, 0)
-                textSize = 32f
+                setPadding(h, Utils.getStatusBarHeight(context).coerceAtLeast((64 * dp).toInt()), h, h)
                 setTextColor(resources.getColor(R.color.color_hint))
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                    typeface = Typeface.create(null, 200, false)
+                    typeface = Typeface.create(null, 500, false)
                 setText(titleId)
             }, LayoutParams(MATCH_PARENT, (256 * dp).toInt() + Utils.getStatusBarHeight(context)))
-//            addView(View(context).apply {
-//                background = FillDrawable(resources.getColor(R.color.color_separator))
-//            }, MarginLayoutParams(MATCH_PARENT, dp.toInt()).apply {
-//                bottomMargin = (12 * dp).toInt()
-//            })
             builder(SettingsPageScope(this))
         }, LayoutParams(MATCH_PARENT, WRAP_CONTENT))
     })

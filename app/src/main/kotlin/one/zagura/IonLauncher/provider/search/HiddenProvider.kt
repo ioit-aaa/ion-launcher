@@ -7,16 +7,17 @@ import one.zagura.IonLauncher.provider.icons.LabelLoader
 
 data object HiddenProvider : BasicProvider<LauncherItem> {
 
-    private var hidden = emptyList<Pair<LauncherItem, String>>()
+    private var hidden = ArrayList<Pair<LauncherItem, String>>()
 
     override fun updateData(context: Context) {
-        hidden = HiddenApps.getItems(context).map {
-            it to LabelLoader.loadLabel(context, it).lowercase()
+        hidden.clear()
+        HiddenApps.getItems(context) {
+            hidden.add(it to LabelLoader.loadLabel(context, it).lowercase())
         }
     }
 
     override fun clearData() {
-        hidden = emptyList()
+        hidden.clear()
     }
 
     override fun getBaseData() = hidden

@@ -61,7 +61,7 @@ class LibraryAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, i: Int) {
         val (category, apps) = getItem(i)
-        holder.view.apps = apps
+        holder.view.setApps(apps)
         holder.view.category = category
     }
 

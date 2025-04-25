@@ -64,10 +64,8 @@ class IconPackPickerActivity : Activity() {
                     list += iconPack
                 }
             }
-            if (deleted) {
-                settings.edit(this) {
-                    "icon_packs" set strings.toTypedArray()
-                }
+            if (deleted) settings.edit(this) {
+                "icon_packs" set strings.toTypedArray()
             }
             list
         }

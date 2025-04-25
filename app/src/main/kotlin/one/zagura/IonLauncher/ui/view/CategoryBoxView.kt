@@ -5,15 +5,18 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
+import android.graphics.drawable.Drawable
 import android.view.GestureDetector
 import android.view.GestureDetector.OnGestureListener
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import androidx.annotation.AnyThread
 import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.provider.icons.IconLoader
 import one.zagura.IonLauncher.provider.items.AppCategorizer
+import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
 
 @SuppressLint("ViewConstructor")
@@ -50,14 +53,26 @@ class CategoryBoxView(
             label = getNameForCategory(context, value)
             invalidate()
         }
-    var apps = emptyList<App>()
-        set(value) {
-            field = value
-            invalidate()
-        }
+    private var icons = emptyArray<Drawable>()
+    private var apps = ArrayList<App>()
+
+    fun setApps(apps: List<App>) {
+        this.apps = ArrayList(apps)
+        TaskRunner.submitUnique(::reloadIcons)
+    }
+
+    @AnyThread
+    private fun reloadIcons() {
+        val apps = apps
+        icons = Array(apps.size) { IconLoader.loadIcon(context, apps[it]) }
+        postInvalidate()
+        if (icons.size > GRID_SIZE * GRID_SIZE)
+            while (apps.size > GRID_SIZE * GRID_SIZE - 1)
+                apps.removeAt(apps.lastIndex)
+        apps.trimToSize()
+    }
 
     private var label = ""
-    private val openIcon = resources.getDrawable(R.drawable.arrow_right)
 
     init {
         val p = (12 * resources.displayMetrics.density).toInt()
@@ -71,7 +86,7 @@ class CategoryBoxView(
         val pb = paddingBottom
         val dp = resources.displayMetrics.density
 
-        val iconCount = if (apps.size <= GRID_SIZE * GRID_SIZE) apps.size
+        val iconCount = if (icons.size <= GRID_SIZE * GRID_SIZE) icons.size
         else GRID_SIZE * GRID_SIZE - 1
         val l = pl + ((width - pl - pr) - drawCtx.iconSize * GRID_SIZE) / (GRID_SIZE + 1) / 2
         val w = width - l * 2
@@ -89,7 +104,7 @@ class CategoryBoxView(
         }
 
         for (i in 0 until iconCount) {
-            val icon = IconLoader.loadIcon(context, apps[i])
+            val icon = icons[i]
             val x = i % GRID_SIZE
             val y = i / GRID_SIZE
             val centerX = l + w * (0.5f + x) / GRID_SIZE
@@ -100,13 +115,13 @@ class CategoryBoxView(
             icon.draw(canvas)
             icon.bounds = drawCtx.tmpRect
         }
-        if (iconCount < apps.size) {
+        if (iconCount < icons.size) {
             val r = drawCtx.iconSize / 2f
             val cx = l + w * (GRID_SIZE - 0.5f) / GRID_SIZE - r
             val cy = l + w * (GRID_SIZE - 0.5f) / GRID_SIZE - r
 
-            for (ii in iconCount until apps.size.coerceAtMost(iconCount + 4)) {
-                val icon = IconLoader.loadIcon(context, apps[ii])
+            for (ii in iconCount until icons.size.coerceAtMost(iconCount + 4)) {
+                val icon = icons[ii]
                 val i = ii - (GRID_SIZE * GRID_SIZE - 1)
                 val x = i % 2
                 val y = i / 2
@@ -193,22 +208,16 @@ class CategoryBoxView(
             val ww = width - paddingLeft - paddingRight
             val l = (ww - drawCtx.iconSize * GRID_SIZE) / (GRID_SIZE + 1) / 2
             val w = ww - l * 2
-            val dp = resources.displayMetrics.density
 
             var vx = paddingLeft + l * 2 + x * (w / GRID_SIZE)
-            var vy = paddingTop + l * 2 + y * (w / GRID_SIZE) - 4 * dp
+            var vy = paddingTop + l * 2 + y * (w / GRID_SIZE)
             val (sx, sy) = IntArray(2).apply(::getLocationInWindow)
             vx += sx
             vy += sy
-            val sh = resources.displayMetrics.heightPixels
-            if (vy > sh / 2) {
-                vy = sh +
-                    Utils.getStatusBarHeight(context) +
-                    Utils.getNavigationBarHeight(context) - vy
-                LongPressMenu.popup(this@CategoryBoxView, item, Gravity.BOTTOM or Gravity.START, vx.toInt(), vy.toInt(), LongPressMenu.Where.DRAWER)
-            }
-            else
-                LongPressMenu.popup(this@CategoryBoxView, item, Gravity.TOP or Gravity.START, vx.toInt(), (vy + drawCtx.iconSize + l).toInt(), LongPressMenu.Where.DRAWER)
+
+            LongPressMenu.popupIcon(this@CategoryBoxView, item, vx.toInt(), vy.toInt(),
+                drawCtx.iconSize.toInt(),
+                LongPressMenu.Where.DRAWER)
 
             Utils.startDrag(this@CategoryBoxView, item, generator(this@CategoryBoxView))
         }

@@ -12,6 +12,8 @@ import android.view.ViewGroup.LayoutParams
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.setPadding
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
@@ -22,6 +24,8 @@ import one.zagura.IonLauncher.provider.items.AppCategorizer
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.view.CategoryBoxView
 import one.zagura.IonLauncher.ui.view.LongPressMenu
+import one.zagura.IonLauncher.util.Settings
+import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
 
 class CategoryAdapter(
@@ -64,23 +68,25 @@ class CategoryAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, type: Int): RecyclerView.ViewHolder {
         val dp = parent.context.resources.displayMetrics.density
+        val settings = parent.context.ionApplication.settings
+        val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
         if (type == 1) {
             return TitleViewHolder(TextView(parent.context).apply {
                 textSize = 42f
-                gravity = Gravity.CENTER
+                gravity = Gravity.START or Gravity.BOTTOM
                 setTextColor(ColorThemer.drawerForeground(context))
-                val h = (256 * dp).toInt().coerceAtMost(Utils.getDisplayHeight(activity) / 4)
-                layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, h)
+                layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                    typeface = Typeface.create(null, 300, false)
+                    typeface = Typeface.create(null, 500, false)
+                val columns = settings["dock:columns", 5]
+                val l = ((parent.width - parent.paddingLeft - parent.paddingRight) / columns - iconSize) / 2
+                setPadding(l, l, l, l)
             })
         }
-        val settings = parent.context.ionApplication.settings
         val icon = ImageView(parent.context)
         val label = TextView(parent.context)
         val view = LinearLayout(parent.context).apply {
             orientation = LinearLayout.VERTICAL
-            val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
             icon.setPadding(0, (12 * dp).toInt(), 0, (10 * dp).toInt())
             addView(icon, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, iconSize + (22 * dp).toInt()))
             val p = (12 * dp).toInt()
@@ -104,22 +110,9 @@ class CategoryAdapter(
             itemView.setOnLongClickListener {
                 val dp = it.resources.displayMetrics.density
                 val item = getItem(bindingAdapterPosition)
-                val sh = it.resources.displayMetrics.heightPixels
                 val (lx, ly) = IntArray(2).apply(icon::getLocationInWindow)
                 val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
-                val h = lx + (-2 * dp).toInt() + (it.width - iconSize) / 2
-                val v = (8 * dp).toInt()
-                if (ly > sh / 2) LongPressMenu.popup(
-                    it, item,
-                    Gravity.BOTTOM or Gravity.START,
-                    h, Utils.getDisplayHeight(activity) - ly + v,
-                    LongPressMenu.Where.DRAWER,
-                ) else LongPressMenu.popup(
-                    it, item,
-                    Gravity.TOP or Gravity.START,
-                    h, ly + icon.height + v,
-                    LongPressMenu.Where.DRAWER,
-                )
+                LongPressMenu.popupIcon(it, item, lx + (it.width - iconSize) / 2, ly + icon.paddingTop, iconSize, LongPressMenu.Where.DRAWER)
                 Utils.startDrag(it, item, it to bindingAdapterPosition)
                 true
             }
@@ -142,16 +135,28 @@ class CategoryAdapter(
         if (i == 0) {
             holder as TitleViewHolder
             (holder.itemView as TextView).text = CategoryBoxView.getNameForCategory(holder.itemView.context, category)
+            val settings = holder.itemView.context.ionApplication.settings
+            val columns = settings["dock:columns", 5]
+            val dp = holder.itemView.resources.displayMetrics.density
+            val contentHeight = apps.size / columns * ((settings["dock:icon-size", 48] + 60) * dp)
+            (holder.itemView as TextView).minHeight = ((Utils.getDisplayHeight(activity) - contentHeight.toInt()) / 2)
             return
         }
-        holder as ViewHolder
-        val context = holder.itemView.context
-        val item = getItem(i)
-        if (showLabels) {
-            val label = LabelLoader.loadLabel(context, item)
-            holder.label.text = label
+        TaskRunner.submit {
+            holder as ViewHolder
+            val context = holder.itemView.context
+            val item = getItem(i)
+            if (showLabels) {
+                val label = LabelLoader.loadLabel(context, item)
+                holder.itemView.post {
+                    holder.label.text = label
+                }
+            }
+            val icon = IconLoader.loadIcon(context, item)
+            holder.itemView.post {
+                holder.icon.setImageDrawable(icon)
+            }
         }
-        holder.icon.setImageDrawable(IconLoader.loadIcon(context, item))
     }
 
     fun update(category: AppCategorizer.AppCategory, apps: List<App>) {

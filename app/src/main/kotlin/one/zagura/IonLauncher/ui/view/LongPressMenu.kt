@@ -11,11 +11,14 @@ import android.graphics.drawable.shapes.OvalShape
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.transition.Transition
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.MarginLayoutParams
+import android.view.animation.Animation
+import android.view.animation.ScaleAnimation
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -23,6 +26,7 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.annotation.StringRes
+import androidx.core.view.doOnLayout
 import com.kieronquinn.app.smartspacer.sdk.client.views.popup.Popup
 import com.kieronquinn.app.smartspacer.sdk.model.SmartspaceTarget
 import one.zagura.IonLauncher.R
@@ -37,8 +41,11 @@ import one.zagura.IonLauncher.provider.icons.LabelLoader
 import one.zagura.IonLauncher.ui.settings.SettingsActivity
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.settings.customIconPicker.CustomIconActivity
+import one.zagura.IonLauncher.ui.view.CategoryBoxView
+import one.zagura.IonLauncher.util.Utils
 import one.zagura.IonLauncher.util.drawable.SquircleRectShape
 import one.zagura.IonLauncher.util.drawable.UniformSquircleRectShape
+import androidx.core.net.toUri
 
 object LongPressMenu {
 
@@ -46,6 +53,26 @@ object LongPressMenu {
 
     enum class Where {
         DRAWER, SUGGESTION, DOCK
+    }
+
+    fun popupIcon(parent: View, item: LauncherItem, iconX: Int, iconY: Int, iconSize: Int, where: Where) {
+//        PopupWindow(View(parent.context).apply { setBackgroundColor(0xffff00ff.toInt()) }, iconSize, iconSize, false)
+//            .also { dismissCurrent(); current = it }
+//            .showAtLocation(parent, Gravity.START or Gravity.TOP, iconX, iconY)
+//        return
+        val sh = parent.resources.displayMetrics.heightPixels
+        val sw = parent.resources.displayMetrics.widthPixels
+        val dp = parent.resources.displayMetrics.density
+        val v = (8 * dp).toInt()
+        val (gravityY, y) = if (iconY > sh / 2)
+            Gravity.BOTTOM to sh +
+                    Utils.getStatusBarHeight(parent.context) +
+                    Utils.getNavigationBarHeight(parent.context) - iconY
+        else Gravity.TOP to iconY + iconSize
+        val (gravityX, x) = if (iconX > sw / 2)
+            Gravity.END to sw - iconX - iconSize
+        else Gravity.START to iconX
+        popup(parent, item, gravityX or gravityY, x + (-2 * dp).toInt(), y + v, where)
     }
 
     fun popup(parent: View, item: LauncherItem, gravity: Int, xoff: Int, yoff: Int, where: Where) {
@@ -69,7 +96,7 @@ object LongPressMenu {
                     context.startActivity(
                         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
-                            .setData(Uri.parse("package:${item.packageName}"))
+                            .setData("package:${item.packageName}".toUri())
                     )
                 }
                 if (where != Where.DOCK) {
@@ -93,6 +120,17 @@ object LongPressMenu {
         }
         w.showAtLocation(parent, gravity, xoff - (2 * dp).toInt() - p, yoff - p)
         current = w
+        content.run {
+            scaleX = 0f
+            scaleY = 0f
+            doOnLayout {
+                pivotX = if (gravity and Gravity.START == Gravity.START) 0f
+                else width.toFloat()
+                pivotY = if (gravity and Gravity.TOP == Gravity.TOP) 0f
+                else height.toFloat()
+            }
+            animate().scaleX(1f).scaleY(1f).duration = 60L
+        }
     }
 
     fun popupSmartspacer(

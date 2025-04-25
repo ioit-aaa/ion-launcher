@@ -1,4 +1,4 @@
-package one.zagura.IonLauncher.ui.drawer
+package one.zagura.IonLauncher.ui.view.settings
 
 import android.app.Activity
 import android.graphics.Typeface
@@ -38,10 +38,6 @@ class HiddenAppsAdapter(
         val label: TextView,
     ) : RecyclerView.ViewHolder(view)
 
-    class TitleViewHolder(
-        text: TextView,
-    ) : RecyclerView.ViewHolder(text)
-
     override fun getItemId(i: Int) =
         if (i == 0) Long.MAX_VALUE
         else getItem(i).hashCode().toLong()
@@ -57,18 +53,10 @@ class HiddenAppsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, type: Int): RecyclerView.ViewHolder {
         val dp = parent.context.resources.displayMetrics.density
-        if (type == 2) {
-            return TitleViewHolder(TextView(parent.context).apply {
-                textSize = 52f
-                gravity = Gravity.CENTER
-                setText(R.string.hidden_apps)
-                setTextColor(ColorThemer.drawerForeground(context))
-                val h = (256 * dp).toInt().coerceAtMost(Utils.getDisplayHeight(activity) / 3)
-                layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, h)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                    typeface = Typeface.create(null, 200, false)
-            })
-        }
+        if (type == 2)
+            return TitleViewHolder(parent.context).apply {
+                bind(parent.resources.getString(R.string.hidden_apps))
+            }
         val settings = parent.context.ionApplication.settings
         val icon = ImageView(parent.context)
         val label = TextView(parent.context).apply {
@@ -98,22 +86,9 @@ class HiddenAppsAdapter(
             itemView.setOnLongClickListener {
                 val dp = it.resources.displayMetrics.density
                 val item = getItem(bindingAdapterPosition)
-                val sh = it.resources.displayMetrics.heightPixels
                 val (lx, ly) = IntArray(2).apply(icon::getLocationInWindow)
                 val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
-                val h = lx + (-2 * dp).toInt() + (it.width - iconSize) / 2
-                val v = (8 * dp).toInt()
-                if (ly > sh / 2) LongPressMenu.popup(
-                    it, item,
-                    Gravity.BOTTOM or Gravity.START,
-                    h, Utils.getDisplayHeight(activity) - ly + v,
-                    LongPressMenu.Where.DRAWER,
-                ) else LongPressMenu.popup(
-                    it, item,
-                    Gravity.TOP or Gravity.START,
-                    h, ly + icon.height + v,
-                    LongPressMenu.Where.DRAWER,
-                )
+                LongPressMenu.popupIcon(it, item, lx + (it.width - iconSize) / 2, ly.toInt() + icon.paddingTop, iconSize, LongPressMenu.Where.DRAWER)
                 LongPressMenu.onDragEnded()
                 true
             }

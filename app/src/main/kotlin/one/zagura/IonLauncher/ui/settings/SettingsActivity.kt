@@ -12,7 +12,7 @@ import one.zagura.IonLauncher.provider.items.ContactsLoader
 import one.zagura.IonLauncher.provider.notification.NotificationService
 import one.zagura.IonLauncher.provider.suggestions.SuggestionsManager
 import one.zagura.IonLauncher.provider.summary.EventsLoader
-import one.zagura.IonLauncher.ui.drawer.HiddenAppsActivity
+import one.zagura.IonLauncher.ui.view.settings.HiddenAppsActivity
 import one.zagura.IonLauncher.ui.view.settings.onClick
 import one.zagura.IonLauncher.ui.view.settings.seekbar
 import one.zagura.IonLauncher.ui.view.settings.setSettingsContentView

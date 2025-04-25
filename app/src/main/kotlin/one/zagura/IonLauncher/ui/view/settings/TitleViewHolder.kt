@@ -14,14 +14,14 @@ class TitleViewHolder(context: Context) : RecyclerView.ViewHolder(TextView(conte
 
     init {
         with(itemView as TextView) {
+            textSize = 42f
+            gravity = Gravity.START or Gravity.BOTTOM
             val dp = context.resources.displayMetrics.density
-            gravity = Gravity.CENTER
             val h = (20 * dp).toInt()
-            setPadding(h, Utils.getStatusBarHeight(context).coerceAtLeast((64 * dp).toInt()), h, 0)
-            textSize = 32f
+            setPadding(h, Utils.getStatusBarHeight(context).coerceAtLeast((64 * dp).toInt()), h, h)
             setTextColor(resources.getColor(R.color.color_hint))
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                typeface = Typeface.create(null, 200, false)
+                typeface = Typeface.create(null, 500, false)
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 (256 * dp).toInt() + Utils.getStatusBarHeight(context)

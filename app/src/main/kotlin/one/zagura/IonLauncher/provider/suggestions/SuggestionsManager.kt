@@ -100,7 +100,8 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
                 else -> 1
             }
         }
-        val dockItems = Dock.getItems(context)
+        val dockItems = ArrayList<LauncherItem?>()
+        Dock.getItems(context) { _, it -> dockItems.add(it) }
         contextLock.withLock {
             val settings = context.ionApplication.settings
             for ((item, data) in contextMap.entries) {
@@ -179,21 +180,22 @@ object SuggestionsManager : UpdatingResource<List<LauncherItem>>() {
     private fun loadFromStorage(context: Context): ContextMap<LauncherItem> {
         return contextLock.withLock {
             val contextMap = ContextMap<LauncherItem>()
-            val contextStrings = suggestionData.getStrings("stat:open-ctx") ?: return@withLock contextMap
             val dayOfYear = Calendar.getInstance()[Calendar.DAY_OF_YEAR]
-            for (itemRepresentation in contextStrings) {
+            suggestionData.getStrings("stat:open-ctx") { i, itemRepresentation ->
                 val k = "stat:open-ctx:$itemRepresentation"
                 val item = LauncherItem.decode(context, itemRepresentation)
-                if (item != null) {
-                    val strings = suggestionData.getInts(k) ?: break
-                    contextMap[item] = strings
-                        .asSequence()
-                        .map(::ContextItem)
-                        .filter { abs(dayOfYear - it.dayOfYear) < 30 }
-                        .toCollection(ArrayList())
-                } else suggestionData.edit(context) {
-                    setStrings(k, null)
+                if (item == null) {
+                    suggestionData.edit(context) { setStrings(k, null) }
+                    return@getStrings
                 }
+                val items = ArrayList<ContextItem>()
+                suggestionData.getInts(k) { i, data ->
+                    val item = ContextItem(data)
+                    if (abs(dayOfYear - item.dayOfYear) < 30)
+                        items.add(item)
+                }
+                if (items.isNotEmpty())
+                    contextMap[item] = items
             }
             contextMap
         }

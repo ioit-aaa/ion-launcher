@@ -150,7 +150,7 @@
 
         <activity
             android:label="@string/hidden_apps"
-            android:name=".ui.drawer.HiddenAppsActivity"
+            android:name=".ui.view.settings.HiddenAppsActivity"
             android:theme="@style/IonLauncher.Settings"
             android:exported="true">
             <intent-filter>

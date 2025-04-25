@@ -6,6 +6,8 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Picture
+import android.graphics.RenderEffect
+import android.graphics.Shader
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
@@ -18,6 +20,7 @@ import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.ViewAnimator
 import androidx.annotation.RequiresApi
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
@@ -267,6 +270,14 @@ class HomeScreen : Activity() {
 
     override fun onStart() {
         super.onStart()
+        desktop.run {
+            scaleX = 0.95f
+            scaleY = 0.95f
+            animate().scaleX(1f).scaleY(1f).setInterpolator {
+                val ix = (1f - it)
+                1f - ix * ix
+            }.duration = 200L
+        }
         ionApplication.settings.consumeUpdate {
             IconLoader.updateIconPacks(this, ionApplication.settings)
             suggestionsView.update(SuggestionsManager.getResource())
@@ -277,9 +288,7 @@ class HomeScreen : Activity() {
             drawerArea.onAppsChanged(it)
         }
         AppLoader.track(false) {
-            runOnUiThread {
-                pinnedGrid.updateGridApps()
-            }
+            pinnedGrid.updateGridApps()
         }
         Battery.track(false) {
             summaryView.updateAtAGlance()
@@ -292,12 +301,12 @@ class HomeScreen : Activity() {
             summaryView.updateAtAGlance()
         }
         widgetView?.startListening()
-        pinnedGrid.updateGridApps()
         Battery.PowerSaver.track {
             if (it != sheetCallback is MinimalDrawerSheetCallback)
                 onPowerSaverModeChanged(it)
         }
         TaskRunner.submit {
+            pinnedGrid.updateGridApps()
             drawerArea.onAppsChanged(AppCategorizer.getResource())
         }
         homeScreen.post {
@@ -401,24 +410,25 @@ class HomeScreen : Activity() {
         val gnc = GestureNavContract.fromIntent(intent) ?: return
         val packageName = gnc.componentName.packageName
         val user = gnc.user
-        val (item, bounds, onAnimEnd) = pinnedGrid.prepareIconifyAnim(packageName, user)
-            ?: suggestionsView.prepareIconifyAnim(packageName, user)
-            ?: return
-
-        bounds.offset(-bounds.width() / 2, -bounds.height() / 2)
-
-        val icon = IconLoader.loadIcon(this, item)
-        icon.copyBounds(drawCtx.tmpRect)
-        val s = (bounds.width() * 2).toInt()
-        val picture = Picture().record(s, s) {
-            icon.setBounds(width / 4, height / 4, width / 4 * 3, height / 4 * 3)
-            icon.draw(this)
+        TaskRunner.submit {
+            val (item, bounds, onAnimEnd) = pinnedGrid.prepareIconifyAnim(packageName, user)
+                ?: suggestionsView.prepareIconifyAnim(packageName, user)
+                ?: return@submit
+            bounds.offset(-bounds.width() / 2, -bounds.height() / 2)
+            val icon = IconLoader.loadIcon(this, item)
+            icon.copyBounds(drawCtx.tmpRect)
+            val s = (bounds.width() * 2).toInt()
+            val picture = Picture().record(s, s) {
+                icon.setBounds(width / 4, height / 4, width / 4 * 3, height / 4 * 3)
+                icon.draw(this)
+            }
+            icon.bounds = drawCtx.tmpRect
+            val surfaceView = FloatingIconView(this, gnc, bounds, picture, onAnimEnd)
+            runOnUiThread {
+                homeScreen.addView(surfaceView, LayoutParams(s, s))
+                surfaceView.bringToFront()
+            }
         }
-        icon.bounds = drawCtx.tmpRect
-
-        val surfaceView = FloatingIconView(this, gnc, bounds, picture, onAnimEnd)
-        homeScreen.addView(surfaceView, LayoutParams(s, s))
-        surfaceView.bringToFront()
     }
 
     private fun updateBGColors(bottomHeight: Float, a: Float) {

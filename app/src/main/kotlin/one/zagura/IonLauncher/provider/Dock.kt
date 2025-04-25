@@ -3,15 +3,17 @@ package one.zagura.IonLauncher.provider
 import android.content.Context
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.ui.ionApplication
+import java.util.ArrayList
 
 object Dock {
 
-    fun getItems(context: Context): List<LauncherItem?> {
+    inline fun getItems(context: Context, use: (i: Int, LauncherItem?) -> Unit) {
         val settings = context.ionApplication.settings
-        val pinned = settings.getStrings("pinned") ?: return emptyList()
         val c = settings["dock:columns", 5] * settings["dock:rows", 2]
-        return pinned.take(c).map {
-            LauncherItem.decode(context, it)
+        settings.getStrings("pinned") { i, s ->
+            if (i >= c)
+                return
+            use(i, LauncherItem.decode(context, s))
         }
     }
 

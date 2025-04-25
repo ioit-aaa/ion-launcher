@@ -36,7 +36,7 @@ import java.util.Calendar
 
 object Utils {
     fun startDrag(view: View, item: LauncherItem, localState: Any?) {
-        val shadow = ItemDragShadow(view.context, IconLoader.loadIcon(view.context, item))
+        val shadow = ItemDragShadow(view.context, item)
         val clipData = ClipData(
             item.toString(),
             arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN),

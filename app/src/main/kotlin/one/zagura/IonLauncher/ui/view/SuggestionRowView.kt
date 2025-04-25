@@ -12,6 +12,7 @@ import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import androidx.annotation.AnyThread
 import androidx.annotation.RequiresApi
 import androidx.core.view.isVisible
 import one.zagura.IonLauncher.R
@@ -21,13 +22,11 @@ import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.icons.IconLoader
 import one.zagura.IonLauncher.provider.icons.LabelLoader
 import one.zagura.IonLauncher.ui.ionApplication
-import one.zagura.IonLauncher.ui.view.SummaryView
 import one.zagura.IonLauncher.util.iconify.IconifyAnim
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.SlideGestureHelper
 import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
-import kotlin.math.abs
 
 class SuggestionRowView(
     context: Context,
@@ -194,18 +193,19 @@ class SuggestionRowView(
     override fun onTouchEvent(e: MotionEvent) = gestureListener.onTouchEvent(e)
 
     @RequiresApi(Build.VERSION_CODES.Q)
+    @AnyThread
     fun prepareIconifyAnim(packageName: String, user: UserHandle): IconifyAnim? {
         val i = suggestions.indexOfFirst { it is App && it.packageName == packageName && it.userHandle == user }
         if (i == -1)
             return null
 
         hideI = i
-        invalidate()
+        postInvalidate()
 
         val dp = resources.displayMetrics.density
         val iconPadding = 8 * dp
         val x = iToX(i).toFloat()
-        val y = paddingTop + iconPadding + IntArray(2).apply(::getLocationOnScreen)[1]
+        val y = paddingTop + iconPadding + y // IntArray(2).apply(::getLocationOnScreen)[1]
         val s = height - paddingTop - paddingBottom - iconPadding * 2
         return IconifyAnim(suggestions[i], RectF(x, y, x + s, y + s)) {
             hideI = -1

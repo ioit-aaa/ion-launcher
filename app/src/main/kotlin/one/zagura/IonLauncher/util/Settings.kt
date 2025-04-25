@@ -15,7 +15,7 @@ class Settings(
     private val fileLock = ReentrantLock()
     var updated = false
 
-    private sealed class Single <V> (
+    sealed class Single <V> (
         val value: V
     ) {
         abstract fun toInt(): Int
@@ -41,7 +41,7 @@ class Settings(
 
     private val singles: HashMap<String, Single<*>> = HashMap()
 
-    private val lists: HashMap<String, Array<Single<*>>> = HashMap()
+    val lists: HashMap<String, Array<Single<*>>> = HashMap()
 
     private var isInitialized: Boolean = false
 
@@ -174,6 +174,9 @@ class Settings(
     fun getString(key: String): String? = singles[key]?.toString()
     fun getStrings(key: String): Array<String>? = lists[key]?.let { l -> Array(l.size) { l[it].toString() } }
     fun getInts(key: String): IntArray? = lists[key]?.let { l -> IntArray(l.size) { l[it].toInt() } }
+
+    inline fun getStrings(key: String, use: (i: Int, String) -> Unit): Boolean = lists[key]?.forEachIndexed { i, s -> use(i, s.toString()) } != null
+    inline fun getInts(key: String, use: (i: Int, Int) -> Unit): Boolean = lists[key]?.forEachIndexed { i, s -> use(i, s.toInt()) } != null
 
     fun has(s: String): Boolean = singles.contains(s) || lists.contains(s)
 

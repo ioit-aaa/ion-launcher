@@ -16,8 +16,11 @@ import android.view.GestureDetector.OnGestureListener
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import androidx.annotation.AnyThread
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.record
+import androidx.core.view.doOnLayout
+import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import one.zagura.IonLauncher.data.items.App
@@ -31,6 +34,7 @@ import one.zagura.IonLauncher.util.LiveWallpaper
 import one.zagura.IonLauncher.util.drawable.NonDrawable
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.SlideGestureHelper
+import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
 
 @SuppressLint("UseCompatLoadingForDrawables")
@@ -49,9 +53,10 @@ class PinnedGridView(
                     drawGrid()
                 }
             else null
-            invalidate()
+            redrawItems()
         }
     private var gridPic: Picture? = null
+    private var iconPics = emptyArray<Picture?>()
 
     // also used with a NonDrawable for iconify animation
     private var replacePreview: ItemPreview? = null
@@ -80,12 +85,15 @@ class PinnedGridView(
     fun applyLayoutCustomizations(settings: Settings) {
         columns = settings["dock:columns", 5]
         rows = settings["dock:rows", 2]
+        iconPics = arrayOfNulls(columns * rows)
         isVisible = rows != 0
         updateLayoutParams {
             height = calculateGridHeight()
         }
-
-        updateGridApps()
+        TaskRunner.submit {
+            updateGridApps(false)
+            post(::redrawItems)
+        }
     }
 
     /**
@@ -113,46 +121,94 @@ class PinnedGridView(
         return paddingBottom + paddingTop + h.toInt()
     }
 
-    fun updateGridApps() {
-        items = ArrayList(Dock.getItems(context))
-        invalidate()
+    @AnyThread
+    fun updateGridApps(redraw: Boolean = true) {
+        var newLen = 0
+        Dock.getItems(context) { i, it ->
+            newLen++
+            when {
+                i >= items.size -> items.add(it)
+                items[i] == it -> return@getItems
+                else -> items[i] = it
+            }
+            val gridX = i % columns
+            val gridY = i / columns
+            if (!redraw)
+                redrawItem(gridX, gridY)
+        }
+        while (items.size > newLen)
+            items.removeAt(items.lastIndex)
     }
 
     override fun onDraw(canvas: Canvas) {
-        drawItems(canvas)
+        for (pic in iconPics)
+            pic?.draw(canvas)
         gridPic?.draw(canvas)
     }
 
-    private fun drawItems(canvas: Canvas) {
+    private fun redrawItems() {
         val r = drawCtx.iconSize / 2
         val sr = drawCtx.iconSize * 0.9f / 2
         val br = drawCtx.iconSize * 3 / 4
-        val d = dropPreview
-        val i = replacePreview
         val ww = width - paddingLeft - paddingRight
         val l = paddingLeft + (ww - drawCtx.iconSize * columns) / (columns + 1) / 2
         val w = width - l * 2
         val h = height
         for (x in 0 until columns)
             for (y in 0 until rows) {
-                val r = if (showPress?.let { it.first == x && it.second == y } == true)
-                    br else if (showDropTargets) sr else r
-                val icon = if (d?.let { it.x == x && it.y == y } == true) d.icon
-                    else if (i?.let { it.x == x && it.y == y } == true) i.icon
-                    else IconLoader.loadIcon(context, getItem(x, y) ?: continue)
-                val centerX = l + w * (0.5f + x) / columns
-                val centerY = h * (0.5f + y) / rows
-                icon.copyBounds(drawCtx.tmpRect)
-                icon.setBounds((centerX - r).toInt(), (centerY - r).toInt(), (centerX + r).toInt(), (centerY + r).toInt())
-                if (showDropTargets) {
-                    val a = icon.alpha
-                    icon.alpha = 200
-                    icon.draw(canvas)
-                    icon.alpha = a
-                } else
-                    icon.draw(canvas)
-                icon.bounds = drawCtx.tmpRect
+                iconPics[x + y * columns] = drawSingleItem(x, y, br, sr, r, l, w, h)
+                continue
             }
+        invalidate()
+    }
+    private fun redrawItem(x: Int, y: Int) {
+        val r = drawCtx.iconSize / 2
+        val sr = drawCtx.iconSize * 0.9f / 2
+        val br = drawCtx.iconSize * 3 / 4
+        val ww = width - paddingLeft - paddingRight
+        val l = paddingLeft + (ww - drawCtx.iconSize * columns) / (columns + 1) / 2
+        val w = width - l * 2
+        val h = height
+        iconPics[x + y * columns] = drawSingleItem(x, y, br, sr, r, l, w, h)
+        invalidate()
+    }
+
+    private fun drawSingleItem(
+        x: Int,
+        y: Int,
+        br: Float,
+        sr: Float,
+        r: Float,
+        l: Float,
+        w: Float,
+        h: Int,
+    ): Picture? {
+        var r1 = r
+        val r = if (showPress?.let { it.first == x && it.second == y } == true)
+            br else if (showDropTargets) sr else r1
+        val icon = dropPreview?.takeIf { it.x == x && it.y == y }?.icon
+            ?: replacePreview?.takeIf { it.x == x && it.y == y }?.icon
+            ?: IconLoader.loadIcon(context, getItem(x, y) ?: return null)
+        val centerX = l + w * (0.5f + x) / columns
+        val centerY = h * (0.5f + y) / rows
+        icon.copyBounds(drawCtx.tmpRect)
+        icon.setBounds(
+            (centerX - r).toInt(),
+            (centerY - r).toInt(),
+            (centerX + r).toInt(),
+            (centerY + r).toInt()
+        )
+        val pic = Picture().record(width, height) {
+            if (showDropTargets) {
+                val a = icon.alpha
+                icon.alpha = 200
+                icon.draw(this)
+                icon.alpha = a
+            } else
+                icon.draw(this)
+        }
+        icon.bounds = drawCtx.tmpRect
+        return pic
     }
 
     private fun Canvas.drawGrid() {
@@ -217,16 +273,10 @@ class PinnedGridView(
         val ww = width - paddingLeft - paddingRight
         val l = (ww - drawCtx.iconSize * columns) / (columns + 1) / 2
         val w = ww - l * 2
-        val h = height
-        val dp = resources.displayMetrics.density
-
         val (sx, sy) = IntArray(2).apply(::getLocationInWindow)
         val vx = paddingLeft + l * 2 + gx * (w / columns)
-        val vy = gy * (h / rows) - 4 * dp
-        val yoff = resources.displayMetrics.heightPixels +
-            Utils.getStatusBarHeight(context) +
-            Utils.getNavigationBarHeight(context) - sy
-        return (sx + vx).toInt() to (yoff - vy).toInt()
+        val vy = gy * (height / rows)
+        return (sx + vx).toInt() to (sy + vy + l).toInt()
     }
 
     fun getIconBounds(x: Int, y: Int): Rect {
@@ -241,6 +291,7 @@ class PinnedGridView(
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
+    @AnyThread
     fun prepareIconifyAnim(packageName: String, user: UserHandle): IconifyAnim? {
         val i = items.indexOfFirst { it is App && it.packageName == packageName && it.userHandle == user }
         if (i == -1 || rows == 0)
@@ -249,7 +300,7 @@ class PinnedGridView(
         val gridX = i % columns
         val gridY = i / columns
         replacePreview = ItemPreview(NonDrawable, gridX, gridY)
-        invalidate()
+        post { redrawItem(gridX, gridY) }
 
         val ww = width - paddingLeft - paddingRight
         val l = (ww - drawCtx.iconSize * columns) / (columns + 1) / 2
@@ -257,21 +308,22 @@ class PinnedGridView(
 
         val rh = height / rows.toFloat()
         val x = l * 2 + gridX * w / columns
-        val y = l + gridY * rh + IntArray(2).apply(::getLocationOnScreen)[1]
+        val y = l + gridY * rh + y // instead of IntArray(2).apply(::getLocationOnScreen)[1], which doesn't work well with animations
         return IconifyAnim(
             items[i]!!,
             RectF(x, y, x + drawCtx.iconSize, y + drawCtx.iconSize),
         ) {
             replacePreview = null
-            invalidate()
+            redrawItem(gridX, gridY)
         }
     }
 
     override fun onTouchEvent(e: MotionEvent): Boolean {
         SlideGestureHelper.onTouchEvent(context, e)
         if (e.action == MotionEvent.ACTION_UP || e.action == MotionEvent.ACTION_CANCEL) {
+            val tmp = showPress
             showPress = null
-            invalidate()
+            tmp?.let { redrawItem(it.first, it.second) }
         }
         return gestureListener.onTouchEvent(e)
     }
@@ -280,8 +332,10 @@ class PinnedGridView(
         override fun onDown(e: MotionEvent) = true
 
         override fun onShowPress(e: MotionEvent) {
+            val tmp = showPress
             showPress = viewToGridCoords(e.x.toInt(), e.y.toInt())
-            invalidate()
+            tmp?.let { redrawItem(it.first, it.second) }
+            showPress?.let { redrawItem(it.first, it.second) }
         }
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float) =
             SlideGestureHelper.onScroll(context, e1, e2)
@@ -299,7 +353,7 @@ class PinnedGridView(
             val (x, y) = viewToGridCoords(e.x.toInt(), e.y.toInt())
             val item = getItem(x, y) ?: return
             val (vx, vy) = gridToPopupCoords(x, y)
-            LongPressMenu.popup(this@PinnedGridView, item, Gravity.BOTTOM or Gravity.START, vx, vy, LongPressMenu.Where.DOCK)
+            LongPressMenu.popupIcon(this@PinnedGridView, item, vx, vy, drawCtx.iconSize.toInt(), LongPressMenu.Where.DOCK)
             Utils.click(context)
             replacePreview = ItemPreview(NonDrawable, x, y)
             dropPreview = ItemPreview(NonDrawable, x, y)
@@ -317,34 +371,39 @@ class PinnedGridView(
                 if (replaceItem != x to y)
                     LongPressMenu.dismissCurrent()
                 val d = dropPreview
-                if (d == null || d.x != x || d.y != y)
-                    Utils.tick(context)
                 val newItem = LauncherItem.decode(context, event.clipDescription.label.toString())!!
                 dropPreview = ItemPreview(IconLoader.loadIcon(context, newItem), x, y)
+                if (d == null || d.x != x || d.y != y) {
+                    Utils.tick(context)
+                    d?.let { redrawItem(it.x, it.y) }
+                    dropPreview?.let { redrawItem(x, y) }
+                }
                 if (replaceItem != null) {
                     replacePreview = ItemPreview(
                         getItem(x, y)?.let { IconLoader.loadIcon(context, it) } ?: NonDrawable,
                         replaceItem.first, replaceItem.second
                     )
+                    redrawItem(replaceItem.first, replaceItem.second)
                 }
-                invalidate()
             }
             DragEvent.ACTION_DRAG_EXITED -> {
                 Utils.tick(context)
+                val tmp = dropPreview
                 dropPreview = null
+                tmp?.let { redrawItem(it.x, it.y) }
                 val replaceItem = (event.localState as? Pair<Int, Int>)?.takeIf { it.first is Int && it.second is Int }
                 if (replaceItem != null) {
                     replacePreview = ItemPreview(
                         NonDrawable,
                         replaceItem.first, replaceItem.second
                     )
+                    redrawItem(replaceItem.first, replaceItem.second)
                 }
-                invalidate()
             }
             DragEvent.ACTION_DRAG_ENDED -> {
                 dropPreview = null
                 replacePreview = null
-                showDropTargets = false
+                showDropTargets = false // this will redraw all items
                 LongPressMenu.onDragEnded()
                 items.trimToSize()
             }
@@ -360,7 +419,6 @@ class PinnedGridView(
 
                 val newItem = LauncherItem.decode(context, event.clipDescription.label.toString())!!
                 setItem(x, y, newItem)
-                invalidate()
             }
         }
         return true

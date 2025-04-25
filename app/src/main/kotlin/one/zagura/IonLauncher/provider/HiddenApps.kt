@@ -9,12 +9,12 @@ import one.zagura.IonLauncher.util.Settings
 
 object HiddenApps {
 
-    private const val KEY = "hidden"
+    const val KEY = "hidden"
 
-    fun getItems(context: Context): List<LauncherItem> {
-        val hidden = context.ionApplication.settings.getStrings(KEY)
-            ?: return emptyList()
-        return hidden.mapNotNull { LauncherItem.decode(context, it) }
+    inline fun getItems(context: Context, use: (LauncherItem) -> Unit) {
+        context.ionApplication.settings.getStrings(KEY) { _, item ->
+            LauncherItem.decode(context, item)?.let(use)
+        }
     }
 
     fun hide(context: Context, item: LauncherItem) {
@@ -47,8 +47,12 @@ object HiddenApps {
     }
 
     fun isHidden(settings: Settings, item: LauncherItem): Boolean {
-        val hidden = settings.getStrings(KEY) ?: return false
-        return hidden.contains(item.toString())
+        val str = item.toString()
+        settings.getStrings(KEY) { _, s ->
+            if (s == str)
+                return true
+        }
+        return false
     }
 
     fun reshow(context: Context, item: App) {

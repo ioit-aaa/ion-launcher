@@ -21,7 +21,7 @@ data object ShortcutsProvider : SearchProvider {
     override fun updateData(context: Context) {
         val s = ArrayList<StaticShortcut>()
         AppLoader.getResource().forEach { ShortcutLoader.getStaticShortcuts(context, it, s) }
-        HiddenApps.getItems(context).forEach {
+        HiddenApps.getItems(context) {
             if (it is App)
                 ShortcutLoader.getStaticShortcuts(context, it, s)
         }

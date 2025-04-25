@@ -1,14 +1,14 @@
-package one.zagura.IonLauncher.ui.drawer
+package one.zagura.IonLauncher.ui.view.settings
 
 import android.app.Activity
 import android.os.Bundle
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.HiddenApps
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.view.PinnedGridView
-import one.zagura.IonLauncher.ui.view.settings.setupWindow
 import one.zagura.IonLauncher.util.Utils
 
 class HiddenAppsActivity : Activity() {
@@ -40,7 +40,9 @@ class HiddenAppsActivity : Activity() {
     override fun onStart() {
         super.onStart()
         AppLoader.track {
-            appsAdapter.update(HiddenApps.getItems(this))
+            val l = ArrayList<LauncherItem>()
+            HiddenApps.getItems(this, l::add)
+            appsAdapter.update(l)
         }
     }
 

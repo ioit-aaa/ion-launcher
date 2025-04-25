@@ -1,10 +1,10 @@
 package one.zagura.IonLauncher.util
 
-import java.util.LinkedList
+import java.lang.Thread.MAX_PRIORITY
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-object TaskRunner : Thread() {
+object TaskRunner {
 
     fun submit(task: () -> Unit) {
         lock.withLock {
@@ -19,14 +19,29 @@ object TaskRunner : Thread() {
         }
     }
 
-    private val queue = LinkedList<() -> Unit>()
+    fun submitUnique(task: () -> Unit) {
+        lock.withLock {
+            if (!queue.contains(task)) {
+                queue.addLast(task)
+                if (!isRunning) {
+                    isRunning = true
+                    Thread(::run).apply {
+                        priority = MAX_PRIORITY
+                        isDaemon = false
+                    }.start()
+                }
+            }
+        }
+    }
+
+    private val queue = ArrayDeque<() -> Unit>()
     private var isRunning = false
     private val lock = ReentrantLock()
 
-    override fun run() {
+    private fun run() {
         while (true) {
             lock.lock()
-            if (queue.peek() == null) {
+            if (queue.isEmpty()) {
                 isRunning = false
                 lock.unlock()
                 return
