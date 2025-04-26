@@ -6,8 +6,7 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Picture
-import android.graphics.RenderEffect
-import android.graphics.Shader
+import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
@@ -16,11 +15,13 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.MarginLayoutParams
+import android.view.WindowInsets
 import android.view.WindowManager
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.LinearLayout
-import android.widget.ViewAnimator
 import androidx.annotation.RequiresApi
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
@@ -29,11 +30,13 @@ import androidx.core.graphics.record
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.core.widget.doOnTextChanged
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 import com.kieronquinn.app.smartspacer.sdk.client.SmartspacerClient
+import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.Widgets
@@ -79,7 +82,9 @@ class HomeScreen : Activity() {
     private var widgetView: WidgetView? = null
 
     private lateinit var pinnedGrid: PinnedGridView
+    private lateinit var bottomBar: FrameLayout
     private lateinit var suggestionsView: SuggestionRowView
+    private lateinit var searchEntry: EditText
 
     private lateinit var drawCtx: SharedDrawingContext
 
@@ -149,8 +154,37 @@ class HomeScreen : Activity() {
 
         summaryView = SummaryView(this, drawCtx)
         mediaView = MediaView(this, drawCtx)
-        suggestionsView = SuggestionRowView(this, drawCtx, ::showDropTargets, ::search)
         pinnedGrid = PinnedGridView(this, drawCtx)
+
+        suggestionsView = SuggestionRowView(this, drawCtx, ::showDropTargets, ::search) {
+            val dp = resources.displayMetrics.density
+            if (it.showCross)
+                drawerArea.clearSearchField()
+            else
+                LongPressMenu.popupLauncher(it,
+                    Gravity.BOTTOM or Gravity.END, (12 * dp).toInt(),
+                    it.height + Utils.getNavigationBarHeight(it.context))
+        }
+        searchEntry = EditText(this).apply {
+            background = null
+            isSingleLine = true
+            typeface = Typeface.DEFAULT_BOLD
+            includeFontPadding = false
+            setHint(R.string.search)
+            doOnTextChanged { s, _, _, _ ->
+                drawerArea.onSearchTextChanged(s)
+                suggestionsView.showCross = !s.isNullOrEmpty()
+            }
+            setOnEditorActionListener { v, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_GO) {
+                    drawerArea.onTextGoAction(v)
+                    true
+                } else false
+            }
+            imeOptions = EditorInfo.IME_ACTION_GO
+            alpha = 0f
+            isVisible = false
+        }
 
         smartspacerView = CustomSmartspaceView(this)
 
@@ -169,13 +203,10 @@ class HomeScreen : Activity() {
                 LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
             addView(pinnedGrid,
                 MarginLayoutParams(LayoutParams.MATCH_PARENT, pinnedGrid.calculateGridHeight()))
-            addView(
-                suggestionsView,
-                MarginLayoutParams(LayoutParams.MATCH_PARENT, 0))
         }
 
         val offset = (256 * dp).toInt()
-        drawerArea = DrawerArea(this, drawCtx, ::showDropTargets, ::onDrawerItemOpened).apply {
+        drawerArea = DrawerArea(this, drawCtx, ::showDropTargets, ::onDrawerItemOpened, searchEntry).apply {
             setPadding(0, offset, 0, 0)
         }
 
@@ -191,11 +222,32 @@ class HomeScreen : Activity() {
             addBottomSheetCallback(sheetCallback)
         }
 
+        bottomBar = FrameLayout(this).apply {
+            addView(suggestionsView, FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+            addView(searchEntry, FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+
+            setOnApplyWindowInsetsListener { v, insets ->
+                val b = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                    insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
+                else
+                    insets.systemWindowInsetBottom
+                v.updateLayoutParams<MarginLayoutParams> {
+                    bottomMargin = b
+                }
+                insets
+            }
+        }
+
         return CoordinatorLayout(this).apply {
             fitsSystemWindows = false
             addView(sheet, CoordinatorLayout.LayoutParams(LayoutParams.MATCH_PARENT, fullHeight + offset).apply {
                 behavior = sheetBehavior
             })
+            addView(
+                bottomBar,
+                CoordinatorLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0).apply {
+                    gravity = Gravity.BOTTOM
+                })
         }
     }
 
@@ -224,18 +276,20 @@ class HomeScreen : Activity() {
             val token = homeScreen.windowToken
             if (token != null)
                 setWallpaperZoomOut?.invoke(wallpaperManager, token, slideOffset)
+            searchEntry.alpha = (slideOffset - 0.5f).coerceAtLeast(0f) * 2f
+            suggestionsView.transitionToSearchBarHolder(slideOffset)
         }
     }
 
     inner class MinimalDrawerSheetCallback : BottomSheetCallback() {
-        override fun onStateChanged(view: View, newState: Int) =
-            onDrawerStateChanged(view, newState)
-
+        override fun onStateChanged(view: View, newState: Int) = onDrawerStateChanged(view, newState)
         override fun onSlide(view: View, slideOffset: Float) {
             val a = (slideOffset * 1.5f).coerceAtMost(1f)
             updateBGColors(Utils.getDisplayHeight(this@HomeScreen) - pinnedGrid.y.toFloat(), a)
             drawerArea.alpha = a * a * a
             desktop.alpha = 1f - a
+            searchEntry.alpha = a
+            suggestionsView.transitionToSearchBarHolder(slideOffset)
         }
     }
 
@@ -243,7 +297,7 @@ class HomeScreen : Activity() {
         if (newState == STATE_EXPANDED)
             Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.drawerForeground(this@HomeScreen)) < 0.5f)
         else {
-            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(drawerArea.windowToken, 0)
             drawerArea.clearSearchField()
             drawerArea.entry.clearFocus()
@@ -252,10 +306,12 @@ class HomeScreen : Activity() {
             drawerArea.focusSearch()
         desktop.isVisible = newState != STATE_EXPANDED
         if (newState == STATE_COLLAPSED) {
+            searchEntry.isVisible = false
             drawerArea.isInvisible = true
             desktop.bringToFront()
             Utils.setDarkStatusFG(window, ColorThemer.lightness(ColorThemer.wallForeground(this@HomeScreen)) < 0.5f)
         } else {
+            searchEntry.isVisible = true
             drawerArea.isInvisible = false
             drawerArea.bringToFront()
         }
@@ -457,8 +513,8 @@ class HomeScreen : Activity() {
         drawCtx.applyColorCustomizations(this)
         if (layout)
             pinnedGrid.applyLayoutCustomizations(settings)
-        val m = pinnedGrid.calculateSideMargin()
-        drawerArea.applyCustomizations(settings, m)
+        val sideMargin = pinnedGrid.calculateSideMargin()
+        drawerArea.applyCustomizationsColor(settings)
         mediaView.applyCustomizations(settings)
         summaryView.applyCustomizations(settings)
         suggestionsView.applyCustomizations(settings)
@@ -467,7 +523,7 @@ class HomeScreen : Activity() {
             summaryView.showAtAGlance = !replaceAtAGlance
             if (replaceAtAGlance) {
                 smartspacerView.isVisible = true
-                smartspacerView.applyCustomizations(settings, m)
+                smartspacerView.applyCustomizations(settings, sideMargin)
             } else
                 smartspacerView.isVisible = false
         }
@@ -476,18 +532,40 @@ class HomeScreen : Activity() {
         screenBackgroundColor = ColorThemer.wallBackground(this)
         drawerBackgroundColor = ColorThemer.drawerBackground(this)
 
+        val fgColor = ColorThemer.drawerForeground(this)
+        val hintColor = ColorThemer.drawerHint(this)
+        with(searchEntry) {
+            setTextColor(fgColor)
+            setHintTextColor(hintColor)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                textCursorDrawable?.setTint(fgColor)
+            highlightColor = fgColor and 0xffffff or 0x33000000
+        }
+
         if (layout) {
-            summaryView.setPadding(m, m.coerceAtLeast(Utils.getStatusBarHeight(this) + m / 2), m, m)
-            mediaView.setPadding(m, m / 2, m, m / 2)
-            suggestionsView.setPadding(m, m / 2, m, m / 2)
+            summaryView.setPadding(sideMargin, sideMargin.coerceAtLeast(Utils.getStatusBarHeight(this) + sideMargin / 2), sideMargin, sideMargin)
+            mediaView.setPadding(sideMargin, sideMargin / 2, sideMargin, sideMargin / 2)
             val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
-            val suggestionRowHeight = iconSize + m
-            suggestionsView.updateLayoutParams {
-                height = suggestionRowHeight
+            val bottomMargin = (sideMargin - Utils.getNavigationBarHeight(this@HomeScreen))
+                .coerceAtLeast(0)
+            bottomBar.updateLayoutParams<MarginLayoutParams> {
+                height = iconSize + sideMargin / 2 + bottomMargin
             }
-            val b = (Utils.getNavigationBarHeight(this@HomeScreen) - m / 2)
-                .coerceAtLeast(m / 2)
-            desktop.setPadding(0, 0, 0, b)
+
+            suggestionsView.setPadding(sideMargin, sideMargin / 2, sideMargin, bottomMargin)
+            with(searchEntry) {
+                val v = (12 * dp).toInt()
+                setPadding(0, sideMargin / 2 + v, 0, bottomMargin + v)
+                updateLayoutParams<MarginLayoutParams> {
+                    leftMargin = iconSize + sideMargin
+                    rightMargin = iconSize + sideMargin
+                }
+            }
+            val b = (Utils.getNavigationBarHeight(this@HomeScreen))
+                .coerceAtLeast(sideMargin) - sideMargin / 2
+            val bottomBarSpaceHeight = iconSize + sideMargin + b
+            desktop.setPadding(0, 0, 0, bottomBarSpaceHeight)
+            drawerArea.applyCustomizationsLayout(settings, sideMargin, bottomBarSpaceHeight)
             val widget = Widgets.getWidget(this)
             if (widget != widgetView?.widget) {
                 if (widgetView != null) {
@@ -503,11 +581,11 @@ class HomeScreen : Activity() {
                         ).apply {
                             gravity = Gravity.CENTER
                             val v = (dp * 6).toInt()
-                            setMargins(m, 0, m, v)
+                            setMargins(sideMargin, 0, sideMargin, v)
                         })
                 }
             }
-            updateBGColors(pinnedGrid.calculateGridHeight() + suggestionRowHeight.toFloat() + b, 0f)
+            updateBGColors(pinnedGrid.calculateGridHeight() + bottomBarSpaceHeight.toFloat(), 0f)
         } else
             updateBGColors(Utils.getDisplayHeight(this@HomeScreen) - pinnedGrid.y.toFloat(), 0f)
     }

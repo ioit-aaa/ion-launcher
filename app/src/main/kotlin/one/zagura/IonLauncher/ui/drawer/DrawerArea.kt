@@ -3,38 +3,25 @@ package one.zagura.IonLauncher.ui.drawer
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.content.res.ColorStateList
-import android.graphics.Typeface
-import android.os.Build
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.view.WindowInsets
-import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import android.widget.ImageView
-import android.widget.LinearLayout
+import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.items.AppLoader
-import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.provider.items.AppCategorizer
 import one.zagura.IonLauncher.provider.search.Search
 import one.zagura.IonLauncher.ui.view.CategoryBoxView
-import one.zagura.IonLauncher.ui.view.LongPressMenu
 import one.zagura.IonLauncher.ui.view.SharedDrawingContext
 import one.zagura.IonLauncher.util.Cancellable
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.TaskRunner
-import one.zagura.IonLauncher.util.drawable.FillDrawable
 import one.zagura.IonLauncher.util.Utils
 
 @SuppressLint("UseCompatLoadingForDrawables", "ViewConstructor")
@@ -43,7 +30,8 @@ class DrawerArea(
     drawCtx: SharedDrawingContext,
     showDropTargets: () -> Unit,
     onItemOpened: (LauncherItem) -> Unit,
-) : LinearLayout(context) {
+    val entry: EditText,
+) : FrameLayout(context) {
 
     private val libraryAdapter = LibraryAdapter(showDropTargets, onItemOpened, context, drawCtx, ::openCategory)
     private val categoryAdapter = CategoryAdapter(showDropTargets, onItemOpened, context)
@@ -51,11 +39,6 @@ class DrawerArea(
 
     val libraryView: RecyclerView
     val recyclerView: RecyclerView
-    val entry: EditText
-    private val extraButton: ImageView
-    private val bottomBar: LinearLayout
-    private val separator = View(context)
-    private val icSearch = context.getDrawable(R.drawable.search)!!
 
     private var categorize = true
     private var results = emptyList<LauncherItem>()
@@ -70,18 +53,18 @@ class DrawerArea(
                 Screen.Library -> {
                     libraryView.visibility = View.VISIBLE
                     recyclerView.visibility = View.GONE
-                    extraButton.setImageResource(R.drawable.options)
+//                    extraButton.setImageResource(R.drawable.options)
                 }
                 Screen.Category -> {
                     recyclerView.visibility = View.VISIBLE
                     libraryView.visibility = View.GONE
-                    extraButton.setImageResource(R.drawable.options)
+//                    extraButton.setImageResource(R.drawable.options)
                     recyclerView.adapter = categoryAdapter
                 }
                 Screen.Search -> {
                     recyclerView.visibility = View.VISIBLE
                     libraryView.visibility = View.GONE
-                    extraButton.setImageResource(R.drawable.cross)
+//                    extraButton.setImageResource(R.drawable.cross)
                     recyclerView.adapter = searchAdapter
                 }
             }
@@ -89,32 +72,6 @@ class DrawerArea(
 
     init {
         val dp = resources.displayMetrics.density
-        entry = EditText(context).apply {
-            background = null
-            isSingleLine = true
-            typeface = Typeface.DEFAULT_BOLD
-            setCompoundDrawablesRelativeWithIntrinsicBounds(icSearch, null, null, null)
-            compoundDrawablePadding = (8 * dp).toInt()
-            includeFontPadding = false
-            setHint(R.string.search)
-            addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-                override fun afterTextChanged(s: Editable) {}
-                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                    searchCancellable.cancel()
-                    TaskRunner.submit {
-                        search(s.toString())
-                    }
-                }
-            })
-            setOnEditorActionListener { v, actionId, _ ->
-                if (actionId == EditorInfo.IME_ACTION_GO) {
-                    results.firstOrNull()?.open(v)
-                    true
-                } else false
-            }
-            imeOptions = EditorInfo.IME_ACTION_GO
-        }
         libraryView = RecyclerView(context).apply {
             adapter = libraryAdapter
             clipToPadding = false
@@ -153,39 +110,20 @@ class DrawerArea(
                 }
             })
         }
-        extraButton = ImageView(context).apply {
-            setImageResource(R.drawable.cross)
-            setOnClickListener {
-                if (screen == Screen.Search)
-                    clearSearchField()
-                else {
-                    LongPressMenu.popupLauncher(it,
-                        Gravity.BOTTOM or Gravity.END, (12 * dp).toInt(),
-                        it.height + Utils.getNavigationBarHeight(context))
-                }
-            }
-        }
-        orientation = VERTICAL
         isInvisible = true
         alpha = 0f
-        addView(libraryView, LayoutParams(MATCH_PARENT, 0, 1f))
-        addView(recyclerView, LayoutParams(MATCH_PARENT, 0, 1f))
-        addView(separator, MATCH_PARENT, dp.toInt())
-        addView(LinearLayout(context).apply {
-            bottomBar = this
-            orientation = HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            addView(entry, LayoutParams(0, WRAP_CONTENT, 1f))
-            addView(extraButton, LayoutParams((40 * dp).toInt(), MATCH_PARENT))
-            setOnApplyWindowInsetsListener { v, insets ->
-                val b = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-                    insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
-                else
-                    insets.systemWindowInsetBottom
-                v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, b)
-                insets
-            }
-        })
+        addView(libraryView, LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        addView(recyclerView, LayoutParams(MATCH_PARENT, MATCH_PARENT))
+    }
+
+    fun onSearchTextChanged(s: CharSequence?) {
+        searchCancellable.cancel()
+        TaskRunner.submit {
+            search(s?.toString() ?: "")
+        }
+    }
+    fun onTextGoAction(view: TextView) {
+        results.firstOrNull()?.open(view)
     }
 
     fun focusSearch() {
@@ -259,43 +197,27 @@ class DrawerArea(
         categoryAdapter.update(category, apps)
     }
 
-    fun applyCustomizations(settings: Settings, sideMargin: Int) {
+    fun applyCustomizationsColor(settings: Settings) {
         searchAdapter.notifyDataSetChanged()
         categorize = settings["drawer:categories", true]
         categoryAdapter.update(AppCategorizer.AppCategory.AllApps, AppLoader.getResource())
         if (screen != Screen.Search)
             unsearch()
         categoryAdapter.showLabels = settings["drawer:labels", true]
+    }
+
+    fun applyCustomizationsLayout(settings: Settings, sideMargin: Int, bottomPadding: Int) {
         with(recyclerView) {
             (layoutManager as GridLayoutManager).spanCount = settings["dock:columns", 5]
             adapter = adapter
             val p = sideMargin / 2
-            setPadding(p, p.coerceAtLeast(Utils.getStatusBarHeight(context)), p, p)
+            setPadding(p, p.coerceAtLeast(Utils.getStatusBarHeight(context)), p, p + bottomPadding)
         }
         with(libraryView) {
             adapter = adapter
             val p = sideMargin / 2
-            setPadding(p, p.coerceAtLeast(Utils.getStatusBarHeight(context)), p, p)
+            setPadding(p, p.coerceAtLeast(Utils.getStatusBarHeight(context)), p, p + bottomPadding)
         }
-        val fgColor = ColorThemer.drawerForeground(context)
-        val hintColor = ColorThemer.drawerHint(context)
-        val separatorColor = hintColor and 0xffffff or 0x44000000
-        val dp = context.resources.displayMetrics.density
-        val h = (sideMargin - (8 * dp).toInt()).coerceAtLeast(0)
-        with(entry) {
-            val v = (12 * dp).toInt()
-            setPadding(h, v, h / 2, v)
-            setTextColor(fgColor)
-            setHintTextColor(hintColor)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                textCursorDrawable?.setTint(fgColor)
-            highlightColor = fgColor and 0xffffff or 0x33000000
-        }
-        bottomBar.setPadding(0, 0, h, Utils.getNavigationBarHeight(context)
-            .coerceAtLeast(sideMargin))
-        extraButton.imageTintList = ColorStateList.valueOf(fgColor)
-        separator.background = FillDrawable(separatorColor)
-        icSearch.setTint(fgColor)
     }
 
     fun onBackPressed(): Boolean {
