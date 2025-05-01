@@ -36,7 +36,7 @@ class IconPackInfo private constructor(
     ).takeIf { it != 0 }
 
     @SuppressLint("DiscouragedApi")
-    fun getDrawableName(packageName: String, name: String, density: Int): String? {
+    fun getDrawableName(packageName: String, name: String): String? {
         val key = "$packageName/$name"
         return calendarPrefixes[key]
             ?.let { it + Calendar.getInstance()[Calendar.DAY_OF_MONTH] }?.takeIf { res.getIdentifier(
@@ -105,13 +105,8 @@ class IconPackInfo private constructor(
         }
 
         private fun loadIconMod(name: String, res: Resources, iconPackPackageName: String, uniformOptions: BitmapFactory.Options): Bitmap? {
-            val i = res.getIdentifier(
-                name,
-                "drawable",
-                iconPackPackageName
-            )
-            if (i == 0)
-                return null
+            val i = res.getIdentifier(name, "drawable", iconPackPackageName)
+            if (i == 0) return null
             return BitmapFactory.decodeResource(res, i, uniformOptions)
         }
 

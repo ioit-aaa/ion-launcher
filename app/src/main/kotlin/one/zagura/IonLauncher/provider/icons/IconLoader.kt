@@ -29,6 +29,7 @@ object IconLoader {
     private val cacheContacts = HashMap<String, Drawable>() // only use lookup key
     private val cacheShortcuts = HashMap<StaticShortcut, Drawable>()
     private var iconPacks = ArrayList<IconPackInfo>()
+    private var iconThemingInfo: IconPackInfo.IconGenInfo? = null
 
     private val iconPacksLock = ReentrantLock()
 
@@ -38,15 +39,20 @@ object IconLoader {
             iconPacksLock.withLock {
                 internalClearCache()
                 iconPacks.clear()
+                iconThemingInfo = null
                 settings.getStrings("icon_packs") { _, p ->
                     try {
-                        iconPacks.add(IconPackInfo.get(context.packageManager, p))
+                        val info = IconPackInfo.get(context.packageManager, p)
+                        iconPacks.add(info)
+                        if (iconThemingInfo == null && info.iconModificationInfo != null)
+                            iconThemingInfo = info.iconModificationInfo
                     } catch (e: Exception) {
                         e.printStackTrace()
                         null
                     }
                 }
             }
+            Runtime.getRuntime().gc()
         }
     }
 
@@ -89,28 +95,21 @@ object IconLoader {
     private fun loadIcon(context: Context, item: ActionItem): Drawable {
         val initIcon = context.packageManager.queryIntentActivities(Intent(item.action), 0)
             .firstOrNull()?.loadIcon(context.packageManager) ?: return NonDrawable
-        return iconPacksLock.withLock {
-            IconThemer.applyTheming(context, initIcon, iconPacks)
-        }
+        return IconThemer.applyTheming(context, initIcon, iconThemingInfo)
     }
 
     private fun loadIcon(context: Context, app: App): Drawable {
         return cacheApps.getOrPut(app) {
-            context.packageManager.getUserBadgedIcon(iconPacksLock.withLock {
-                val custom = EditedItems.getIcon(context, app)
-                if (custom != null)
-                    return@withLock IconThemer.transformIconFromIconPack(custom)
-                val externalIcon = getIconPackIcon(context, app.packageName, app.name)
-                if (externalIcon != null)
-                    return@withLock IconThemer.transformIconFromIconPack(externalIcon)
-                val launcherApps =
-                    context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
-                launcherApps.getActivityList(app.packageName, app.userHandle)
+            val icon = EditedItems.getIcon(context, app)?.let(IconThemer::transformIconFromIconPack)
+                ?: getIconPackIcon(context, app.packageName, app.name)?.let(IconThemer::transformIconFromIconPack)
+                ?: (context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps)
+                    .getActivityList(app.packageName, app.userHandle)
                     ?.find { it.name == app.name }
                     ?.getIcon(context.resources.displayMetrics.densityDpi)
-                    ?.let { IconThemer.applyTheming(context, it, iconPacks) }
-                    ?: return@withLock NonDrawable
-            }, app.userHandle)
+                    ?.let { IconThemer.applyTheming(context, it, iconThemingInfo) }
+            icon?.let {
+                context.packageManager.getUserBadgedIcon(icon, app.userHandle)
+            } ?: NonDrawable
         }
     }
 
@@ -120,21 +119,21 @@ object IconLoader {
                 val inputStream = context.contentResolver.openInputStream(contact.iconUri)
                 val pic = Drawable.createFromStream(inputStream, contact.iconUri.toString())
                     ?: return@getOrPut NonDrawable
-                return@getOrPut IconThemer.iconifyQuadImage(pic)
+                return@getOrPut IconThemer.fromQuadImage(pic)
             } catch (_: FileNotFoundException) {}
             val realName = LabelLoader.loadLabel(context, contact).trim()
             if (realName.isEmpty())
                 return@getOrPut NonDrawable
-            IconThemer.makeContact(realName)
+            IconThemer.fromContactName(realName)
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.N_MR1)
     private fun loadIcon(context: Context, shortcut: StaticShortcut): Drawable {
         return cacheShortcuts.getOrPut(shortcut) {
-            val custom = EditedItems.getIcon(context, shortcut)
-            if (custom != null)
-                return@getOrPut IconThemer.transformIconFromIconPack(custom)
+            EditedItems.getIcon(context, shortcut)?.let {
+                return@getOrPut IconThemer.transformIconFromIconPack(it)
+            }
             val launcherApps =
                 context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
             if (!launcherApps.hasShortcutHostPermission())
@@ -148,7 +147,9 @@ object IconLoader {
         }
     }
 
-    private fun getIconPackIcon(context: Context, packageName: String, name: String) = iconPacks.firstNotNullOfOrNull {
-        it.getDrawable(packageName, name, context.resources.displayMetrics.densityDpi)
+    private fun getIconPackIcon(context: Context, packageName: String, name: String) = iconPacksLock.withLock {
+        iconPacks.firstNotNullOfOrNull {
+            it.getDrawable(packageName, name, context.resources.displayMetrics.densityDpi)
+        }
     }
 }

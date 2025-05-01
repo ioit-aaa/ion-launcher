@@ -94,8 +94,9 @@ class ClippedDrawable(
     override fun getAlpha() = content.alpha
     override fun setColorFilter(cf: ColorFilter?) { content.colorFilter = cf }
 
-    override fun getIntrinsicWidth() = content.intrinsicWidth
-    override fun getIntrinsicHeight() = content.intrinsicHeight
+    // using bounds width instead of intrinsicWidth to avoid low resolution when badging
+    override fun getIntrinsicWidth() = content.bounds.width()
+    override fun getIntrinsicHeight() = content.bounds.height()
     override fun getMinimumWidth() = content.minimumWidth
     override fun getMinimumHeight() = content.minimumHeight
 }

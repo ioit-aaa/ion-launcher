@@ -3,7 +3,6 @@ package one.zagura.IonLauncher.provider.icons
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
@@ -21,10 +20,12 @@ import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.alpha
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.get
+import androidx.core.graphics.scale
 import one.zagura.IonLauncher.provider.ColorThemer
 import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.Utils.setGrayscale
@@ -36,9 +37,6 @@ import one.zagura.IonLauncher.util.drawable.IconGlossDrawable
 import one.zagura.IonLauncher.util.drawable.NonDrawable
 import one.zagura.IonLauncher.util.drawable.SquircleRectShape
 import kotlin.math.max
-import androidx.core.graphics.createBitmap
-import androidx.core.graphics.scale
-import androidx.core.graphics.drawable.toDrawable
 
 object IconThemer {
 
@@ -89,8 +87,10 @@ object IconThemer {
         return makeIcon(iconBG, monochrome, false)
     }
 
-    fun iconifyQuadImage(icon: Drawable): ClippedDrawable {
-        val icon = if (doIconGloss) IconGlossDrawable(icon) else icon
+    fun fromQuadImage(initIcon: Drawable): Drawable {
+        var icon = if (doIconGloss) IconGlossDrawable(initIcon, radiusRatio) else initIcon
+        if (initIcon is BitmapDrawable && max(icon.intrinsicWidth, icon.intrinsicHeight) >= iconSize)
+            icon = BitmapDrawable(null, icon.toBitmap(iconSize, iconSize))
         val w = icon.intrinsicWidth
         val h = icon.intrinsicHeight
         val r = w * radiusRatio
@@ -105,17 +105,14 @@ object IconThemer {
         return ClippedDrawable(icon, path, iconBG, doIconRim)
     }
 
-    fun makeContact(name: String): Drawable = ContactDrawable(
+    fun fromContactName(name: String): Drawable = ContactDrawable(
         name.substring(0, name.length.coerceAtMost(2)),
         radiusRatio, iconBG, iconFG)
 
     fun transformIconFromIconPack(icon: Drawable): Drawable =
         transformIcon(icon, willBeThemed = false, isIconPack = true)
 
-    fun applyTheming(context: Context, icon: Drawable, iconPacks: List<IconPackInfo>): Drawable {
-        val iconThemingInfo = iconPacks.firstNotNullOfOrNull {
-            it.iconModificationInfo
-        }
+    fun applyTheming(context: Context, icon: Drawable, iconThemingInfo: IconPackInfo.IconGenInfo?): Drawable {
         val ti = transformIcon(icon, iconThemingInfo != null, false)
         return if (iconThemingInfo == null) ti
         else applyIconPackTheming(ti, iconThemingInfo, context.resources).apply {
@@ -127,7 +124,9 @@ object IconThemer {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || icon !is AdaptiveIconDrawable) {
             icon.setGrayscale(doGrayscale)
             if (isIconPack)
-                return icon
+                return if (icon is BitmapDrawable)
+                    rescaleIconIfBig(icon)
+                else icon
             val w = icon.intrinsicWidth
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                 doMonochrome && !doMonochromeBG)
@@ -135,12 +134,8 @@ object IconThemer {
             val isIconFullQuad = icon.toBitmap(1, 1)[0, 0].alpha == 255
             if (!doForceAdaptive && !isIconFullQuad)
                 return icon
-            return iconifyQuadImage(if (isIconFullQuad) icon else InsetDrawable(icon, w / 6))
+            return fromQuadImage(if (isIconFullQuad) icon else InsetDrawable(icon, w / 6))
         }
-
-        var fg = icon.foreground?.let(::reshapeNestedAdaptiveIcons) ?: NonDrawable
-        var bg = icon.background?.let(::reshapeNestedAdaptiveIcons)
-        fg.setGrayscale(doGrayscale)
 
         if (doMonochrome && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val monochrome = icon.monochrome
@@ -151,10 +146,14 @@ object IconThemer {
                     return InsetDrawable(monochrome, -w / if (willBeThemed) 5 else 7)
                 }
                 monochrome.colorFilter = PorterDuffColorFilter(iconFG, PorterDuff.Mode.SRC_IN)
-                fg = monochrome
-                return makeIcon(iconBG, fg, isIconPack)
+                return makeIcon(iconBG, monochrome, isIconPack)
             }
         }
+
+        val bg = icon.background?.let(::reshapeNestedAdaptiveIcons)
+        val fg = icon.foreground?.let(::reshapeNestedAdaptiveIcons) ?: NonDrawable
+        fg.setGrayscale(doGrayscale)
+
         var icon: Drawable = run {
             if (doGrayscale) when (bg) {
                 null -> return@run makeIcon(iconBG, fg, isIconPack)
@@ -186,13 +185,22 @@ object IconThemer {
         fg: Drawable?,
         isIconPack: Boolean,
     ): ClippedDrawable {
-        val layers = LayerDrawable(arrayOf(if (doIconGloss && (doIconGlossOnThemed || !isIconPack))
-            bg?.let(::IconGlossDrawable) else bg, fg))
-        val w = layers.intrinsicWidth
-        val h = layers.intrinsicHeight
+        val layers = LayerDrawable(arrayOf(bg, fg))
+        var w = layers.intrinsicWidth
+        var h = layers.intrinsicHeight
         layers.setLayerInset(0, -w / 4, -h / 4, -w / 4, -h / 4)
         layers.setLayerInset(1, -w / 4, -h / 4, -w / 4, -h / 4)
-        layers.setBounds(0, 0, w, h)
+
+        val glossed = if (doIconGloss && (doIconGlossOnThemed || !isIconPack))
+            IconGlossDrawable(layers, radiusRatio) else layers
+
+        val final = if ((bg is BitmapDrawable && max(bg.bitmap.width, bg.bitmap.height) > iconSize) ||
+            (fg is BitmapDrawable && max(fg.bitmap.width, fg.bitmap.height) > iconSize))
+            BitmapDrawable(null, glossed.toBitmap(w, h).scale(iconSize, iconSize)).also {
+                w = iconSize
+                h = iconSize
+            }
+        else glossed
 
         val r = w * radiusRatio
         val path = if (doSquircle)
@@ -202,7 +210,9 @@ object IconThemer {
                 0f, 0f, w.toFloat(), w.toFloat(),
                 floatArrayOf(r, r, r, r, r, r, r, r), Path.Direction.CW)
         }
-        return ClippedDrawable(layers, path, iconBG, doIconRim)
+
+        final.setBounds(0, 0, w, h)
+        return ClippedDrawable(final, path, iconBG, doIconRim)
     }
 
     private fun makeIcon(
@@ -321,5 +331,13 @@ object IconThemer {
             }
             else -> icon
         }
+    }
+
+    private fun rescaleIconIfBig(icon: BitmapDrawable): BitmapDrawable {
+        val b = icon.bitmap ?: return icon
+        val s = max(b.width, b.height)
+        if (s <= iconSize)
+            return icon
+        return BitmapDrawable(b.scale(b.width * iconSize / s, b.height * iconSize / s))
     }
 }

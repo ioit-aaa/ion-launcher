@@ -47,8 +47,8 @@ class CustomIconActivity : Activity() {
         val iconPacks = IconPackInfo.getAvailableIconPacks(packageManager)
         val defIcons = if (item is App) iconPacks.mapNotNull {
             val packageName = it.activityInfo.packageName
-            val density = resources.displayMetrics.densityDpi
-            val name = IconPackInfo.get(packageManager, packageName).getDrawableName(item.packageName, item.name, density)
+            val name = IconPackInfo.get(packageManager, packageName)
+                .getDrawableName(item.packageName, item.name)
                 ?: return@mapNotNull null
             packageName to name
         } else emptyList()

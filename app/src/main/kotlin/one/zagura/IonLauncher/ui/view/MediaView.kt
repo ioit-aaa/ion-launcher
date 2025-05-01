@@ -54,7 +54,7 @@ class MediaView(
             this.players = Array(players.size) {
                 val player = players[it]
                 val drawable = player.cover?.let {
-                    IconThemer.iconifyQuadImage(BitmapDrawable(it).apply {
+                    IconThemer.fromQuadImage(BitmapDrawable(it).apply {
                         setBounds(0, 0, it.width, it.height)
                     })
                 } ?: AppLoader.getResource().firstOrNull { it.packageName == player.controller.packageName }
