@@ -21,6 +21,7 @@ import one.zagura.IonLauncher.provider.items.AppCategorizer
 import one.zagura.IonLauncher.provider.search.Search
 import one.zagura.IonLauncher.provider.summary.Battery
 import one.zagura.IonLauncher.ui.view.CategoryBoxView
+import one.zagura.IonLauncher.ui.view.ClickableRecyclerView
 import one.zagura.IonLauncher.ui.view.SharedDrawingContext
 import one.zagura.IonLauncher.util.Cancellable
 import one.zagura.IonLauncher.util.Settings
@@ -62,8 +63,8 @@ class DrawerArea(
             }
         })
     }
-    val recyclerView = RecyclerView(context).apply {
-        visibility = View.GONE
+    val recyclerView = ClickableRecyclerView(context).apply {
+        visibility = GONE
         adapter = searchAdapter
         clipToPadding = false
         setHasFixedSize(true)
@@ -83,6 +84,9 @@ class DrawerArea(
                 }
             }
         })
+        setOnClickListener {
+            screen = Screen.Library
+        }
     }
 
     enum class Screen {

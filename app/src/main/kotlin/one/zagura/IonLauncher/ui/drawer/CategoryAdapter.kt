@@ -86,6 +86,7 @@ class CategoryAdapter(
                 val columns = settings["dock:columns", 5]
                 val l = ((parent.width - parent.paddingLeft - parent.paddingRight) / columns - iconSize) / 2
                 setPadding(l, l, l, l)
+                setOnClickListener { parent.performClick() }
             })
         }
         val icon = ImageView(parent.context)
