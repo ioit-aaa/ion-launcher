@@ -166,7 +166,7 @@ class CategoryAdapter(
                 TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 42f, view.resources.displayMetrics).toInt()) +
                 (12 * dp).toInt()
 
-        val insideIcons = view.getInsideIcons()
+        val insideIcons = view.getInsideIcons().take(columns.coerceAtMost(4))
         if (insideIcons.isEmpty())
             return
 
@@ -185,10 +185,12 @@ class CategoryAdapter(
             .duration = 170L
 
         val content = FrameLayout(view.context)
-        val popup = PopupWindow(content, view.resources.displayMetrics.widthPixels, abs(sourceY - destY) + iconSize, false)
-        popup.setOnDismissListener { currentAnimationPopup = null }
-
-        for ((i, icon) in insideIcons.take(columns.coerceAtMost(4)).withIndex())
+        val displayWidth = view.resources.displayMetrics.widthPixels
+        val popup = PopupWindow(content, displayWidth, abs(sourceY - destY) + iconSize, false).apply {
+            isTouchable = false
+            setOnDismissListener { currentAnimationPopup = null }
+        }
+        for ((i, icon) in insideIcons.withIndex())
             content.addView(View(view.context).apply {
                 translationX = sourceX.toFloat()
                 translationY = (sourceY - destY).coerceAtLeast(0).toFloat()
@@ -205,6 +207,7 @@ class CategoryAdapter(
                     .scaleX(1f)
                     .scaleY(1f)
                     .alpha(0f)
+                    .setStartDelay((if (sourceX > displayWidth / 2) i else insideIcons.size - 1 - i) * 10L)
                     .setInterpolator(DecelerateInterpolator())
                     .also { if (i == 0) it.withEndAction { popup.dismiss() } }
                     .duration = 200L

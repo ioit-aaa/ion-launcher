@@ -3,7 +3,6 @@ package one.zagura.IonLauncher.ui.drawer
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
@@ -97,6 +96,8 @@ class DrawerArea(
     }
     private var screen: Screen = Screen.Library
         set(s) {
+            if (field == s)
+                return
             val prev = field
             field = s
             when (s) {
@@ -284,5 +285,12 @@ class DrawerArea(
     fun openAllApps() {
         screen = Screen.Category
         categoryAdapter.update(AppCategorizer.AppCategory.AllApps, AppLoader.getResource())
+        libraryView.clearAnimation()
+        recyclerView.clearAnimation()
+        recyclerView.visibility = VISIBLE
+        recyclerView.alpha = 1f
+        recyclerView.scaleX = 1f
+        recyclerView.scaleY = 1f
+        libraryView.visibility = GONE
     }
 }
