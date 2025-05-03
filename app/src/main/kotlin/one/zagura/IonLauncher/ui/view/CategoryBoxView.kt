@@ -174,7 +174,7 @@ class CategoryBoxView(
         val w = ww - l * 2
         val x = l * 2 + x * w / GRID_SIZE
         val y = l * 2 + y * w / GRID_SIZE
-        return Rect(x, y, drawCtx.iconSize.toInt(), drawCtx.iconSize.toInt())
+        return Rect(paddingLeft + x, paddingTop + y, drawCtx.iconSize.toInt(), drawCtx.iconSize.toInt())
     }
 
     override fun onTouchEvent(e: MotionEvent) = gestureListener.onTouchEvent(e)
@@ -183,6 +183,8 @@ class CategoryBoxView(
     fun setDragState(generator: (CategoryBoxView) -> Any?) {
         this.generator = generator
     }
+
+    fun getInsideIcons(): List<Drawable> = icons.drop(GRID_SIZE * GRID_SIZE - 1)
 
     private val gestureListener = GestureDetector(context, object : OnGestureListener {
         override fun onDown(e: MotionEvent) = true

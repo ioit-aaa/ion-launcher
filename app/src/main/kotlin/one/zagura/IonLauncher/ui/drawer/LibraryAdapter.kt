@@ -16,7 +16,7 @@ class LibraryAdapter(
     val onItemOpened: (LauncherItem) -> Unit,
     val activity: Activity,
     val drawCtx: SharedDrawingContext,
-    val openCategory: (AppCategorizer.AppCategory, List<App>) -> Unit,
+    val openCategory: (AppCategorizer.AppCategory, List<App>, CategoryBoxView) -> Unit,
 ) : RecyclerView.Adapter<LibraryAdapter.ViewHolder>() {
 
     init {
@@ -55,7 +55,7 @@ class LibraryAdapter(
             }
             view.setOnClickListener {
                 val item = getItem(bindingAdapterPosition)
-                openCategory(item.first, item.second)
+                openCategory(item.first, item.second, view)
             }
         }
 

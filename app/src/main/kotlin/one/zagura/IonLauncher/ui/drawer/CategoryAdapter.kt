@@ -1,19 +1,23 @@
 package one.zagura.IonLauncher.ui.drawer
 
 import android.app.Activity
+import android.content.Context
 import android.graphics.Typeface
 import android.os.Build
 import android.text.TextUtils
+import android.util.TypedValue
 import android.view.DragEvent
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupWindow
 import android.widget.TextView
-import androidx.core.view.setPadding
-import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import one.zagura.IonLauncher.data.items.App
 import one.zagura.IonLauncher.data.items.LauncherItem
@@ -24,9 +28,10 @@ import one.zagura.IonLauncher.provider.items.AppCategorizer
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.view.CategoryBoxView
 import one.zagura.IonLauncher.ui.view.LongPressMenu
-import one.zagura.IonLauncher.util.Settings
 import one.zagura.IonLauncher.util.TaskRunner
 import one.zagura.IonLauncher.util.Utils
+import kotlin.math.abs
+import kotlin.math.min
 
 class CategoryAdapter(
     val showDropTargets: () -> Unit,
@@ -131,19 +136,105 @@ class CategoryAdapter(
         }
     }
 
+    private var currentAnimationPopup: PopupWindow? = null
+    private var sourceX = 0
+    private var sourceY = 0
+    fun animateExitTransition(recyclerView: RecyclerView) {
+        if (sourceX == 0 && sourceY == 0)
+            return
+        recyclerView.pivotX = sourceX.toFloat()
+        recyclerView.pivotY = sourceY.toFloat()
+        recyclerView.animate()
+            .scaleX(0.5f).scaleY(0.5f)
+            .setInterpolator(AccelerateInterpolator())
+            .duration = 150L
+        sourceY = 0
+        sourceX = 0
+    }
+    fun animateEnterTransition(view: CategoryBoxView, recyclerView: RecyclerView) {
+        currentAnimationPopup?.dismiss()
+        val settings = view.context.ionApplication.settings
+        val dp = view.resources.displayMetrics.density
+
+        val columns = settings["dock:columns", 5]
+        val iconSize = (settings["dock:icon-size", 48] * dp).toInt()
+
+        val recyclerInnerWidth = recyclerView.width - recyclerView.paddingLeft - recyclerView.paddingRight
+        val destY = recyclerView.paddingTop + calcTopMinHeight(view.context)
+            .coerceAtLeast((recyclerInnerWidth / columns - iconSize) +
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 42f, view.resources.displayMetrics).toInt()) +
+                (12 * dp).toInt()
+
+        val insideIcons = view.getInsideIcons()
+        if (insideIcons.isEmpty())
+            return
+
+        val iconBounds = view.getIconBounds(1, 1)
+        val loc = IntArray(2).apply(view::getLocationOnScreen)
+        sourceX = iconBounds.left + loc[0]
+        sourceY = iconBounds.top + loc[1]
+
+        recyclerView.pivotX = sourceX.toFloat()
+        recyclerView.pivotY = sourceY.toFloat()
+        recyclerView.scaleX = 0.7f
+        recyclerView.scaleY = 0.7f
+        recyclerView.animate()
+            .scaleX(1f).scaleY(1f)
+            .setInterpolator { it * it }
+            .duration = 170L
+
+        val content = FrameLayout(view.context)
+        val popup = PopupWindow(content, view.resources.displayMetrics.widthPixels, abs(sourceY - destY) + iconSize, false)
+        popup.setOnDismissListener { currentAnimationPopup = null }
+
+        for ((i, icon) in insideIcons.take(columns.coerceAtMost(4)).withIndex())
+            content.addView(View(view.context).apply {
+                translationX = sourceX.toFloat()
+                translationY = (sourceY - destY).coerceAtLeast(0).toFloat()
+                background = icon
+                scaleX = .45f
+                scaleY = .45f
+                val x = i % CategoryBoxView.GRID_SIZE
+                val y = i / CategoryBoxView.GRID_SIZE
+                pivotX = x * iconBounds.right.toFloat()
+                pivotY = y * iconBounds.bottom.toFloat()
+                animate()
+                    .translationX(recyclerView.paddingLeft + i * recyclerInnerWidth / columns.toFloat() + (recyclerInnerWidth / columns - iconSize) / 2)
+                    .translationY((destY - sourceY).coerceAtLeast(0).toFloat())
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .alpha(0f)
+                    .setInterpolator(DecelerateInterpolator())
+                    .also { if (i == 0) it.withEndAction { popup.dismiss() } }
+                    .duration = 200L
+            }, iconBounds.right, iconBounds.bottom)
+        currentAnimationPopup = popup
+        popup.showAtLocation(view, Gravity.START or Gravity.TOP, 0, min(sourceY, destY))
+        sourceX += iconSize / 2
+        sourceY += iconSize / 2
+    }
+
+    private fun calcTopMinHeight(context: Context): Int {
+        val settings = context.ionApplication.settings
+        val columns = settings["dock:columns", 5]
+        val dp = context.resources.displayMetrics.density
+        val contentHeight = apps.size / columns * ((settings["dock:icon-size", 48] + 60) * dp)
+        return ((Utils.getDisplayHeight(activity) - contentHeight.toInt()) / 2)
+    }
+
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, i: Int) {
         if (i == 0) {
-            holder as TitleViewHolder
-            (holder.itemView as TextView).text = CategoryBoxView.getNameForCategory(holder.itemView.context, category)
-            val settings = holder.itemView.context.ionApplication.settings
-            val columns = settings["dock:columns", 5]
-            val dp = holder.itemView.resources.displayMetrics.density
-            val contentHeight = apps.size / columns * ((settings["dock:icon-size", 48] + 60) * dp)
-            (holder.itemView as TextView).minHeight = ((Utils.getDisplayHeight(activity) - contentHeight.toInt()) / 2)
+            with(holder.itemView as TextView) {
+                text = CategoryBoxView.getNameForCategory(holder.itemView.context, category)
+                minHeight = calcTopMinHeight(holder.itemView.context)
+            }
             return
         }
+        holder as ViewHolder
+        holder.label.text = ""
+        holder.icon.setImageDrawable(null)
+        holder.itemView.alpha = 0f
         TaskRunner.submit {
-            holder as ViewHolder
             val context = holder.itemView.context
             val item = getItem(i)
             if (showLabels) {
@@ -155,6 +246,7 @@ class CategoryAdapter(
             val icon = IconLoader.loadIcon(context, item)
             holder.itemView.post {
                 holder.icon.setImageDrawable(icon)
+                holder.itemView.animate().alpha(1f).duration = 100L
             }
         }
     }

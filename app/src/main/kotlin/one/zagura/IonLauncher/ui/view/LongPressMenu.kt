@@ -8,17 +8,13 @@ import android.graphics.Typeface
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.OvalShape
-import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import android.transition.Transition
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.MarginLayoutParams
-import android.view.animation.Animation
-import android.view.animation.ScaleAnimation
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -41,7 +37,6 @@ import one.zagura.IonLauncher.provider.icons.LabelLoader
 import one.zagura.IonLauncher.ui.settings.SettingsActivity
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.settings.customIconPicker.CustomIconActivity
-import one.zagura.IonLauncher.ui.view.CategoryBoxView
 import one.zagura.IonLauncher.util.Utils
 import one.zagura.IonLauncher.util.drawable.SquircleRectShape
 import one.zagura.IonLauncher.util.drawable.UniformSquircleRectShape
@@ -204,6 +199,15 @@ object LongPressMenu {
         }
         w.showAtLocation(parent, gravity, xoff, yoff)
         current = w
+        content.run {
+            scaleX = 0f
+            scaleY = 0f
+            doOnLayout {
+                if (gravity and Gravity.END == Gravity.END) pivotX = width.toFloat()
+                if (gravity and Gravity.BOTTOM == Gravity.BOTTOM) pivotY = height.toFloat()
+            }
+            animate().scaleX(1f).scaleY(1f).duration = 60L
+        }
     }
 
     private fun popupEdit(parent: View, item: LauncherItem) {

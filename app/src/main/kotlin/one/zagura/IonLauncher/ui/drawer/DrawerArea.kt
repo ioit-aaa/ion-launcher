@@ -5,6 +5,8 @@ import android.app.Activity
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
@@ -17,6 +19,7 @@ import one.zagura.IonLauncher.data.items.LauncherItem
 import one.zagura.IonLauncher.provider.items.AppLoader
 import one.zagura.IonLauncher.provider.items.AppCategorizer
 import one.zagura.IonLauncher.provider.search.Search
+import one.zagura.IonLauncher.provider.summary.Battery
 import one.zagura.IonLauncher.ui.view.CategoryBoxView
 import one.zagura.IonLauncher.ui.view.SharedDrawingContext
 import one.zagura.IonLauncher.util.Cancellable
@@ -37,79 +40,102 @@ class DrawerArea(
     private val categoryAdapter = CategoryAdapter(showDropTargets, onItemOpened, context)
     private val searchAdapter = SearchAdapter(showDropTargets, onItemOpened, context)
 
-    val libraryView: RecyclerView
-    val recyclerView: RecyclerView
-
     private var categorize = true
     private var results = emptyList<LauncherItem>()
+
+    private var notSearchedYet = true
+    private var searchCancellable = Cancellable()
+
+    val libraryView = RecyclerView(context).apply {
+        adapter = libraryAdapter
+        clipToPadding = false
+        setHasFixedSize(true)
+        itemAnimator = null
+        layoutManager = GridLayoutManager(context, 2, RecyclerView.VERTICAL, false)
+        addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(v: RecyclerView, newState: Int) {
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING && entry.isFocused) {
+                    entry.clearFocus()
+                    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(v.windowToken, 0)
+                }
+            }
+        })
+    }
+    val recyclerView = RecyclerView(context).apply {
+        visibility = View.GONE
+        adapter = searchAdapter
+        clipToPadding = false
+        setHasFixedSize(true)
+        itemAnimator = null
+        layoutManager = GridLayoutManager(context, 1, RecyclerView.VERTICAL, false).apply {
+            spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(i: Int) =
+                    if (screen == Screen.Search || i == 0) spanCount else 1
+            }
+        }
+        addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(v: RecyclerView, newState: Int) {
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING && entry.isFocused) {
+                    entry.clearFocus()
+                    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(v.windowToken, 0)
+                }
+            }
+        })
+    }
 
     enum class Screen {
         Library, Category, Search
     }
     private var screen: Screen = Screen.Library
         set(s) {
+            val prev = field
             field = s
             when (s) {
                 Screen.Library -> {
-                    libraryView.visibility = View.VISIBLE
-                    recyclerView.visibility = View.GONE
-//                    extraButton.setImageResource(R.drawable.options)
+                    if (Battery.PowerSaver.getResource()) {
+                        libraryView.visibility = VISIBLE
+                        libraryView.alpha = 1f
+                        recyclerView.visibility = GONE
+                        return
+                    }
+                    libraryView.bringToFront()
+                    libraryView.visibility = VISIBLE
+                    libraryView.animate().alpha(1f).duration = 100L
+                    recyclerView.animate().alpha(0f).withEndAction {
+                        recyclerView.visibility = GONE
+                    }.setInterpolator(AccelerateInterpolator()).duration = 150L
+                    if (prev == Screen.Category)
+                        categoryAdapter.animateExitTransition(recyclerView)
                 }
                 Screen.Category -> {
-                    recyclerView.visibility = View.VISIBLE
-                    libraryView.visibility = View.GONE
-//                    extraButton.setImageResource(R.drawable.options)
+                    if (Battery.PowerSaver.getResource()) {
+                        recyclerView.visibility = VISIBLE
+                        recyclerView.alpha = 1f
+                        libraryView.visibility = GONE
+                        return
+                    }
+                    recyclerView.bringToFront()
+                    recyclerView.visibility = VISIBLE
+                    recyclerView.animate().alpha(1f).setInterpolator(DecelerateInterpolator()).duration = 150L
+                    libraryView.animate().alpha(0f).withEndAction {
+                        libraryView.visibility = GONE
+                    }.setInterpolator(AccelerateInterpolator()).duration = 100L
                     recyclerView.adapter = categoryAdapter
                 }
                 Screen.Search -> {
-                    recyclerView.visibility = View.VISIBLE
-                    libraryView.visibility = View.GONE
-//                    extraButton.setImageResource(R.drawable.cross)
+                    recyclerView.bringToFront()
+                    libraryView.visibility = GONE
+                    recyclerView.visibility = VISIBLE
+                    recyclerView.alpha = 1f
                     recyclerView.adapter = searchAdapter
                 }
             }
         }
 
+
     init {
-        val dp = resources.displayMetrics.density
-        libraryView = RecyclerView(context).apply {
-            adapter = libraryAdapter
-            clipToPadding = false
-            setHasFixedSize(true)
-            itemAnimator = null
-            layoutManager = GridLayoutManager(context, 2, RecyclerView.VERTICAL, false)
-            addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrollStateChanged(v: RecyclerView, newState: Int) {
-                    if (newState == RecyclerView.SCROLL_STATE_DRAGGING && entry.isFocused) {
-                        entry.clearFocus()
-                        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                        imm.hideSoftInputFromWindow(v.windowToken, 0)
-                    }
-                }
-            })
-        }
-        recyclerView = RecyclerView(context).apply {
-            visibility = View.GONE
-            adapter = searchAdapter
-            clipToPadding = false
-            setHasFixedSize(true)
-            itemAnimator = null
-            layoutManager = GridLayoutManager(context, 1, RecyclerView.VERTICAL, false).apply {
-                spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                    override fun getSpanSize(i: Int) =
-                        if (screen == Screen.Search || i == 0) spanCount else 1
-                }
-            }
-            addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrollStateChanged(v: RecyclerView, newState: Int) {
-                    if (newState == RecyclerView.SCROLL_STATE_DRAGGING && entry.isFocused) {
-                        entry.clearFocus()
-                        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                        imm.hideSoftInputFromWindow(v.windowToken, 0)
-                    }
-                }
-            })
-        }
         isInvisible = true
         alpha = 0f
         addView(libraryView, LayoutParams(MATCH_PARENT, MATCH_PARENT))
@@ -170,9 +196,6 @@ class DrawerArea(
         notSearchedYet = true
     }
 
-    private var notSearchedYet = true
-    private var searchCancellable = Cancellable()
-
     private fun search(query: String) {
         if (query.isBlank()) {
             post { unsearch() }
@@ -192,9 +215,28 @@ class DrawerArea(
         }
     }
     
-    private fun openCategory(category: AppCategorizer.AppCategory, apps: List<App>) {
+    private fun openCategory(category: AppCategorizer.AppCategory, apps: List<App>, view: CategoryBoxView) {
         screen = Screen.Category
         categoryAdapter.update(category, apps)
+        if (Battery.PowerSaver.getResource()) {
+            recyclerView.scaleX = 1f
+            recyclerView.scaleY = 1f
+            return
+        }
+        categoryAdapter.animateEnterTransition(view, recyclerView)
+        val l = IntArray(2).apply(view::getLocationOnScreen)
+        view.animate()
+            .scaleX(2f).scaleY(2f)
+            .translationX(resources.displayMetrics.widthPixels / 2f - (l[0] + view.width / 2))
+            .translationY(resources.displayMetrics.heightPixels / 2f - (l[1] + view.height / 2))
+            .setInterpolator { it * it }
+            .withEndAction {
+                view.scaleX = 1f
+                view.scaleY = 1f
+                view.translationX = 0f
+                view.translationY = 0f
+            }
+            .duration = 120L
     }
 
     fun applyCustomizationsColor(settings: Settings) {
@@ -228,5 +270,8 @@ class DrawerArea(
         return false
     }
 
-    fun openAllApps() = openCategory(AppCategorizer.AppCategory.AllApps, AppLoader.getResource())
+    fun openAllApps() {
+        screen = Screen.Category
+        categoryAdapter.update(AppCategorizer.AppCategory.AllApps, AppLoader.getResource())
+    }
 }

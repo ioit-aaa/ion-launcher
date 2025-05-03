@@ -3,7 +3,6 @@ package one.zagura.IonLauncher.ui
 import android.app.Activity
 import android.app.WallpaperColors
 import android.app.WallpaperManager
-import android.content.Context
 import android.content.Intent
 import android.graphics.Picture
 import android.graphics.Typeface
@@ -163,7 +162,7 @@ class HomeScreen : Activity() {
             else
                 LongPressMenu.popupLauncher(it,
                     Gravity.BOTTOM or Gravity.END, (12 * dp).toInt(),
-                    it.height + Utils.getNavigationBarHeight(it.context))
+                    it.height + (12 * dp).toInt())
         }
         searchEntry = EditText(this).apply {
             background = null
@@ -252,7 +251,7 @@ class HomeScreen : Activity() {
     }
 
     inner class DrawerSheetCallback : BottomSheetCallback() {
-        private val wallpaperManager = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
+        private val wallpaperManager = getSystemService(WALLPAPER_SERVICE) as WallpaperManager
         private val setWallpaperZoomOut = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) try {
             WallpaperManager::class.java
                 .getDeclaredMethod("setWallpaperZoomOut", IBinder::class.java, Float::class.java)
@@ -340,15 +339,9 @@ class HomeScreen : Activity() {
             NotificationService.MediaObserver.updateMediaItem(applicationContext)
             applyCustomizations(true)
         }
-        AppCategorizer.track(false) {
-            drawerArea.onAppsChanged(it)
-        }
-        AppLoader.track(false) {
-            pinnedGrid.updateGridApps()
-        }
-        Battery.track(false) {
-            summaryView.updateAtAGlance()
-        }
+        AppCategorizer.track(false) { drawerArea.onAppsChanged(it) }
+        AppLoader.track(false) { pinnedGrid.updateGridApps() }
+        Battery.track(false) { summaryView.updateAtAGlance() }
         TopNotificationProvider.track(false) {
             summaryView.updateAtAGlance()
         }
@@ -364,8 +357,6 @@ class HomeScreen : Activity() {
         TaskRunner.submit {
             pinnedGrid.updateGridApps()
             drawerArea.onAppsChanged(AppCategorizer.getResource())
-        }
-        homeScreen.post {
             // Just in case it died for some reason (in post cause lower priority)
             if (NotificationService.hasPermission(this))
                 startService(Intent(this, NotificationService::class.java))
@@ -380,10 +371,12 @@ class HomeScreen : Activity() {
         TopNotificationProvider.release()
         Battery.release()
         Battery.PowerSaver.release()
-        mediaView.clearData()
         widgetView?.stopListening()
-        SuggestionsManager.saveToStorage(this)
-        summaryView.clearData()
+        TaskRunner.submit {
+            summaryView.clearData()
+            mediaView.clearData()
+            SuggestionsManager.saveToStorage(this)
+        }
     }
 
     override fun onResume() {
