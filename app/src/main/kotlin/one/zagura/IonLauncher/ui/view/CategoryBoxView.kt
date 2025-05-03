@@ -8,7 +8,6 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.GestureDetector
 import android.view.GestureDetector.OnGestureListener
-import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.AnyThread
@@ -37,6 +36,7 @@ class CategoryBoxView(
                 AppCategorizer.AppCategory.Utilities -> R.string.utilities
                 AppCategorizer.AppCategory.Media -> R.string.media
                 AppCategorizer.AppCategory.Communication -> R.string.communication
+                AppCategorizer.AppCategory.Internet -> R.string.internet
                 AppCategorizer.AppCategory.Productivity -> R.string.productivity
                 AppCategorizer.AppCategory.Wellbeing -> R.string.wellbeing
                 AppCategorizer.AppCategory.Commute -> R.string.commute

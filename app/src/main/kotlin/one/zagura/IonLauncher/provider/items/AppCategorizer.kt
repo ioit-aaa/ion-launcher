@@ -15,6 +15,7 @@ import one.zagura.IonLauncher.provider.icons.IconPackInfo
 import one.zagura.IonLauncher.provider.icons.LabelLoader
 import one.zagura.IonLauncher.provider.items.AppLoader.compareLabels
 
+
 object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<App>>>() {
 
     enum class AppCategory {
@@ -32,6 +33,7 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
         Image,
 
         Communication,
+        Internet,
         News,
 
         Productivity,
@@ -49,6 +51,7 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
     fun categorizeAllApps(context: Context, apps: List<App>) {
         val c = CategorizationContext(context)
         apps.forEach(c::processApp)
+        c.joinBIntoAIfSmall(AppCategory.Communication, AppCategory.Internet)
         c.joinBIntoAIfSmall(AppCategory.System, AppCategory.Customization)
         c.joinBIntoAIfSmall(AppCategory.Utilities, AppCategory.Wellbeing)
         c.joinBIntoAIfSmall(AppCategory.Utilities, AppCategory.Commute)
@@ -85,7 +88,6 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
 
         private val systemPackages = (getForCategory(Intent.CATEGORY_APP_MARKET) +
                 getForCategory(Intent.CATEGORY_APP_FILES) +
-                getForCategory(Intent.CATEGORY_APP_BROWSER) +
                 getForAction(Settings.ACTION_SETTINGS)).map { it.activityInfo.packageName }
                 // Hard coded package names: only the "must-haves" are hardcoded
                 .plus(arrayOf("com.topjohnwu.magisk", "org.fdroid.fdroid", "org.kde.kdeconnect_tp")).toSet()
@@ -113,6 +115,8 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
                 getForCategory(Intent.CATEGORY_APP_CONTACTS) +
                 getForCategory(Intent.ACTION_CALL) +
                 getForCategory(Intent.ACTION_DIAL)).map { it.activityInfo.packageName }.toSet()
+        private val internetPackages =
+            getForCategory(Intent.CATEGORY_APP_BROWSER).map { it.activityInfo.packageName }.toSet()
 
         val categories = HashMap<AppCategory, MutableList<App>>(AppCategory.entries.size)
 
@@ -132,7 +136,12 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
                         ApplicationInfo.CATEGORY_IMAGE -> categories.add(AppCategory.Image)
                         ApplicationInfo.CATEGORY_VIDEO -> categories.add(AppCategory.Image)
                         ApplicationInfo.CATEGORY_AUDIO -> categories.add(AppCategory.Audio)
-                        ApplicationInfo.CATEGORY_SOCIAL -> categories.add(AppCategory.Communication)
+                        ApplicationInfo.CATEGORY_SOCIAL -> {
+                            categories.add(AppCategory.Communication)
+                            val permissions = context.packageManager.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS).requestedPermissions
+                            if (permissions != null && permissions.contains("android.permission.INTERNET"))
+                                categories.add(AppCategory.Internet)
+                        }
 
                         ApplicationInfo.CATEGORY_NEWS -> categories.add(AppCategory.News)
                         ApplicationInfo.CATEGORY_MAPS -> categories.add(AppCategory.Commute)
@@ -150,6 +159,8 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
                 categories.add(AppCategory.Commute)
             if (commPackages.contains(packageName))
                 categories.add(AppCategory.Communication)
+            if (internetPackages.contains(packageName))
+                categories.add(AppCategory.Internet)
             if (utilityPackages.contains(packageName))
                 categories.add(AppCategory.Utilities)
             if (productivityPackages.contains(packageName))
@@ -230,13 +241,10 @@ object AppCategorizer : UpdatingResource<Map<AppCategorizer.AppCategory, List<Ap
         private fun getForAction(action: String) =
             context.packageManager.queryIntentActivities(Intent(action), 0)
 
-        private fun getForAcaaaation(action: String) =
-            context.packageManager.getPackageInfo(action, 0).featureGroups
-
         fun joinBIntoAIfSmall(a: AppCategory, b: AppCategory) {
             val aa = categories[a] ?: return
             val bb = categories[b] ?: return
-            if (aa.size < 3 || bb.size < 3) {
+            if (aa.count { !bb.contains(it) } < 3 || bb.count { !aa.contains(it) } < 3) {
                 for (app in bb) if (app !in aa)
                     aa.add(app)
                 categories.remove(b)
