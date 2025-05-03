@@ -547,8 +547,7 @@ class HomeScreen : Activity() {
 
             suggestionsView.setPadding(sideMargin, sideMargin / 2, sideMargin, bottomMargin)
             with(searchEntry) {
-                val v = (12 * dp).toInt()
-                setPadding(0, sideMargin / 2 + v, 0, bottomMargin + v)
+                setPadding(0, sideMargin / 2, 0, bottomMargin)
                 updateLayoutParams<MarginLayoutParams> {
                     leftMargin = iconSize + sideMargin
                     rightMargin = iconSize + sideMargin
