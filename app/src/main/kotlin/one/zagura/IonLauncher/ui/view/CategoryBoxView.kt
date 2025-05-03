@@ -74,11 +74,6 @@ class CategoryBoxView(
 
     private var label = ""
 
-    init {
-        val p = (12 * resources.displayMetrics.density).toInt()
-        setPadding(p, p, p, p)
-    }
-
     override fun onDraw(canvas: Canvas) {
         val pl = paddingLeft
         val pt = paddingTop

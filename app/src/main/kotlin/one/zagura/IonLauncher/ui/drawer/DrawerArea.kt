@@ -22,6 +22,7 @@ import one.zagura.IonLauncher.provider.search.Search
 import one.zagura.IonLauncher.provider.summary.Battery
 import one.zagura.IonLauncher.ui.view.CategoryBoxView
 import one.zagura.IonLauncher.ui.view.ClickableRecyclerView
+import one.zagura.IonLauncher.ui.view.FadingEdgeRecyclerView
 import one.zagura.IonLauncher.ui.view.SharedDrawingContext
 import one.zagura.IonLauncher.util.Cancellable
 import one.zagura.IonLauncher.util.Settings
@@ -47,9 +48,10 @@ class DrawerArea(
     private var notSearchedYet = true
     private var searchCancellable = Cancellable()
 
-    val libraryView = RecyclerView(context).apply {
+    val libraryView = FadingEdgeRecyclerView(context).apply {
         adapter = libraryAdapter
         clipToPadding = false
+        isVerticalFadingEdgeEnabled = true
         setHasFixedSize(true)
         itemAnimator = null
         layoutManager = GridLayoutManager(context, 2, RecyclerView.VERTICAL, false)
@@ -67,6 +69,7 @@ class DrawerArea(
         visibility = GONE
         adapter = searchAdapter
         clipToPadding = false
+        isVerticalFadingEdgeEnabled = true
         setHasFixedSize(true)
         itemAnimator = null
         layoutManager = GridLayoutManager(context, 1, RecyclerView.VERTICAL, false).apply {
@@ -133,6 +136,8 @@ class DrawerArea(
                     libraryView.visibility = GONE
                     recyclerView.visibility = VISIBLE
                     recyclerView.alpha = 1f
+                    recyclerView.scaleX = 1f
+                    recyclerView.scaleY = 1f
                     recyclerView.adapter = searchAdapter
                 }
             }
@@ -253,16 +258,18 @@ class DrawerArea(
     }
 
     fun applyCustomizationsLayout(settings: Settings, sideMargin: Int, bottomPadding: Int) {
+        val p = sideMargin / 2
+        val t = p.coerceAtLeast(Utils.getStatusBarHeight(context))
         with(recyclerView) {
             (layoutManager as GridLayoutManager).spanCount = settings["dock:columns", 5]
             adapter = adapter
-            val p = sideMargin / 2
-            setPadding(p, p.coerceAtLeast(Utils.getStatusBarHeight(context)), p, p + bottomPadding)
+            setPadding(p, t, p, p + bottomPadding)
+            setFadingEdgeLength(bottomPadding)
         }
         with(libraryView) {
             adapter = adapter
-            val p = sideMargin / 2
-            setPadding(p, p.coerceAtLeast(Utils.getStatusBarHeight(context)), p, p + bottomPadding)
+            setPadding(p, t, p, p + bottomPadding)
+            setFadingEdgeLength(bottomPadding)
         }
     }
 

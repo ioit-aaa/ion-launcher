@@ -36,7 +36,10 @@ class LibraryAdapter(
     private fun getItem(i: Int) = categories[i]
 
     override fun onCreateViewHolder(parent: ViewGroup, type: Int) =
-        ViewHolder(CategoryBoxView(parent.context, drawCtx, onItemOpened)).apply {
+        ViewHolder(CategoryBoxView(parent.context, drawCtx, onItemOpened).apply {
+            val p = parent.paddingLeft
+            setPadding(p, p, p, p)
+        }).apply {
             view.setDragState { v -> v }
             view.setOnDragListener { v, e ->
                 if (e.action == DragEvent.ACTION_DRAG_EXITED) {
