@@ -21,7 +21,7 @@ class HiddenAppsActivity : Activity() {
 
         val settings = ionApplication.settings
 
-        appsAdapter = HiddenAppsAdapter(settings["drawer:labels", true], this)
+        appsAdapter = HiddenAppsAdapter()
 
         val recycler = RecyclerView(this).apply {
             val p = PinnedGridView.calculateSideMargin(context) / 2

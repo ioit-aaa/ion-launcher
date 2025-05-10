@@ -1,8 +1,5 @@
 package one.zagura.IonLauncher.ui.view.settings
 
-import android.app.Activity
-import android.graphics.Typeface
-import android.os.Build
 import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
@@ -19,12 +16,8 @@ import one.zagura.IonLauncher.provider.icons.IconLoader
 import one.zagura.IonLauncher.provider.icons.LabelLoader
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.ui.view.LongPressMenu
-import one.zagura.IonLauncher.util.Utils
 
-class HiddenAppsAdapter(
-    private val showLabels: Boolean,
-    private val activity: Activity,
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class HiddenAppsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     init {
         setHasStableIds(true)
@@ -70,7 +63,7 @@ class HiddenAppsAdapter(
             icon.setPadding(0, (12 * dp).toInt(), 0, (10 * dp).toInt())
             addView(icon, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, iconSize + (22 * dp).toInt()))
             val p = (12 * dp).toInt()
-            if (showLabels) addView(label.apply {
+            addView(label.apply {
                 gravity = Gravity.CENTER_HORIZONTAL
                 textSize = 12f
                 includeFontPadding = false

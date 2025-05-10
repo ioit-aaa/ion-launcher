@@ -102,14 +102,13 @@ class DrawerArea(
             field = s
             when (s) {
                 Screen.Library -> {
+                    libraryView.bringToFront()
+                    libraryView.visibility = VISIBLE
                     if (Battery.PowerSaver.getResource()) {
-                        libraryView.visibility = VISIBLE
                         libraryView.alpha = 1f
                         recyclerView.visibility = GONE
                         return
                     }
-                    libraryView.bringToFront()
-                    libraryView.visibility = VISIBLE
                     libraryView.animate().alpha(1f).duration = 100L
                     recyclerView.animate().alpha(0f).withEndAction {
                         recyclerView.visibility = GONE
@@ -118,19 +117,18 @@ class DrawerArea(
                         categoryAdapter.animateExitTransition(recyclerView)
                 }
                 Screen.Category -> {
+                    recyclerView.adapter = categoryAdapter
+                    recyclerView.bringToFront()
+                    recyclerView.visibility = VISIBLE
                     if (Battery.PowerSaver.getResource()) {
-                        recyclerView.visibility = VISIBLE
                         recyclerView.alpha = 1f
                         libraryView.visibility = GONE
                         return
                     }
-                    recyclerView.bringToFront()
-                    recyclerView.visibility = VISIBLE
                     recyclerView.animate().alpha(1f).setInterpolator(DecelerateInterpolator()).duration = 150L
                     libraryView.animate().alpha(0f).withEndAction {
                         libraryView.visibility = GONE
                     }.setInterpolator(AccelerateInterpolator()).duration = 100L
-                    recyclerView.adapter = categoryAdapter
                 }
                 Screen.Search -> {
                     recyclerView.bringToFront()
@@ -204,6 +202,9 @@ class DrawerArea(
         results = emptyList()
         screen = if (categorize) Screen.Library else Screen.Category
         notSearchedYet = true
+        recyclerView.alpha = 1f
+        recyclerView.scaleX = 1f
+        recyclerView.scaleY = 1f
     }
 
     private fun search(query: String) {
@@ -226,8 +227,8 @@ class DrawerArea(
     }
     
     private fun openCategory(category: AppCategorizer.AppCategory, apps: List<App>, view: CategoryBoxView) {
-        screen = Screen.Category
         categoryAdapter.update(category, apps)
+        screen = Screen.Category
         if (Battery.PowerSaver.getResource()) {
             recyclerView.scaleX = 1f
             recyclerView.scaleY = 1f
@@ -251,14 +252,13 @@ class DrawerArea(
 
     fun applyCustomizationsColor(settings: Settings) {
         searchAdapter.notifyDataSetChanged()
-        categorize = settings["drawer:categories", true]
         categoryAdapter.update(AppCategorizer.AppCategory.AllApps, AppLoader.getResource())
         if (screen != Screen.Search)
             unsearch()
-        categoryAdapter.showLabels = settings["drawer:labels", true]
     }
 
     fun applyCustomizationsLayout(settings: Settings, sideMargin: Int, bottomPadding: Int) {
+        categorize = settings["drawer:categories", true]
         val p = sideMargin / 2
         val t = p.coerceAtLeast(Utils.getStatusBarHeight(context))
         with(recyclerView) {

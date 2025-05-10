@@ -13,14 +13,11 @@ import android.os.UserHandle
 import android.view.DragEvent
 import android.view.GestureDetector
 import android.view.GestureDetector.OnGestureListener
-import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.AnyThread
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.record
-import androidx.core.view.doOnLayout
-import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import one.zagura.IonLauncher.data.items.App
@@ -371,7 +368,8 @@ class PinnedGridView(
                 if (replaceItem != x to y)
                     LongPressMenu.dismissCurrent()
                 val d = dropPreview
-                val newItem = LauncherItem.decode(context, event.clipDescription.label.toString())!!
+                val newItem = LauncherItem.decode(context, event.clipDescription.label.toString())
+                    ?: return false
                 dropPreview = ItemPreview(IconLoader.loadIcon(context, newItem), x, y)
                 if (d == null || d.x != x || d.y != y) {
                     Utils.tick(context)
@@ -417,7 +415,8 @@ class PinnedGridView(
                 if (origCoords != null)
                     setItem(origCoords.first, origCoords.second, getItem(x, y))
 
-                val newItem = LauncherItem.decode(context, event.clipDescription.label.toString())!!
+                val newItem = LauncherItem.decode(context, event.clipDescription.label.toString())
+                    ?: return false
                 setItem(x, y, newItem)
             }
         }

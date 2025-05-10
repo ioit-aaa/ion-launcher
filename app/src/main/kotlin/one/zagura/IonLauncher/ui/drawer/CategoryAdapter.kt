@@ -43,7 +43,6 @@ class CategoryAdapter(
         setHasStableIds(true)
     }
 
-    var showLabels = false
     var category = AppCategorizer.AppCategory.AllApps
         private set
     private var apps = emptyList<LauncherItem>()
@@ -95,17 +94,17 @@ class CategoryAdapter(
             orientation = LinearLayout.VERTICAL
             icon.setPadding(0, (12 * dp).toInt(), 0, (10 * dp).toInt())
             addView(icon, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, iconSize + (22 * dp).toInt()))
-            val p = (12 * dp).toInt()
-            if (showLabels) addView(label.apply {
+            addView(label.apply {
                 maxLines = 1
                 ellipsize = TextUtils.TruncateAt.END
                 setTextColor(ColorThemer.drawerForeground(context))
                 gravity = Gravity.CENTER_HORIZONTAL
                 textSize = 12f
                 includeFontPadding = false
-                setPadding(p / 4, 0, p / 4, 0)
+                val p = (2 * dp).toInt()
+                setPadding(p, 0, p, 0)
             })
-            setPadding(0, 0, 0, p)
+            setPadding(0, 0, 0, (12 * dp).toInt())
         }
         return ViewHolder(view, icon, label).apply {
             itemView.setOnClickListener {
@@ -222,8 +221,11 @@ class CategoryAdapter(
         val settings = context.ionApplication.settings
         val columns = settings["dock:columns", 5]
         val dp = context.resources.displayMetrics.density
-        val contentHeight = apps.size / columns * ((settings["dock:icon-size", 48] + 60) * dp)
-        return ((Utils.getDisplayHeight(activity) - contentHeight.toInt()) / 2)
+        val itemHeight = (settings["dock:icon-size", 48] + 34) * dp +
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12f, context.resources.displayMetrics)
+        val contentHeight = (apps.size + columns - 1) / columns * itemHeight
+        val recyclerHeight = recyclerView?.let { it.height - it.paddingTop - it.paddingBottom } ?: 0
+        return (recyclerHeight - contentHeight.toInt()) / 4 * 3
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, i: Int) {
@@ -241,11 +243,9 @@ class CategoryAdapter(
         TaskRunner.submit {
             val context = holder.itemView.context
             val item = getItem(i)
-            if (showLabels) {
-                val label = LabelLoader.loadLabel(context, item)
-                holder.itemView.post {
-                    holder.label.text = label
-                }
+            val label = LabelLoader.loadLabel(context, item)
+            holder.itemView.post {
+                holder.label.text = label
             }
             val icon = IconLoader.loadIcon(context, item)
             holder.itemView.post {
@@ -254,6 +254,10 @@ class CategoryAdapter(
             }
         }
     }
+
+    private var recyclerView: RecyclerView? = null
+    override fun onAttachedToRecyclerView(r: RecyclerView) { recyclerView = r }
+    override fun onDetachedFromRecyclerView(r: RecyclerView) { recyclerView = null }
 
     fun update(category: AppCategorizer.AppCategory, apps: List<App>) {
         this.apps = apps
