@@ -8,6 +8,7 @@ import android.media.session.PlaybackState
 import android.os.Build
 import android.view.View
 import one.zagura.IonLauncher.data.items.LauncherItem
+import java.lang.reflect.InvocationTargetException
 
 data class MediaPlayerData(
     val controller: MediaController,
@@ -22,7 +23,7 @@ data class MediaPlayerData(
     fun onTap(view: View) {
         val session = controller.sessionActivity
         val options = LauncherItem.createOpeningAnimation(view)
-        if (session != null) {
+        if (session != null) try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
                 session.send(view.context, 0, null, null, null, null,
                     options.setPendingIntentBackgroundActivityStartMode(
@@ -31,8 +32,7 @@ data class MediaPlayerData(
             else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
                 session.send(view.context, 0, null, null, null, null, options.toBundle())
             else session.send(view.context, 0, null)
-
-        }
+        } catch (_: InvocationTargetException) {}
 
         val intent = controller.packageName?.let {
             view.context.packageManager.getLaunchIntentForPackage(it)?.apply {
