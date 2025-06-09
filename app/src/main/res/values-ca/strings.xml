@@ -33,7 +33,6 @@
     <string name="background">Fons</string>
     <string name="foreground">Text i icones</string>
     <string name="background_opacity">Opacitat del fons</string>
-    <string name="app_drawer_background_opacity">Opacitat del calaix d\'aplicacions</string>
     <string name="card_background_opacity">Opacitat de targeta</string>
     <string name="app_info">Info d\'app</string>
     <string name="hide">Amagar</string>
@@ -88,4 +87,17 @@
     <string name="pill_shaped">Forma de pastilla</string>
     <string name="smoother_rounded_corners">Puntes arrodonides suavitzades</string>
     <string name="zoom_wallpaper">Agrandar el fons</string>
+    <string name="gestures">Gestos</string>
+    <string name="open_menu_popup">Obrir menu</string>
+    <string name="open_drawer">Obrir calaix d\'aplicacions</string>
+    <string name="open_notifications">Obrir notificacions</string>
+    <string name="open_quick_settings">Obrir panel de configuració</string>
+    <string name="open_all_apps">Obrir llista d\'aplicacions</string>
+    <string name="none">Res</string>
+    <string name="double_tap">Doble pressió</string>
+    <string name="home_button">Botó pantalla principal</string>
+    <string name="long_press">Pressió llarga</string>
+    <string name="swipe_left_to_right">Lliscar cap a la dreta</string>
+    <string name="swipe_right_to_left">Lliscar cap a l\'esquerra</string>
+    <string name="swipe_down">Lliscar abaix</string>
 </resources>

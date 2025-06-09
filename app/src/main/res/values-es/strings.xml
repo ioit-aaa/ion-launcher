@@ -33,7 +33,6 @@
     <string name="background">Fondo</string>
     <string name="foreground">Texto e iconos</string>
     <string name="background_opacity">Opacidad del fondo</string>
-    <string name="app_drawer_background_opacity">Opacidad del cajón de aplicaciones</string>
     <string name="card_background_opacity">Opacidad de tarjeta</string>
     <string name="app_info">Info de app</string>
     <string name="hide">Esconder</string>
@@ -88,4 +87,17 @@
     <string name="pill_shaped">Forma de píldora</string>
     <string name="smoother_rounded_corners">Puntas redondeadas suavizadas</string>
     <string name="zoom_wallpaper">Agrandar el fondo</string>
+    <string name="gestures">Gestos</string>
+    <string name="open_menu_popup">Abrir menu</string>
+    <string name="open_drawer">Abrir cajón de aplicaciones</string>
+    <string name="open_notifications">Abrir notificaciones</string>
+    <string name="open_quick_settings">Abrir panel de ajustes</string>
+    <string name="open_all_apps">Abrir lista de aplicaciones</string>
+    <string name="none">Nada</string>
+    <string name="double_tap">Doble toque</string>
+    <string name="home_button">Boton pantalla principal</string>
+    <string name="long_press">Presión larga</string>
+    <string name="swipe_left_to_right">Deslizar hacia la derecha</string>
+    <string name="swipe_right_to_left">Deslizar hacia la izquierda</string>
+    <string name="swipe_down">Deslizar abajo</string>
 </resources>

@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.view.Gravity
 import android.view.View
+import androidx.annotation.StringRes
 import one.zagura.IonLauncher.BuildConfig
+import one.zagura.IonLauncher.R
 import one.zagura.IonLauncher.ui.ionApplication
 import one.zagura.IonLauncher.util.Utils
 

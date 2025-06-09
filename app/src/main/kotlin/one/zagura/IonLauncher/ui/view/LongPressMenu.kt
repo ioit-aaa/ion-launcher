@@ -51,10 +51,6 @@ object LongPressMenu {
     }
 
     fun popupIcon(parent: View, item: LauncherItem, iconX: Int, iconY: Int, iconSize: Int, where: Where) {
-//        PopupWindow(View(parent.context).apply { setBackgroundColor(0xffff00ff.toInt()) }, iconSize, iconSize, false)
-//            .also { dismissCurrent(); current = it }
-//            .showAtLocation(parent, Gravity.START or Gravity.TOP, iconX, iconY)
-//        return
         val sh = parent.resources.displayMetrics.heightPixels
         val sw = parent.resources.displayMetrics.widthPixels
         val dp = parent.resources.displayMetrics.density
@@ -71,51 +67,26 @@ object LongPressMenu {
     }
 
     fun popup(parent: View, item: LauncherItem, gravity: Int, xoff: Int, yoff: Int, where: Where) {
-        val dp = parent.resources.displayMetrics.density
-        dismissCurrent()
-        val content = LinearLayout(parent.context)
-        val w = PopupWindow(content, (192 * dp).toInt(), LayoutParams.WRAP_CONTENT, false)
-        w.setOnDismissListener { current = null }
-        val p = (12 * dp).toInt()
-        with(content) {
-            setPadding(p, p, p, p)
-            clipToPadding = false
-            orientation = LinearLayout.VERTICAL
-            val bg = if (where == Where.DRAWER) ColorThemer.drawerForeground(context)
-                else ColorThemer.cardBackgroundOpaque(context)
-            val fg = if (where == Where.DRAWER) ColorThemer.drawerBackgroundOpaque(context)
-                else ColorThemer.cardForeground(context)
-            if (item is App) {
-                addOption(R.string.app_info, bg, fg, place = Place.First) {
-                    w.dismiss()
-                    context.startActivity(
-                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
-                            .setData("package:${item.packageName}".toUri())
-                    )
-                }
-                if (where != Where.DOCK) {
-                    if (HiddenApps.isHidden(context.ionApplication.settings, item))
-                        addOption(R.string.unhide, bg, fg, place = Place.Other) {
-                            w.dismiss()
-                            HiddenApps.show(it.context, item)
-                        }
-                    else addOption(R.string.hide, bg, fg, place = Place.Other) {
-                        w.dismiss()
-                        HiddenApps.hide(it.context, item)
-                    }
-                }
-            }
-            if (item is App || item is StaticShortcut) {
-                addOption(R.string.edit, bg, fg, place = if (item is App) Place.Last else Place.Other) {
-                    w.dismiss()
-                    popupEdit(parent, item)
-                }
-            }
+        val l = ArrayList<Pair<Int, (View) -> Unit>>()
+        if (item is App) {
+            l.add(R.string.app_info to {
+                parent.context.startActivity(
+                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+                        .setData("package:${item.packageName}".toUri()))
+            })
+            if (where != Where.DOCK)
+                l.add(if (HiddenApps.isHidden(parent.context.ionApplication.settings, item))
+                    R.string.unhide to { HiddenApps.show(it.context, item) }
+                else R.string.hide to { HiddenApps.hide(it.context, item) })
         }
+        if (item is App || item is StaticShortcut)
+            l.add(R.string.edit to { popupEdit(parent, item) })
+        val w = customPopup(parent.context, *l.toTypedArray())
+        val dp = parent.resources.displayMetrics.density
+        val p = (12 * dp).toInt()
         w.showAtLocation(parent, gravity, xoff - (2 * dp).toInt() - p, yoff - p)
-        current = w
-        content.run {
+        w.contentView.run {
             scaleX = 0f
             scaleY = 0f
             doOnLayout {
@@ -138,6 +109,46 @@ object LongPressMenu {
         feedbackIntent: Intent?,
         settingsIntent: Intent?,
     ) : Popup {
+        val w = customPopup(context, *listOfNotNull(
+            if (settingsIntent != null)
+                R.string.settings to { v: View -> launchIntent(settingsIntent) }
+            else null,
+            R.string.tweaks to { v: View ->
+                context.startActivity(Intent(context, SettingsActivity::class.java)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK), LauncherItem.createOpeningAnimation(v).toBundle())
+            },
+            R.string.wallpaper to { v: View ->
+                context.startActivity(Intent(Intent.ACTION_SET_WALLPAPER), LauncherItem.createOpeningAnimation(v).toBundle())
+            },
+        ).toTypedArray())
+        w.showAtLocation(anchorView, Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, anchorView.height)
+        return object : Popup {
+            override fun dismiss() = w.dismiss()
+        }
+    }
+
+    fun popupLauncher(parent: View, gravity: Int, xoff: Int, yoff: Int) {
+        val w = customPopup(parent.context,
+            R.string.tweaks to {
+                it.context.startActivity(Intent(it.context, SettingsActivity::class.java)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK), LauncherItem.createOpeningAnimation(it).toBundle())
+            },
+            R.string.wallpaper to {
+                it.context.startActivity(Intent(Intent.ACTION_SET_WALLPAPER), LauncherItem.createOpeningAnimation(it).toBundle())
+            })
+        w.showAtLocation(parent, gravity, xoff, yoff)
+        w.contentView.run {
+            scaleX = 0f
+            scaleY = 0f
+            doOnLayout {
+                if (gravity and Gravity.END == Gravity.END) pivotX = width.toFloat()
+                if (gravity and Gravity.BOTTOM == Gravity.BOTTOM) pivotY = height.toFloat()
+            }
+            animate().scaleX(1f).scaleY(1f).duration = 60L
+        }
+    }
+
+    fun customPopup(context: Context, vararg items: Pair<Int, (View) -> Unit>): PopupWindow {
         val dp = context.resources.displayMetrics.density
         dismissCurrent()
         val content = LinearLayout(context)
@@ -150,64 +161,19 @@ object LongPressMenu {
             val bg = ColorThemer.cardBackgroundOpaque(context)
             val fg = ColorThemer.cardForeground(context)
             orientation = LinearLayout.VERTICAL
-            if (settingsIntent != null)
-                addOption(R.string.settings, bg, fg, place = Place.First) {
+            for ((i, item) in items.withIndex()) {
+                addOption(item.first, bg, fg, when (i) {
+                    0 -> Place.First
+                    items.lastIndex -> Place.Last
+                    else -> Place.Other
+                }) {
                     w.dismiss()
-                    launchIntent(settingsIntent)
+                    item.second(it)
                 }
-            addOption(R.string.tweaks, bg, fg, place = if (settingsIntent != null) Place.Other else Place.First) {
-                w.dismiss()
-                context.startActivity(Intent(context, SettingsActivity::class.java)
-                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK), LauncherItem.createOpeningAnimation(it).toBundle())
-            }
-            addOption(R.string.wallpaper, bg, fg, place = Place.Last) {
-                w.dismiss()
-                context.startActivity(Intent(Intent.ACTION_SET_WALLPAPER), LauncherItem.createOpeningAnimation(it).toBundle())
             }
         }
-        w.showAtLocation(anchorView, Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, anchorView.height)
         current = w
-        return object : Popup {
-            override fun dismiss() {
-                w.dismiss()
-            }
-        }
-    }
-
-    fun popupLauncher(parent: View, gravity: Int, xoff: Int, yoff: Int) {
-        val dp = parent.resources.displayMetrics.density
-        dismissCurrent()
-        val content = LinearLayout(parent.context)
-        val w = PopupWindow(content, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true)
-        w.setOnDismissListener { current = null }
-        val p = (12 * dp).toInt()
-        with(content) {
-            setPadding(p, p, p, p)
-            clipToPadding = false
-            val bg = ColorThemer.cardBackgroundOpaque(context)
-            val fg = ColorThemer.cardForeground(context)
-            orientation = LinearLayout.VERTICAL
-            addOption(R.string.tweaks, bg, fg, place = Place.First) {
-                w.dismiss()
-                context.startActivity(Intent(context, SettingsActivity::class.java)
-                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK), LauncherItem.createOpeningAnimation(it).toBundle())
-            }
-            addOption(R.string.wallpaper, bg, fg, place = Place.Last) {
-                w.dismiss()
-                context.startActivity(Intent(Intent.ACTION_SET_WALLPAPER), LauncherItem.createOpeningAnimation(it).toBundle())
-            }
-        }
-        w.showAtLocation(parent, gravity, xoff, yoff)
-        current = w
-        content.run {
-            scaleX = 0f
-            scaleY = 0f
-            doOnLayout {
-                if (gravity and Gravity.END == Gravity.END) pivotX = width.toFloat()
-                if (gravity and Gravity.BOTTOM == Gravity.BOTTOM) pivotY = height.toFloat()
-            }
-            animate().scaleX(1f).scaleY(1f).duration = 60L
-        }
+        return w
     }
 
     private fun popupEdit(parent: View, item: LauncherItem) {

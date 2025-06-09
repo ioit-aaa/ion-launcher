@@ -33,7 +33,6 @@
     <string name="background">Фон</string>
     <string name="foreground">Техт и иконки</string>
     <string name="background_opacity">Непрозрачность фона</string>
-    <string name="app_drawer_background_opacity">Непрозрачность панели приложений</string>
     <string name="card_background_opacity">Непрозрачность панели календаря</string>
     <string name="app_info">Инфо приложения</string>
     <string name="hide">Спрятать</string>
@@ -88,4 +87,17 @@
     <string name="pill_shaped">Разделeнное</string>
     <string name="smoother_rounded_corners">Сглаженные закругленные кончики</string>
     <string name="zoom_wallpaper">Увиличить фон</string>
+    <string name="gestures">Жесты</string>
+    <string name="open_menu_popup">Отрыть меню</string>
+    <string name="open_drawer">Открыть панель приложений</string>
+    <string name="open_notifications">Открыть уведомления</string>
+    <string name="open_quick_settings">Открыть быстрые настройки</string>
+    <string name="open_all_apps">Открыть все приложения</string>
+    <string name="none">Ничего</string>
+    <string name="double_tap">Двойное нажатие</string>
+    <string name="home_button">Кнопка домой</string>
+    <string name="long_press">Долгое нажатие</string>
+    <string name="swipe_left_to_right">Пальцем слева направо</string>
+    <string name="swipe_right_to_left">Пальцем справа налево</string>
+    <string name="swipe_down">Пальтцем вниз</string>
 </resources>

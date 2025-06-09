@@ -38,8 +38,16 @@ import androidx.annotation.StringRes
 import androidx.core.widget.NestedScrollView
 import androidx.core.widget.doOnTextChanged
 import one.zagura.IonLauncher.R
+import one.zagura.IonLauncher.data.items.ActionItem
 import one.zagura.IonLauncher.provider.ColorThemer
+import one.zagura.IonLauncher.provider.icons.LabelLoader
 import one.zagura.IonLauncher.ui.ionApplication
+import one.zagura.IonLauncher.ui.view.Gestures.ACTION_LOCK
+import one.zagura.IonLauncher.ui.view.Gestures.ACTION_OPEN_DRAWER
+import one.zagura.IonLauncher.ui.view.Gestures.ACTION_OPEN_MENU_POPUP
+import one.zagura.IonLauncher.ui.view.Gestures.ACTION_OPEN_NOTIFICATIONS
+import one.zagura.IonLauncher.ui.view.Gestures.ACTION_OPEN_QS
+import one.zagura.IonLauncher.ui.view.LongPressMenu
 import one.zagura.IonLauncher.util.drawable.FillDrawable
 import one.zagura.IonLauncher.util.Utils
 import kotlin.contracts.ExperimentalContracts
@@ -292,6 +300,62 @@ fun SettingViewScope.color(settingId: String, default: ColorThemer.ColorSetting)
     view.background = RippleDrawable(
         ColorStateList.valueOf(view.resources.getColor(R.color.color_disabled)),
         ColorDrawable(view.resources.getColor(R.color.color_bg)), null)
+}
+
+fun SettingViewScope.gestureChooser(
+    settingId: String,
+    default: String?,
+) {
+    val text = TextView(view.context).apply {
+        val action = (context.ionApplication.settings.getString(settingId) ?: default)?.ifEmpty { null }
+        text = getGestureActionName(view.context, action)
+    }
+    view.addView(text)
+    view.setOnClickListener {
+        val settings = it.context.ionApplication.settings
+        val w = LongPressMenu.customPopup(it.context,
+            R.string.none to {
+                settings.edit(it.context) { settingId set null }
+                text.text = it.context.getString(R.string.none)
+            },
+            R.string.open_menu_popup to {
+                settings.edit(it.context) { settingId set ACTION_OPEN_MENU_POPUP }
+                text.text = it.context.getString(R.string.open_menu_popup)
+            },
+            R.string.open_drawer to {
+                settings.edit(it.context) { settingId set ACTION_OPEN_DRAWER }
+                text.text = it.context.getString(R.string.open_drawer)
+            },
+            R.string.open_notifications to {
+                settings.edit(it.context) { settingId set ACTION_OPEN_NOTIFICATIONS }
+                text.text = it.context.getString(R.string.open_notifications)
+            },
+            R.string.open_quick_settings to {
+                settings.edit(it.context) { settingId set ACTION_OPEN_QS }
+                text.text = it.context.getString(R.string.open_quick_settings)
+            },
+            R.string.lock_screen to {
+                settings.edit(it.context) { settingId set ACTION_LOCK }
+                text.text = it.context.getString(R.string.lock_screen)
+            },
+            R.string.open_all_apps to {
+                settings.edit(it.context) { settingId set Intent.ACTION_ALL_APPS }
+                text.text = it.context.getString(R.string.open_all_apps)
+            })
+        val p = IntArray(2).apply(text::getLocationOnScreen)
+        w.showAtLocation(text, Gravity.CENTER, p[0] - view.resources.displayMetrics.widthPixels / 2, p[1] - view.resources.displayMetrics.heightPixels / 2)
+    }
+}
+
+private fun getGestureActionName(context: Context, action: String?) = when (action) {
+    null -> context.getString(R.string.none)
+    ACTION_OPEN_MENU_POPUP -> context.getString(R.string.open_menu_popup)
+    ACTION_OPEN_DRAWER -> context.getString(R.string.open_drawer)
+    ACTION_OPEN_NOTIFICATIONS -> context.getString(R.string.notification_access)
+    ACTION_OPEN_QS -> context.getString(R.string.open_quick_settings)
+    ACTION_LOCK -> context.getString(R.string.lock_screen)
+    Intent.ACTION_ALL_APPS -> context.getString(R.string.open_all_apps)
+    else -> LabelLoader.loadLabel(context, ActionItem(action))
 }
 
 fun SettingViewScope.seekbar(

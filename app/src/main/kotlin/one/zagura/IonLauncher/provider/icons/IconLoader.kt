@@ -32,6 +32,7 @@ object IconLoader {
     private var iconThemingInfo: IconPackInfo.IconGenInfo? = null
 
     private val iconPacksLock = ReentrantLock()
+    private val appsLock = ReentrantLock()
 
     fun updateIconPacks(context: Context, settings: Settings) {
         IconThemer.updateSettings(context, settings)
@@ -57,7 +58,7 @@ object IconLoader {
     }
 
     private fun internalClearCache() {
-        cacheApps.clear()
+        appsLock.withLock { cacheApps.clear() }
         cacheContacts.clear()
         cacheShortcuts.clear()
     }
@@ -67,10 +68,12 @@ object IconLoader {
     }
 
     fun removePackage(packageName: String) {
-        val iterator = cacheApps.iterator()
-        for ((app, _) in iterator)
-            if (app.packageName == packageName)
-                iterator.remove()
+        appsLock.withLock {
+            val iterator = cacheApps.iterator()
+            for ((app, _) in iterator)
+                if (app.packageName == packageName)
+                    iterator.remove()
+        }
     }
 
     fun invalidateItem(item: LauncherItem) {
@@ -98,53 +101,47 @@ object IconLoader {
         return IconThemer.applyTheming(context, initIcon, iconThemingInfo)
     }
 
-    private fun loadIcon(context: Context, app: App): Drawable {
-        return cacheApps.getOrPut(app) {
-            val icon = EditedItems.getIcon(context, app)?.let(IconThemer::transformIconFromIconPack)
-                ?: getIconPackIcon(context, app.packageName, app.name)?.let(IconThemer::transformIconFromIconPack)
-                ?: (context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps)
-                    .getActivityList(app.packageName, app.userHandle)
-                    ?.find { it.name == app.name }
-                    ?.getIcon(context.resources.displayMetrics.densityDpi)
-                    ?.let { IconThemer.applyTheming(context, it, iconThemingInfo) }
-            icon?.let {
-                context.packageManager.getUserBadgedIcon(icon, app.userHandle)
-            } ?: NonDrawable
-        }
-    }
+    private fun loadIcon(context: Context, app: App): Drawable = appsLock.withLock { cacheApps.getOrPut(app) {
+        val icon = EditedItems.getIcon(context, app)?.let(IconThemer::transformIconFromIconPack)
+            ?: getIconPackIcon(context, app.packageName, app.name)?.let(IconThemer::transformIconFromIconPack)
+            ?: (context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps)
+                .getActivityList(app.packageName, app.userHandle)
+                ?.find { it.name == app.name }
+                ?.getIcon(context.resources.displayMetrics.densityDpi)
+                ?.let { IconThemer.applyTheming(context, it, iconThemingInfo) }
+        icon?.let {
+            context.packageManager.getUserBadgedIcon(icon, app.userHandle)
+        } ?: NonDrawable
+    }}
 
-    private fun loadIcon(context: Context, contact: ContactItem): Drawable {
-        return cacheContacts.getOrPut(contact.lookupKey) {
-            if (contact.iconUri != null) try {
-                val inputStream = context.contentResolver.openInputStream(contact.iconUri)
-                val pic = Drawable.createFromStream(inputStream, contact.iconUri.toString())
-                    ?: return@getOrPut NonDrawable
-                return@getOrPut IconThemer.fromQuadImage(pic)
-            } catch (_: FileNotFoundException) {}
-            val realName = LabelLoader.loadLabel(context, contact).trim()
-            if (realName.isEmpty())
-                return@getOrPut NonDrawable
-            IconThemer.fromContactName(realName)
-        }
+    private fun loadIcon(context: Context, contact: ContactItem): Drawable = cacheContacts.getOrPut(contact.lookupKey) {
+        if (contact.iconUri != null) try {
+            val inputStream = context.contentResolver.openInputStream(contact.iconUri)
+            val pic = Drawable.createFromStream(inputStream, contact.iconUri.toString())
+                ?: return@getOrPut NonDrawable
+            return@getOrPut IconThemer.fromQuadImage(pic)
+        } catch (_: FileNotFoundException) {}
+        val realName = LabelLoader.loadLabel(context, contact).trim()
+        if (realName.isEmpty())
+            return@getOrPut NonDrawable
+        IconThemer.fromContactName(realName)
     }
 
     @RequiresApi(Build.VERSION_CODES.N_MR1)
-    private fun loadIcon(context: Context, shortcut: StaticShortcut): Drawable {
-        return cacheShortcuts.getOrPut(shortcut) {
-            EditedItems.getIcon(context, shortcut)?.let {
-                return@getOrPut IconThemer.transformIconFromIconPack(it)
-            }
-            val launcherApps =
-                context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
-            if (!launcherApps.hasShortcutHostPermission())
-                return@getOrPut NonDrawable
-            val icon = launcherApps.getShortcutIconDrawable(
-                shortcut.getShortcutInfo(context) ?: return@getOrPut NonDrawable,
-                context.resources.displayMetrics.densityDpi
-            ) ?: return@getOrPut NonDrawable
-            icon.setGrayscale(IconThemer.doGrayscale)
-            icon
+    private fun loadIcon(context: Context, shortcut: StaticShortcut): Drawable = cacheShortcuts.getOrPut(shortcut) {
+        EditedItems.getIcon(context, shortcut)?.let {
+            return@getOrPut IconThemer.transformIconFromIconPack(it)
         }
+        val launcherApps =
+            context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+        if (!launcherApps.hasShortcutHostPermission())
+            return@getOrPut NonDrawable
+        val icon = launcherApps.getShortcutIconDrawable(
+            shortcut.getShortcutInfo(context) ?: return@getOrPut NonDrawable,
+            context.resources.displayMetrics.densityDpi
+        ) ?: return@getOrPut NonDrawable
+        icon.setGrayscale(IconThemer.doGrayscale)
+        icon
     }
 
     private fun getIconPackIcon(context: Context, packageName: String, name: String) = iconPacksLock.withLock {

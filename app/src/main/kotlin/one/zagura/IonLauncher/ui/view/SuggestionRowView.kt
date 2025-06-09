@@ -354,7 +354,6 @@ class SuggestionRowView(
                 return
             }
             val item = suggestions[i]
-            val dp = resources.displayMetrics.density
             val xOff = iToX(i)
             LongPressMenu.popup(
                 this@SuggestionRowView, item,

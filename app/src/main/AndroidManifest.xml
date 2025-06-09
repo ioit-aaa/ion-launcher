@@ -81,7 +81,8 @@
                 <!-- Gesture actions -->
                 <action android:name="android.intent.action.ALL_APPS"/>
                 <action android:name="android.intent.action.SEARCH"/>
-                <action android:name=".gesture.OPEN_DRAWER"/>
+                <action android:name="one.zagura.IonLauncher.OPEN_MENU_POPUP"/>
+                <action android:name="one.zagura.IonLauncher.OPEN_DRAWER"/>
             </intent-filter>
         </activity>
 
@@ -98,9 +99,10 @@
         </activity>
 
         <activity android:name=".ui.settings.WallpaperSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
+        <activity android:name=".ui.settings.GestureSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
+        <activity android:name=".ui.settings.DrawerSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
         <activity android:name=".ui.settings.IconsSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
         <activity android:name=".ui.settings.CardsSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
-        <activity android:name=".ui.settings.DrawerSettingsActivity" android:theme="@style/IonLauncher.Settings"/>
         <activity android:name=".ui.settings.SetupActivity" android:theme="@style/IonLauncher.Settings"/>
 
         <activity

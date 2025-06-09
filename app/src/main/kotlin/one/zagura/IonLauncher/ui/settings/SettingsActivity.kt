@@ -33,6 +33,7 @@ class SettingsActivity : Activity() {
             setting(R.string.cards) { onClick(CardsSettingsActivity::class.java) }
             setting(R.string.drawer) { onClick(DrawerSettingsActivity::class.java) }
             setting(R.string.wallpaper) { onClick(WallpaperSettingsActivity::class.java) }
+            setting(R.string.gestures) { onClick(GestureSettingsActivity::class.java) }
             setting(R.string.icon_size, isVertical = true) {
                 seekbar("dock:icon-size", 48, min = 24, max = 72, multiplier = 8)
             }

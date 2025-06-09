@@ -32,7 +32,6 @@
     <string name="background">Background</string>
     <string name="foreground">Foreground</string>
     <string name="background_opacity">Background Opacity</string>
-    <string name="app_drawer_background_opacity">App Drawer Opacity</string>
     <string name="card_background_opacity">Card Opacity</string>
     <string name="app_info">App Info</string>
     <string name="hide">Hide</string>
@@ -90,4 +89,17 @@
     <string name="pill_shaped">Pill-shaped</string>
     <string name="smoother_rounded_corners">Squircle (smoothed) rounded corners</string>
     <string name="zoom_wallpaper">Zoom Wallpaper</string>
+    <string name="gestures">Gestures</string>
+    <string name="open_menu_popup">Open Menu Popup</string>
+    <string name="open_drawer">Open Drawer</string>
+    <string name="open_notifications">Open Notifications</string>
+    <string name="open_quick_settings">Open Quick Settings</string>
+    <string name="open_all_apps">Open All Apps</string>
+    <string name="none">None</string>
+    <string name="double_tap">Double-tap</string>
+    <string name="home_button">Home Button</string>
+    <string name="long_press">Long-press</string>
+    <string name="swipe_left_to_right">Swipe Left to Right</string>
+    <string name="swipe_right_to_left">Swipe Right to Left</string>
+    <string name="swipe_down">Swipe Down</string>
 </resources>
