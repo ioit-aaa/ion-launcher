@@ -258,9 +258,19 @@ class HomeScreen : Activity() {
                 .apply { isAccessible = true }
         } catch (_: Exception) { null } else null
         private val offset = 256 * resources.displayMetrics.density * 0.4f
+        private var wallToken: IBinder? = null
 
-        override fun onStateChanged(view: View, newState: Int) =
+        override fun onStateChanged(view: View, newState: Int) {
+            wallToken = if (ionApplication.settings["wall:zoom", true])
+                homeScreen.windowToken
+            else {
+                val t = homeScreen.windowToken
+                if (t != null)
+                    setWallpaperZoomOut?.invoke(wallpaperManager, t, 1f)
+                null
+            }
             onDrawerStateChanged(view, newState)
+        }
 
         override fun onSlide(view: View, slideOffset: Float) {
             drawerArea.alpha = slideOffset * slideOffset / 0.6f - 0.4f
@@ -272,9 +282,8 @@ class HomeScreen : Activity() {
             val scale = 1f - a * 0.05f
             desktop.scaleX = scale
             desktop.scaleY = scale
-            val token = homeScreen.windowToken
-            if (token != null)
-                setWallpaperZoomOut?.invoke(wallpaperManager, token, slideOffset)
+            if (wallToken != null)
+                setWallpaperZoomOut?.invoke(wallpaperManager, wallToken, slideOffset)
             searchEntry.alpha = (slideOffset - 0.5f).coerceAtLeast(0f) * 2f
             suggestionsView.transitionToSearchBarHolder(slideOffset)
         }
@@ -338,6 +347,15 @@ class HomeScreen : Activity() {
             suggestionsView.update(SuggestionsManager.getResource())
             NotificationService.MediaObserver.updateMediaItem(applicationContext)
             applyCustomizations(true)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && homeScreen.windowToken != null) try {
+                WallpaperManager::class.java
+                    .getDeclaredMethod("setWallpaperZoomOut", IBinder::class.java, Float::class.java)
+                    .apply { isAccessible = true }
+                    .invoke(
+                        getSystemService(WALLPAPER_SERVICE) as WallpaperManager,
+                        homeScreen.windowToken,
+                        if (ionApplication.settings["wall:zoom", true]) 0f else 1f)
+            } catch (_: Exception) {}
         }
         AppCategorizer.track(false) { drawerArea.onAppsChanged(it) }
         AppLoader.track(false) { pinnedGrid.updateGridApps() }

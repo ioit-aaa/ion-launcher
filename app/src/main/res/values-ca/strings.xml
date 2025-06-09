@@ -87,4 +87,5 @@
     <string name="settings">Configuració</string>
     <string name="pill_shaped">Forma de pastilla</string>
     <string name="smoother_rounded_corners">Puntes arrodonides suavitzades</string>
+    <string name="zoom_wallpaper">Agrandar el fons</string>
 </resources>
