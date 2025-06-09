@@ -1,0 +1,7 @@
+- Added setting to disable wallpaper animations on Android 11
+- Added many animations
+- Tweaked popups
+- Improved searchbar and app drawer opening animation
+- Tweaked icon theming
+- Fixed wallpaper being a solid color
+- Removed option to disable app drawer labels
