@@ -341,7 +341,7 @@ fun SettingViewScope.gestureChooser(
             R.string.open_all_apps to {
                 settings.edit(it.context) { settingId set Intent.ACTION_ALL_APPS }
                 text.text = it.context.getString(R.string.open_all_apps)
-            })
+            }, focusable = true)
         val p = IntArray(2).apply(text::getLocationOnScreen)
         w.showAtLocation(text, Gravity.CENTER, p[0] - view.resources.displayMetrics.widthPixels / 2, p[1] - view.resources.displayMetrics.heightPixels / 2)
     }

@@ -82,7 +82,7 @@ object LongPressMenu {
         }
         if (item is App || item is StaticShortcut)
             l.add(R.string.edit to { popupEdit(parent, item) })
-        val w = customPopup(parent.context, *l.toTypedArray())
+        val w = customPopup(parent.context, *l.toTypedArray(), focusable = false)
         val dp = parent.resources.displayMetrics.density
         val p = (12 * dp).toInt()
         w.showAtLocation(parent, gravity, xoff - (2 * dp).toInt() - p, yoff - p)
@@ -120,7 +120,7 @@ object LongPressMenu {
             R.string.wallpaper to { v: View ->
                 context.startActivity(Intent(Intent.ACTION_SET_WALLPAPER), LauncherItem.createOpeningAnimation(v).toBundle())
             },
-        ).toTypedArray())
+        ).toTypedArray(), focusable = true)
         w.showAtLocation(anchorView, Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, anchorView.height)
         return object : Popup {
             override fun dismiss() = w.dismiss()
@@ -135,7 +135,7 @@ object LongPressMenu {
             },
             R.string.wallpaper to {
                 it.context.startActivity(Intent(Intent.ACTION_SET_WALLPAPER), LauncherItem.createOpeningAnimation(it).toBundle())
-            })
+            }, focusable = true)
         w.showAtLocation(parent, gravity, xoff, yoff)
         w.contentView.run {
             scaleX = 0f
@@ -148,19 +148,19 @@ object LongPressMenu {
         }
     }
 
-    fun customPopup(context: Context, vararg items: Pair<Int, (View) -> Unit>): PopupWindow {
+    fun customPopup(context: Context, vararg items: Pair<Int, (View) -> Unit>, focusable: Boolean): PopupWindow {
         val dp = context.resources.displayMetrics.density
         dismissCurrent()
         val content = LinearLayout(context)
-        val w = PopupWindow(content, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true)
+        val w = PopupWindow(content, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, focusable)
         w.setOnDismissListener { current = null }
         val p = (12 * dp).toInt()
         with(content) {
             setPadding(p, p, p, p)
             clipToPadding = false
+            orientation = LinearLayout.VERTICAL
             val bg = ColorThemer.cardBackgroundOpaque(context)
             val fg = ColorThemer.cardForeground(context)
-            orientation = LinearLayout.VERTICAL
             for ((i, item) in items.withIndex()) {
                 addOption(item.first, bg, fg, when (i) {
                     0 -> Place.First
